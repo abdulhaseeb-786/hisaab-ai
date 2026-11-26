@@ -1,0 +1,6 @@
+sku,qty,unit_price,payment_type
+OIL-001,2,550,cash
+GRN-001,1,1380,cash
+TEA-001,2,760,udhaar
+DRY-001,3,295,cash
+BAD-ROW-01,-5,100,cash

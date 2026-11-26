@@ -1,0 +1,6 @@
+sku,name,category,unit,cost_price,selling_price,pack_unit,units_per_pack
+NEW-OIL-01,Shan Sunflower Cooking Oil 1L,Cooking Oil & Ghee,pouch,520,570,carton,16
+NEW-TEA-01,Danedar Gold Leaf Tea 250g,Tea & Beverages,pouch,380,430,carton,24
+NEW-RICE-01,Super Basmati Kernel Rice 5kg,Grains & Pulses,bag,1600,1850,bundle,4
+NEW-SOAP-01,Lux White Velvet Soap 115g,Personal Care,bar,110,135,carton,48
+BAD-ITEM-01,Faulty Defective Product,Test Category,piece,500,450,carton,12
