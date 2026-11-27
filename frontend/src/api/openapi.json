@@ -1,0 +1,4833 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HisaabAI Retail Intelligence",
+    "description": "Retail decision support for Pakistani general stores (CYE 2026, Track 3)",
+    "version": "0.3.0"
+  },
+  "paths": {
+    "/api/store": {
+      "get": {
+        "tags": [
+          "Store"
+        ],
+        "summary": "Get Store Profile",
+        "description": "The store's name, location and data window, so the app never hard-codes them.",
+        "operationId": "get_store_profile_api_store_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreProfile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/today": {
+      "get": {
+        "tags": [
+          "Today's Actions"
+        ],
+        "summary": "Get Today Actions",
+        "description": "Top 3 actions for today, each with evidence and a next step (HOME-01).",
+        "operationId": "get_today_actions_api_actions_today_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodayActionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Dashboard Kpis",
+        "description": "Sales, gross profit, stock, khata, payables and cash for a period, with the change vs the period before (HOME-02).",
+        "operationId": "get_dashboard_kpis_api_dashboard_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "today",
+                "7d",
+                "30d",
+                "90d"
+              ],
+              "type": "string",
+              "default": "30d",
+              "title": "Period"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KPISummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Inventory & Products"
+        ],
+        "summary": "List Products",
+        "description": "Products with days of cover, risk and the reason, plus counts for the filter chips (INV-01, INV-02).",
+        "operationId": "list_products_api_products_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "critical",
+                "high",
+                "medium",
+                "ok",
+                "unknown",
+                "at_risk",
+                "dead_stock",
+                "out_of_stock"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "risk",
+                "name",
+                "cover",
+                "value"
+              ],
+              "type": "string",
+              "default": "risk",
+              "title": "Sort"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product_id}": {
+      "get": {
+        "tags": [
+          "Inventory & Products"
+        ],
+        "summary": "Get Product Detail",
+        "description": "One product: health, price history, recent stock movements and the last 30 days' sales.",
+        "operationId": "get_product_detail_api_products__product_id__get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product_id}/price": {
+      "patch": {
+        "tags": [
+          "Inventory & Products"
+        ],
+        "summary": "Update Product Price",
+        "description": "Change the shelf price. A price-history row is recorded so the margin check sees it.",
+        "operationId": "update_product_price_api_products__product_id__price_patch",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceUpdateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product_id}/stock-adjustment": {
+      "post": {
+        "tags": [
+          "Inventory & Products"
+        ],
+        "summary": "Adjust Stock",
+        "description": "Record stock received or written off. Stock can never go below zero.",
+        "operationId": "adjust_stock_api_products__product_id__stock_adjustment_post",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockAdjustmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockAdjustmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reorder-plan": {
+      "post": {
+        "tags": [
+          "Reorder Planner (Hero Flow)"
+        ],
+        "summary": "Create Budget Reorder Plan",
+        "description": "'I have Rs 50,000. What should I buy today and why?' Whole packs, never over budget (REC-01..04).",
+        "operationId": "create_budget_reorder_plan_api_reorder_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReorderPlanResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forecast": {
+      "post": {
+        "tags": [
+          "Demand Forecasting"
+        ],
+        "summary": "Get Demand Forecast",
+        "description": "Forecast for a product, a category or the whole store, compared with two baselines on held-out days (FC-01..03).",
+        "operationId": "get_demand_forecast_api_forecast_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForecastRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insights": {
+      "get": {
+        "tags": [
+          "Insights"
+        ],
+        "summary": "Get Insights",
+        "description": "Margin squeezes (PROF-01) and dead stock (INV-03), with evidence.",
+        "operationId": "get_insights_api_insights_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsightsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/credit/summary": {
+      "get": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "Get Credit Summary",
+        "description": "Khata balances, aging by days past due, and Safe Mark scores with reasons (CRED-01).",
+        "operationId": "get_credit_summary_api_credit_summary_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/credit/customers/{customer_id}": {
+      "get": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "Get Customer Ledger",
+        "description": "One customer's khata page with a running balance.",
+        "operationId": "get_customer_ledger_api_credit_customers__customer_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerLedgerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/credit/payment": {
+      "post": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "Record Customer Payment",
+        "description": "Record a repayment (wasooli). It cannot be more than the customer owes.",
+        "operationId": "record_customer_payment_api_credit_payment_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentRecordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payables/summary": {
+      "get": {
+        "tags": [
+          "Supplier Payables & Cash"
+        ],
+        "summary": "Get Payables Summary",
+        "description": "What the shop owes each distributor: overdue, due soon, and orders still on the way.",
+        "operationId": "get_payables_summary_api_payables_summary_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 30,
+              "minimum": 1,
+              "default": 7,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayablesSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payables/cash-outlook": {
+      "get": {
+        "tags": [
+          "Supplier Payables & Cash"
+        ],
+        "summary": "Get Cash Outlook",
+        "description": "Day-by-day cash for the next week from today's real cash in hand, with every assumption listed (CASH-01).",
+        "operationId": "get_cash_outlook_api_payables_cash_outlook_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 14,
+              "minimum": 1,
+              "default": 7,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashOutlookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/copilot/chat": {
+      "post": {
+        "tags": [
+          "Copilot"
+        ],
+        "summary": "Copilot Chat",
+        "description": "Answer a question in English or Roman Urdu using only allow-listed, read-only tools (COP-01..04).",
+        "operationId": "copilot_chat_api_copilot_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/import/csv": {
+      "post": {
+        "tags": [
+          "CSV Import"
+        ],
+        "summary": "Preview Csv",
+        "description": "Step 1: check every row and show problems by row number. Nothing is saved yet (DATA-02).",
+        "operationId": "preview_csv_api_import_csv_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_preview_csv_api_import_csv_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CSVPreviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/import/commit": {
+      "post": {
+        "tags": [
+          "CSV Import"
+        ],
+        "summary": "Commit Csv",
+        "description": "Step 2: save the valid rows from the preview, all or nothing.",
+        "operationId": "commit_csv_api_import_commit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CSVCommitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CSVCommitResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/import/template/{import_type}": {
+      "get": {
+        "tags": [
+          "CSV Import"
+        ],
+        "summary": "Download Template",
+        "description": "A sample CSV with the right columns.",
+        "operationId": "download_template_api_import_template__import_type__get",
+        "parameters": [
+          {
+            "name": "import_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "products",
+                "sales"
+              ],
+              "type": "string",
+              "title": "Import Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/demo/reset": {
+      "post": {
+        "tags": [
+          "Demo"
+        ],
+        "summary": "Reset Demo",
+        "description": "Rebuild the demo store from the fixed seed (DATA-01). Needs the X-Demo-Key header.",
+        "operationId": "reset_demo_api_demo_reset_post",
+        "parameters": [
+          {
+            "name": "x-demo-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Demo-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoResetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "restock",
+              "fix_price",
+              "collect_khata",
+              "clear_dead_stock",
+              "cash_warning"
+            ],
+            "title": "Action Type"
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ],
+            "title": "Urgency"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "next_step": {
+            "type": "string",
+            "title": "Next Step"
+          },
+          "title_ur": {
+            "type": "string",
+            "title": "Title Ur"
+          },
+          "summary_ur": {
+            "type": "string",
+            "title": "Summary Ur"
+          },
+          "next_step_ur": {
+            "type": "string",
+            "title": "Next Step Ur"
+          },
+          "target": {
+            "$ref": "#/components/schemas/ActionTarget"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "money_at_stake_pkr": {
+            "type": "number",
+            "title": "Money At Stake Pkr"
+          },
+          "money_at_stake_label": {
+            "type": "string",
+            "title": "Money At Stake Label"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "priority",
+          "action_type",
+          "urgency",
+          "title",
+          "summary",
+          "next_step",
+          "title_ur",
+          "summary_ur",
+          "next_step_ur",
+          "target",
+          "money_at_stake_pkr",
+          "money_at_stake_label",
+          "evidence"
+        ],
+        "title": "ActionItem"
+      },
+      "ActionTarget": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "product",
+              "customer",
+              "cash"
+            ],
+            "title": "Kind"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "ActionTarget"
+      },
+      "AgingBuckets": {
+        "properties": {
+          "not_due_pkr": {
+            "type": "number",
+            "title": "Not Due Pkr"
+          },
+          "overdue_1_30_days_pkr": {
+            "type": "number",
+            "title": "Overdue 1 30 Days Pkr"
+          },
+          "overdue_31_60_days_pkr": {
+            "type": "number",
+            "title": "Overdue 31 60 Days Pkr"
+          },
+          "overdue_61_plus_days_pkr": {
+            "type": "number",
+            "title": "Overdue 61 Plus Days Pkr"
+          },
+          "total_outstanding_pkr": {
+            "type": "number",
+            "title": "Total Outstanding Pkr"
+          },
+          "total_overdue_pkr": {
+            "type": "number",
+            "title": "Total Overdue Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "not_due_pkr",
+          "overdue_1_30_days_pkr",
+          "overdue_31_60_days_pkr",
+          "overdue_61_plus_days_pkr",
+          "total_outstanding_pkr",
+          "total_overdue_pkr"
+        ],
+        "title": "AgingBuckets"
+      },
+      "Body_preview_csv_api_import_csv_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          },
+          "import_type": {
+            "type": "string",
+            "enum": [
+              "products",
+              "sales"
+            ],
+            "title": "Import Type",
+            "default": "products"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_preview_csv_api_import_csv_post"
+      },
+      "CSVCommitRequest": {
+        "properties": {
+          "batch_token": {
+            "type": "string",
+            "title": "Batch Token"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_token"
+        ],
+        "title": "CSVCommitRequest"
+      },
+      "CSVCommitResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "rows_imported": {
+            "type": "integer",
+            "title": "Rows Imported"
+          },
+          "created": {
+            "type": "integer",
+            "title": "Created"
+          },
+          "updated": {
+            "type": "integer",
+            "title": "Updated"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "rows_imported",
+          "created",
+          "updated",
+          "message"
+        ],
+        "title": "CSVCommitResponse"
+      },
+      "CSVPreviewResponse": {
+        "properties": {
+          "import_type": {
+            "type": "string",
+            "enum": [
+              "products",
+              "sales"
+            ],
+            "title": "Import Type"
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows"
+          },
+          "valid_rows_count": {
+            "type": "integer",
+            "title": "Valid Rows Count"
+          },
+          "invalid_rows_count": {
+            "type": "integer",
+            "title": "Invalid Rows Count"
+          },
+          "sample_preview": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Sample Preview"
+          },
+          "row_errors": {
+            "items": {
+              "$ref": "#/components/schemas/RowError"
+            },
+            "type": "array",
+            "title": "Row Errors"
+          },
+          "batch_token": {
+            "type": "string",
+            "title": "Batch Token"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "import_type",
+          "total_rows",
+          "valid_rows_count",
+          "invalid_rows_count",
+          "sample_preview",
+          "row_errors",
+          "batch_token",
+          "expires_in_minutes"
+        ],
+        "title": "CSVPreviewResponse"
+      },
+      "CalendarEffect": {
+        "properties": {
+          "event": {
+            "type": "string",
+            "title": "Event"
+          },
+          "multiplier": {
+            "type": "number",
+            "title": "Multiplier"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event",
+          "multiplier"
+        ],
+        "title": "CalendarEffect"
+      },
+      "CashDay": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "opening_cash_pkr": {
+            "type": "number",
+            "title": "Opening Cash Pkr"
+          },
+          "cash_sales_in_pkr": {
+            "type": "number",
+            "title": "Cash Sales In Pkr"
+          },
+          "wasooli_in_pkr": {
+            "type": "number",
+            "title": "Wasooli In Pkr"
+          },
+          "supplier_payments_out_pkr": {
+            "type": "number",
+            "title": "Supplier Payments Out Pkr"
+          },
+          "expenses_out_pkr": {
+            "type": "number",
+            "title": "Expenses Out Pkr"
+          },
+          "closing_cash_pkr": {
+            "type": "number",
+            "title": "Closing Cash Pkr"
+          },
+          "supplier_payments": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedSupplierPayment"
+            },
+            "type": "array",
+            "title": "Supplier Payments"
+          },
+          "expenses": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedExpense"
+            },
+            "type": "array",
+            "title": "Expenses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "opening_cash_pkr",
+          "cash_sales_in_pkr",
+          "wasooli_in_pkr",
+          "supplier_payments_out_pkr",
+          "expenses_out_pkr",
+          "closing_cash_pkr",
+          "supplier_payments",
+          "expenses"
+        ],
+        "title": "CashDay"
+      },
+      "CashInflows": {
+        "properties": {
+          "cash_sales_pkr": {
+            "type": "number",
+            "title": "Cash Sales Pkr"
+          },
+          "debt_collections_wasooli_pkr": {
+            "type": "number",
+            "title": "Debt Collections Wasooli Pkr"
+          },
+          "total_inflows_pkr": {
+            "type": "number",
+            "title": "Total Inflows Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cash_sales_pkr",
+          "debt_collections_wasooli_pkr",
+          "total_inflows_pkr"
+        ],
+        "title": "CashInflows"
+      },
+      "CashOutflows": {
+        "properties": {
+          "supplier_payables_due_pkr": {
+            "type": "number",
+            "title": "Supplier Payables Due Pkr"
+          },
+          "operating_expenses_pkr": {
+            "type": "number",
+            "title": "Operating Expenses Pkr"
+          },
+          "total_outflows_pkr": {
+            "type": "number",
+            "title": "Total Outflows Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_payables_due_pkr",
+          "operating_expenses_pkr",
+          "total_outflows_pkr"
+        ],
+        "title": "CashOutflows"
+      },
+      "CashOutlookResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "horizon_days": {
+            "type": "integer",
+            "title": "Horizon Days"
+          },
+          "opening_cash_pkr": {
+            "type": "number",
+            "title": "Opening Cash Pkr"
+          },
+          "cash_position": {
+            "$ref": "#/components/schemas/CashPosition"
+          },
+          "projected_inflows": {
+            "$ref": "#/components/schemas/CashInflows"
+          },
+          "projected_outflows": {
+            "$ref": "#/components/schemas/CashOutflows"
+          },
+          "projected_closing_cash_pkr": {
+            "type": "number",
+            "title": "Projected Closing Cash Pkr"
+          },
+          "lowest_cash_pkr": {
+            "type": "number",
+            "title": "Lowest Cash Pkr"
+          },
+          "lowest_cash_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Lowest Cash Date"
+          },
+          "safety_cash_pkr": {
+            "type": "number",
+            "title": "Safety Cash Pkr"
+          },
+          "shortfall_warning": {
+            "type": "boolean",
+            "title": "Shortfall Warning"
+          },
+          "shortfall_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shortfall Date"
+          },
+          "shortfall_risk_pkr": {
+            "type": "number",
+            "title": "Shortfall Risk Pkr"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/CashDay"
+            },
+            "type": "array",
+            "title": "Days"
+          },
+          "expense_schedule": {
+            "items": {
+              "$ref": "#/components/schemas/ExpenseRule"
+            },
+            "type": "array",
+            "title": "Expense Schedule"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "as_of",
+          "horizon_days",
+          "opening_cash_pkr",
+          "cash_position",
+          "projected_inflows",
+          "projected_outflows",
+          "projected_closing_cash_pkr",
+          "lowest_cash_pkr",
+          "lowest_cash_date",
+          "safety_cash_pkr",
+          "shortfall_warning",
+          "shortfall_date",
+          "shortfall_risk_pkr",
+          "days",
+          "expense_schedule",
+          "assumptions"
+        ],
+        "title": "CashOutlookResponse"
+      },
+      "CashPosition": {
+        "properties": {
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "opening_cash_pkr": {
+            "type": "number",
+            "title": "Opening Cash Pkr"
+          },
+          "opening_cash_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opening Cash Date"
+          },
+          "cash_sales_pkr": {
+            "type": "number",
+            "title": "Cash Sales Pkr"
+          },
+          "wasooli_pkr": {
+            "type": "number",
+            "title": "Wasooli Pkr"
+          },
+          "supplier_payments_pkr": {
+            "type": "number",
+            "title": "Supplier Payments Pkr"
+          },
+          "expenses_pkr": {
+            "type": "number",
+            "title": "Expenses Pkr"
+          },
+          "cash_in_hand_pkr": {
+            "type": "number",
+            "title": "Cash In Hand Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "as_of",
+          "opening_cash_pkr",
+          "opening_cash_date",
+          "cash_sales_pkr",
+          "wasooli_pkr",
+          "supplier_payments_pkr",
+          "expenses_pkr",
+          "cash_in_hand_pkr"
+        ],
+        "title": "CashPosition"
+      },
+      "ChatMessage": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage"
+      },
+      "ChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Message"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id",
+            "default": 1
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "roman_urdu",
+              "english",
+              "urdu"
+            ],
+            "title": "Language",
+            "default": "roman_urdu"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "response": {
+            "type": "string",
+            "title": "Response"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "roman_urdu",
+              "english",
+              "urdu"
+            ],
+            "title": "Language"
+          },
+          "tool_calls": {
+            "items": {
+              "$ref": "#/components/schemas/ToolCallExecution"
+            },
+            "type": "array",
+            "title": "Tool Calls"
+          },
+          "provider_used": {
+            "type": "string",
+            "enum": [
+              "gemini",
+              "groq",
+              "offline"
+            ],
+            "title": "Provider Used"
+          },
+          "grounded": {
+            "type": "boolean",
+            "title": "Grounded"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "response",
+          "language",
+          "tool_calls",
+          "provider_used",
+          "grounded"
+        ],
+        "title": "ChatResponse"
+      },
+      "CopilotStatus": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "gemini_configured": {
+            "type": "boolean",
+            "title": "Gemini Configured"
+          },
+          "groq_configured": {
+            "type": "boolean",
+            "title": "Groq Configured"
+          },
+          "offline_available": {
+            "type": "boolean",
+            "title": "Offline Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "gemini_configured",
+          "groq_configured",
+          "offline_available"
+        ],
+        "title": "CopilotStatus"
+      },
+      "CreditSummaryResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "default_credit_term_days": {
+            "type": "integer",
+            "title": "Default Credit Term Days"
+          },
+          "aging": {
+            "$ref": "#/components/schemas/AgingBuckets"
+          },
+          "total_customers_with_balance": {
+            "type": "integer",
+            "title": "Total Customers With Balance"
+          },
+          "total_overdue_customers": {
+            "type": "integer",
+            "title": "Total Overdue Customers"
+          },
+          "top_defaulters": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerKhataItem"
+            },
+            "type": "array",
+            "title": "Top Defaulters"
+          },
+          "customers": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerKhataItem"
+            },
+            "type": "array",
+            "title": "Customers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "as_of",
+          "default_credit_term_days",
+          "aging",
+          "total_customers_with_balance",
+          "total_overdue_customers",
+          "top_defaulters",
+          "customers"
+        ],
+        "title": "CreditSummaryResponse"
+      },
+      "CustomerAging": {
+        "properties": {
+          "not_due": {
+            "type": "number",
+            "title": "Not Due"
+          },
+          "overdue_1_30": {
+            "type": "number",
+            "title": "Overdue 1 30"
+          },
+          "overdue_31_60": {
+            "type": "number",
+            "title": "Overdue 31 60"
+          },
+          "overdue_61_plus": {
+            "type": "number",
+            "title": "Overdue 61 Plus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "not_due",
+          "overdue_1_30",
+          "overdue_31_60",
+          "overdue_61_plus"
+        ],
+        "title": "CustomerAging"
+      },
+      "CustomerKhataItem": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "total_balance_pkr": {
+            "type": "number",
+            "title": "Total Balance Pkr"
+          },
+          "overdue_amount_pkr": {
+            "type": "number",
+            "title": "Overdue Amount Pkr"
+          },
+          "days_overdue": {
+            "type": "integer",
+            "title": "Days Overdue"
+          },
+          "credit_limit_pkr": {
+            "type": "number",
+            "title": "Credit Limit Pkr"
+          },
+          "over_limit": {
+            "type": "boolean",
+            "title": "Over Limit"
+          },
+          "safe_mark_score": {
+            "type": "number",
+            "title": "Safe Mark Score",
+            "description": "0-100. Starts at 100; each lost point has a listed reason."
+          },
+          "score_factors": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreFactor"
+            },
+            "type": "array",
+            "title": "Score Factors"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Risk Level"
+          },
+          "last_payment_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Payment Date"
+          },
+          "days_since_last_payment": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Since Last Payment"
+          },
+          "last_purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Purchase Date"
+          },
+          "aging": {
+            "$ref": "#/components/schemas/CustomerAging"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "phone",
+          "total_balance_pkr",
+          "overdue_amount_pkr",
+          "days_overdue",
+          "credit_limit_pkr",
+          "over_limit",
+          "safe_mark_score",
+          "score_factors",
+          "risk_level",
+          "last_payment_date",
+          "days_since_last_payment",
+          "last_purchase_date",
+          "aging"
+        ],
+        "title": "CustomerKhataItem"
+      },
+      "CustomerLedgerResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "credit_limit_pkr": {
+            "type": "number",
+            "title": "Credit Limit Pkr"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerKhataItem"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/LedgerLine"
+            },
+            "type": "array",
+            "title": "Entries"
+          },
+          "total_entries": {
+            "type": "integer",
+            "title": "Total Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "phone",
+          "credit_limit_pkr",
+          "summary",
+          "entries",
+          "total_entries"
+        ],
+        "title": "CustomerLedgerResponse"
+      },
+      "DailyForecastPoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "forecast_units": {
+            "type": "number",
+            "title": "Forecast Units"
+          },
+          "model_units": {
+            "type": "number",
+            "title": "Model Units"
+          },
+          "baseline_lag7_units": {
+            "type": "number",
+            "title": "Baseline Lag7 Units"
+          },
+          "baseline_ma7_units": {
+            "type": "number",
+            "title": "Baseline Ma7 Units"
+          },
+          "calendar_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calendar Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "forecast_units",
+          "model_units",
+          "baseline_lag7_units",
+          "baseline_ma7_units",
+          "calendar_label"
+        ],
+        "title": "DailyForecastPoint"
+      },
+      "DailyRevenuePoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "revenue_pkr": {
+            "type": "number",
+            "title": "Revenue Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "revenue_pkr"
+        ],
+        "title": "DailyRevenuePoint"
+      },
+      "DeadStockItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "stock_qty": {
+            "type": "number",
+            "title": "Stock Qty"
+          },
+          "cost_price_pkr": {
+            "type": "number",
+            "title": "Cost Price Pkr"
+          },
+          "selling_price_pkr": {
+            "type": "number",
+            "title": "Selling Price Pkr"
+          },
+          "tied_up_capital_pkr": {
+            "type": "number",
+            "title": "Tied Up Capital Pkr"
+          },
+          "days_since_last_sale": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Since Last Sale"
+          },
+          "last_sold_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sold At"
+          },
+          "lookback_days": {
+            "type": "integer",
+            "title": "Lookback Days"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          },
+          "recommended_action": {
+            "type": "string",
+            "title": "Recommended Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "name",
+          "category",
+          "image_url",
+          "stock_qty",
+          "cost_price_pkr",
+          "selling_price_pkr",
+          "tied_up_capital_pkr",
+          "days_since_last_sale",
+          "last_sold_at",
+          "lookback_days",
+          "evidence",
+          "recommended_action"
+        ],
+        "title": "DeadStockItem"
+      },
+      "DemoResetResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "store_name": {
+            "type": "string",
+            "title": "Store Name"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed"
+          },
+          "data_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Data Start"
+          },
+          "data_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Data End"
+          },
+          "products": {
+            "type": "integer",
+            "title": "Products"
+          },
+          "sales": {
+            "type": "integer",
+            "title": "Sales"
+          },
+          "sale_lines": {
+            "type": "integer",
+            "title": "Sale Lines"
+          },
+          "customers": {
+            "type": "integer",
+            "title": "Customers"
+          },
+          "purchases": {
+            "type": "integer",
+            "title": "Purchases"
+          },
+          "seconds": {
+            "type": "number",
+            "title": "Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "store_name",
+          "seed",
+          "data_start",
+          "data_end",
+          "products",
+          "sales",
+          "sale_lines",
+          "customers",
+          "purchases",
+          "seconds"
+        ],
+        "title": "DemoResetResponse"
+      },
+      "ExpenseRule": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "rule": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly"
+            ],
+            "title": "Rule"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "weekday": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekday"
+          },
+          "day_of_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Of Month"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "rule",
+          "amount"
+        ],
+        "title": "ExpenseRule"
+      },
+      "ForecastRequest": {
+        "properties": {
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "horizon_days": {
+            "type": "integer",
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Horizon Days",
+            "default": 7
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "title": "ForecastRequest"
+      },
+      "ForecastResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "target_type": {
+            "type": "string",
+            "enum": [
+              "product",
+              "category",
+              "store"
+            ],
+            "title": "Target Type"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "horizon_days": {
+            "type": "integer",
+            "title": "Horizon Days"
+          },
+          "model_used": {
+            "type": "string",
+            "enum": [
+              "calendar_smoothing",
+              "last_week_same_day",
+              "moving_average_7d"
+            ],
+            "title": "Model Used"
+          },
+          "model_label": {
+            "type": "string",
+            "title": "Model Label"
+          },
+          "selection_reason": {
+            "type": "string",
+            "title": "Selection Reason"
+          },
+          "quality_label": {
+            "type": "string",
+            "enum": [
+              "Good",
+              "Fair",
+              "Low",
+              "Sparse",
+              "Unknown"
+            ],
+            "title": "Quality Label"
+          },
+          "is_sparse": {
+            "type": "boolean",
+            "title": "Is Sparse"
+          },
+          "quality_reason": {
+            "type": "string",
+            "title": "Quality Reason"
+          },
+          "evaluation_wape_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Wape Pct"
+          },
+          "evaluation_total_error_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Total Error Pct"
+          },
+          "evaluation_mae": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Mae"
+          },
+          "holdout_days": {
+            "type": "integer",
+            "title": "Holdout Days"
+          },
+          "model_comparison": {
+            "items": {
+              "$ref": "#/components/schemas/ModelScore"
+            },
+            "type": "array",
+            "title": "Model Comparison"
+          },
+          "total_forecast_units": {
+            "type": "number",
+            "title": "Total Forecast Units"
+          },
+          "daily_predictions": {
+            "items": {
+              "$ref": "#/components/schemas/DailyForecastPoint"
+            },
+            "type": "array",
+            "title": "Daily Predictions"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryPoint"
+            },
+            "type": "array",
+            "title": "History"
+          },
+          "weekday_factors": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Weekday Factors"
+          },
+          "learned_calendar_effects": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarEffect"
+            },
+            "type": "array",
+            "title": "Learned Calendar Effects"
+          },
+          "upcoming_events": {
+            "items": {
+              "$ref": "#/components/schemas/UpcomingEvent"
+            },
+            "type": "array",
+            "title": "Upcoming Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "target_type",
+          "target_id",
+          "target_name",
+          "horizon_days",
+          "model_used",
+          "model_label",
+          "selection_reason",
+          "quality_label",
+          "is_sparse",
+          "quality_reason",
+          "evaluation_wape_pct",
+          "evaluation_total_error_pct",
+          "evaluation_mae",
+          "holdout_days",
+          "model_comparison",
+          "total_forecast_units",
+          "daily_predictions",
+          "history",
+          "weekday_factors",
+          "learned_calendar_effects",
+          "upcoming_events"
+        ],
+        "title": "ForecastResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HistoryPoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "units": {
+            "type": "number",
+            "title": "Units"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "units"
+        ],
+        "title": "HistoryPoint"
+      },
+      "InsightsResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "margin_squeezes": {
+            "items": {
+              "$ref": "#/components/schemas/MarginSqueezeItem"
+            },
+            "type": "array",
+            "title": "Margin Squeezes"
+          },
+          "dead_stock": {
+            "items": {
+              "$ref": "#/components/schemas/DeadStockItem"
+            },
+            "type": "array",
+            "title": "Dead Stock"
+          },
+          "dead_stock_total_pkr": {
+            "type": "number",
+            "title": "Dead Stock Total Pkr"
+          },
+          "margin_profit_at_risk_pkr": {
+            "type": "number",
+            "title": "Margin Profit At Risk Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "as_of",
+          "margin_squeezes",
+          "dead_stock",
+          "dead_stock_total_pkr",
+          "margin_profit_at_risk_pkr"
+        ],
+        "title": "InsightsResponse"
+      },
+      "KPISummary": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "today",
+              "7d",
+              "30d",
+              "90d"
+            ],
+            "title": "Period"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Period End"
+          },
+          "revenue_pkr": {
+            "type": "number",
+            "title": "Revenue Pkr"
+          },
+          "cogs_pkr": {
+            "type": "number",
+            "title": "Cogs Pkr"
+          },
+          "gross_profit_pkr": {
+            "type": "number",
+            "title": "Gross Profit Pkr"
+          },
+          "gross_margin_pct": {
+            "type": "number",
+            "title": "Gross Margin Pct"
+          },
+          "sales_count": {
+            "type": "integer",
+            "title": "Sales Count"
+          },
+          "average_basket_pkr": {
+            "type": "number",
+            "title": "Average Basket Pkr"
+          },
+          "operating_expenses_pkr": {
+            "type": "number",
+            "title": "Operating Expenses Pkr"
+          },
+          "previous_revenue_pkr": {
+            "type": "number",
+            "title": "Previous Revenue Pkr"
+          },
+          "previous_gross_profit_pkr": {
+            "type": "number",
+            "title": "Previous Gross Profit Pkr"
+          },
+          "revenue_change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Change Pct"
+          },
+          "gross_profit_change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gross Profit Change Pct"
+          },
+          "inventory_value_at_cost_pkr": {
+            "type": "number",
+            "title": "Inventory Value At Cost Pkr"
+          },
+          "products_at_risk_count": {
+            "type": "integer",
+            "title": "Products At Risk Count"
+          },
+          "out_of_stock_count": {
+            "type": "integer",
+            "title": "Out Of Stock Count"
+          },
+          "out_of_stock_on_order_count": {
+            "type": "integer",
+            "title": "Out Of Stock On Order Count"
+          },
+          "dead_stock_value_pkr": {
+            "type": "number",
+            "title": "Dead Stock Value Pkr"
+          },
+          "dead_stock_count": {
+            "type": "integer",
+            "title": "Dead Stock Count"
+          },
+          "receivables_outstanding_pkr": {
+            "type": "number",
+            "title": "Receivables Outstanding Pkr"
+          },
+          "overdue_receivables_pkr": {
+            "type": "number",
+            "title": "Overdue Receivables Pkr"
+          },
+          "overdue_customers_count": {
+            "type": "integer",
+            "title": "Overdue Customers Count"
+          },
+          "payables_total_pkr": {
+            "type": "number",
+            "title": "Payables Total Pkr"
+          },
+          "payables_due_7d_pkr": {
+            "type": "number",
+            "title": "Payables Due 7D Pkr"
+          },
+          "payables_overdue_pkr": {
+            "type": "number",
+            "title": "Payables Overdue Pkr"
+          },
+          "cash_in_hand_pkr": {
+            "type": "number",
+            "title": "Cash In Hand Pkr"
+          },
+          "daily_revenue": {
+            "items": {
+              "$ref": "#/components/schemas/DailyRevenuePoint"
+            },
+            "type": "array",
+            "title": "Daily Revenue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "period_start",
+          "period_end",
+          "revenue_pkr",
+          "cogs_pkr",
+          "gross_profit_pkr",
+          "gross_margin_pct",
+          "sales_count",
+          "average_basket_pkr",
+          "operating_expenses_pkr",
+          "previous_revenue_pkr",
+          "previous_gross_profit_pkr",
+          "revenue_change_pct",
+          "gross_profit_change_pct",
+          "inventory_value_at_cost_pkr",
+          "products_at_risk_count",
+          "out_of_stock_count",
+          "out_of_stock_on_order_count",
+          "dead_stock_value_pkr",
+          "dead_stock_count",
+          "receivables_outstanding_pkr",
+          "overdue_receivables_pkr",
+          "overdue_customers_count",
+          "payables_total_pkr",
+          "payables_due_7d_pkr",
+          "payables_overdue_pkr",
+          "cash_in_hand_pkr",
+          "daily_revenue"
+        ],
+        "title": "KPISummary"
+      },
+      "LedgerLine": {
+        "properties": {
+          "entry_id": {
+            "type": "integer",
+            "title": "Entry Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "purchase",
+              "payment"
+            ],
+            "title": "Kind"
+          },
+          "amount_pkr": {
+            "type": "number",
+            "title": "Amount Pkr"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "running_balance_pkr": {
+            "type": "number",
+            "title": "Running Balance Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entry_id",
+          "timestamp",
+          "kind",
+          "amount_pkr",
+          "due_date",
+          "description",
+          "running_balance_pkr"
+        ],
+        "title": "LedgerLine"
+      },
+      "MarginSqueezeItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "previous_cost_pkr": {
+            "type": "number",
+            "title": "Previous Cost Pkr"
+          },
+          "current_cost_pkr": {
+            "type": "number",
+            "title": "Current Cost Pkr"
+          },
+          "cost_increase_pkr": {
+            "type": "number",
+            "title": "Cost Increase Pkr"
+          },
+          "cost_increase_pct": {
+            "type": "number",
+            "title": "Cost Increase Pct"
+          },
+          "shelf_selling_price_pkr": {
+            "type": "number",
+            "title": "Shelf Selling Price Pkr"
+          },
+          "previous_margin_pct": {
+            "type": "number",
+            "title": "Previous Margin Pct"
+          },
+          "current_margin_pct": {
+            "type": "number",
+            "title": "Current Margin Pct"
+          },
+          "margin_drop_pct": {
+            "type": "number",
+            "title": "Margin Drop Pct"
+          },
+          "recommended_selling_price_pkr": {
+            "type": "number",
+            "title": "Recommended Selling Price Pkr"
+          },
+          "average_daily_demand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Daily Demand"
+          },
+          "monthly_profit_at_risk_pkr": {
+            "type": "number",
+            "title": "Monthly Profit At Risk Pkr"
+          },
+          "cost_changed_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Cost Changed On"
+          },
+          "days_since_cost_change": {
+            "type": "integer",
+            "title": "Days Since Cost Change"
+          },
+          "change_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Reason"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          },
+          "recommended_action": {
+            "type": "string",
+            "title": "Recommended Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "name",
+          "category",
+          "image_url",
+          "previous_cost_pkr",
+          "current_cost_pkr",
+          "cost_increase_pkr",
+          "cost_increase_pct",
+          "shelf_selling_price_pkr",
+          "previous_margin_pct",
+          "current_margin_pct",
+          "margin_drop_pct",
+          "recommended_selling_price_pkr",
+          "average_daily_demand",
+          "monthly_profit_at_risk_pkr",
+          "cost_changed_on",
+          "days_since_cost_change",
+          "change_reason",
+          "evidence",
+          "recommended_action"
+        ],
+        "title": "MarginSqueezeItem"
+      },
+      "ModelScore": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "enum": [
+              "calendar_smoothing",
+              "last_week_same_day",
+              "moving_average_7d"
+            ],
+            "title": "Model"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "wape_pct": {
+            "type": "number",
+            "title": "Wape Pct",
+            "description": "Average daily error, as % of units sold"
+          },
+          "mae_units": {
+            "type": "number",
+            "title": "Mae Units"
+          },
+          "total_error_pct": {
+            "type": "number",
+            "title": "Total Error Pct",
+            "description": "Error on the total units over the test window"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "label",
+          "wape_pct",
+          "mae_units",
+          "total_error_pct"
+        ],
+        "title": "ModelScore"
+      },
+      "OpenInvoice": {
+        "properties": {
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "invoice_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Invoice Date"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due Date"
+          },
+          "invoice_amount_pkr": {
+            "type": "number",
+            "title": "Invoice Amount Pkr"
+          },
+          "open_amount_pkr": {
+            "type": "number",
+            "title": "Open Amount Pkr"
+          },
+          "is_overdue": {
+            "type": "boolean",
+            "title": "Is Overdue"
+          },
+          "days_overdue": {
+            "type": "integer",
+            "title": "Days Overdue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference",
+          "invoice_date",
+          "due_date",
+          "invoice_amount_pkr",
+          "open_amount_pkr",
+          "is_overdue",
+          "days_overdue"
+        ],
+        "title": "OpenInvoice"
+      },
+      "PayablesSummaryResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "horizon_days": {
+            "type": "integer",
+            "title": "Horizon Days"
+          },
+          "total_payables_pkr": {
+            "type": "number",
+            "title": "Total Payables Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "due_within_horizon_pkr": {
+            "type": "number",
+            "title": "Due Within Horizon Pkr"
+          },
+          "pending_orders_value_pkr": {
+            "type": "number",
+            "title": "Pending Orders Value Pkr"
+          },
+          "suppliers": {
+            "items": {
+              "$ref": "#/components/schemas/SupplierPayableItem"
+            },
+            "type": "array",
+            "title": "Suppliers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "as_of",
+          "horizon_days",
+          "total_payables_pkr",
+          "overdue_pkr",
+          "due_within_horizon_pkr",
+          "pending_orders_value_pkr",
+          "suppliers"
+        ],
+        "title": "PayablesSummaryResponse"
+      },
+      "PaymentRecordRequest": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "amount": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Amount"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Notes",
+            "default": "Counter wasooli"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "amount"
+        ],
+        "title": "PaymentRecordRequest"
+      },
+      "PaymentRecordResponse": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "amount_received": {
+            "type": "number",
+            "title": "Amount Received"
+          },
+          "previous_balance": {
+            "type": "number",
+            "title": "Previous Balance"
+          },
+          "new_balance": {
+            "type": "number",
+            "title": "New Balance"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "amount_received",
+          "previous_balance",
+          "new_balance",
+          "message"
+        ],
+        "title": "PaymentRecordResponse"
+      },
+      "PlannedExpense": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "amount_pkr": {
+            "type": "number",
+            "title": "Amount Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "label",
+          "amount_pkr"
+        ],
+        "title": "PlannedExpense"
+      },
+      "PlannedSupplierPayment": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "amount_pkr": {
+            "type": "number",
+            "title": "Amount Pkr"
+          },
+          "was_overdue": {
+            "type": "boolean",
+            "title": "Was Overdue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "supplier_name",
+          "reference",
+          "amount_pkr",
+          "was_overdue"
+        ],
+        "title": "PlannedSupplierPayment"
+      },
+      "PriceChange": {
+        "properties": {
+          "effective_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Effective Date"
+          },
+          "cost_price": {
+            "type": "number",
+            "title": "Cost Price"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "margin_pct": {
+            "type": "number",
+            "title": "Margin Pct"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effective_date",
+          "cost_price",
+          "selling_price",
+          "margin_pct",
+          "reason"
+        ],
+        "title": "PriceChange"
+      },
+      "PriceUpdateRequest": {
+        "properties": {
+          "new_selling_price": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "New Selling Price"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Reason",
+            "default": "Shelf price updated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_selling_price"
+        ],
+        "title": "PriceUpdateRequest"
+      },
+      "PriceUpdateResponse": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "old_selling_price": {
+            "type": "number",
+            "title": "Old Selling Price"
+          },
+          "new_selling_price": {
+            "type": "number",
+            "title": "New Selling Price"
+          },
+          "new_margin_pct": {
+            "type": "number",
+            "title": "New Margin Pct"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "old_selling_price",
+          "new_selling_price",
+          "new_margin_pct",
+          "message"
+        ],
+        "title": "PriceUpdateResponse"
+      },
+      "ProductDetailResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "cost_price": {
+            "type": "number",
+            "title": "Cost Price"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "margin_pct": {
+            "type": "number",
+            "title": "Margin Pct"
+          },
+          "stock_qty": {
+            "type": "number",
+            "title": "Stock Qty"
+          },
+          "stock_value_pkr": {
+            "type": "number",
+            "title": "Stock Value Pkr"
+          },
+          "lead_time_days": {
+            "type": "integer",
+            "title": "Lead Time Days"
+          },
+          "safety_stock_days": {
+            "type": "integer",
+            "title": "Safety Stock Days"
+          },
+          "supplier_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Name"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "average_daily_demand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Daily Demand"
+          },
+          "units_sold_lookback": {
+            "type": "number",
+            "title": "Units Sold Lookback"
+          },
+          "lookback_days": {
+            "type": "integer",
+            "title": "Lookback Days"
+          },
+          "days_of_cover": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Of Cover"
+          },
+          "effective_cover_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Cover Days"
+          },
+          "stockout_risk": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "ok",
+              "unknown"
+            ],
+            "title": "Stockout Risk"
+          },
+          "risk_reason": {
+            "type": "string",
+            "title": "Risk Reason"
+          },
+          "risk_reason_ur": {
+            "type": "string",
+            "title": "Risk Reason Ur"
+          },
+          "is_out_of_stock": {
+            "type": "boolean",
+            "title": "Is Out Of Stock"
+          },
+          "reorder_point": {
+            "type": "number",
+            "title": "Reorder Point"
+          },
+          "target_stock": {
+            "type": "number",
+            "title": "Target Stock"
+          },
+          "pending_receipts": {
+            "type": "number",
+            "title": "Pending Receipts"
+          },
+          "next_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Delivery Date"
+          },
+          "recommended_order_qty": {
+            "type": "number",
+            "title": "Recommended Order Qty"
+          },
+          "last_sold_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sold At"
+          },
+          "days_since_last_sale": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Since Last Sale"
+          },
+          "is_dead_stock": {
+            "type": "boolean",
+            "title": "Is Dead Stock"
+          },
+          "pack_info": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductPackInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "price_history": {
+            "items": {
+              "$ref": "#/components/schemas/PriceChange"
+            },
+            "type": "array",
+            "title": "Price History"
+          },
+          "recent_movements": {
+            "items": {
+              "$ref": "#/components/schemas/StockMovementItem"
+            },
+            "type": "array",
+            "title": "Recent Movements"
+          },
+          "units_sold_30d": {
+            "type": "number",
+            "title": "Units Sold 30D"
+          },
+          "revenue_30d_pkr": {
+            "type": "number",
+            "title": "Revenue 30D Pkr"
+          },
+          "gross_profit_30d_pkr": {
+            "type": "number",
+            "title": "Gross Profit 30D Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "name",
+          "category",
+          "unit",
+          "cost_price",
+          "selling_price",
+          "margin_pct",
+          "stock_qty",
+          "stock_value_pkr",
+          "lead_time_days",
+          "safety_stock_days",
+          "supplier_id",
+          "supplier_name",
+          "image_url",
+          "average_daily_demand",
+          "units_sold_lookback",
+          "lookback_days",
+          "days_of_cover",
+          "effective_cover_days",
+          "stockout_risk",
+          "risk_reason",
+          "risk_reason_ur",
+          "is_out_of_stock",
+          "reorder_point",
+          "target_stock",
+          "pending_receipts",
+          "next_delivery_date",
+          "recommended_order_qty",
+          "last_sold_at",
+          "days_since_last_sale",
+          "is_dead_stock",
+          "pack_info",
+          "price_history",
+          "recent_movements",
+          "units_sold_30d",
+          "revenue_30d_pkr",
+          "gross_profit_30d_pkr"
+        ],
+        "title": "ProductDetailResponse"
+      },
+      "ProductListResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "counts_by_risk": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts By Risk"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/ProductResponse"
+            },
+            "type": "array",
+            "title": "Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "counts_by_risk",
+          "categories",
+          "products"
+        ],
+        "title": "ProductListResponse"
+      },
+      "ProductPackInfo": {
+        "properties": {
+          "pack_unit": {
+            "type": "string",
+            "title": "Pack Unit"
+          },
+          "units_per_pack": {
+            "type": "integer",
+            "title": "Units Per Pack"
+          },
+          "sell_unit": {
+            "type": "string",
+            "title": "Sell Unit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pack_unit",
+          "units_per_pack",
+          "sell_unit"
+        ],
+        "title": "ProductPackInfo"
+      },
+      "ProductResponse": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "cost_price": {
+            "type": "number",
+            "title": "Cost Price"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "margin_pct": {
+            "type": "number",
+            "title": "Margin Pct"
+          },
+          "stock_qty": {
+            "type": "number",
+            "title": "Stock Qty"
+          },
+          "stock_value_pkr": {
+            "type": "number",
+            "title": "Stock Value Pkr"
+          },
+          "lead_time_days": {
+            "type": "integer",
+            "title": "Lead Time Days"
+          },
+          "safety_stock_days": {
+            "type": "integer",
+            "title": "Safety Stock Days"
+          },
+          "supplier_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Name"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "average_daily_demand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Daily Demand"
+          },
+          "units_sold_lookback": {
+            "type": "number",
+            "title": "Units Sold Lookback"
+          },
+          "lookback_days": {
+            "type": "integer",
+            "title": "Lookback Days"
+          },
+          "days_of_cover": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Of Cover"
+          },
+          "effective_cover_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Cover Days"
+          },
+          "stockout_risk": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "ok",
+              "unknown"
+            ],
+            "title": "Stockout Risk"
+          },
+          "risk_reason": {
+            "type": "string",
+            "title": "Risk Reason"
+          },
+          "risk_reason_ur": {
+            "type": "string",
+            "title": "Risk Reason Ur"
+          },
+          "is_out_of_stock": {
+            "type": "boolean",
+            "title": "Is Out Of Stock"
+          },
+          "reorder_point": {
+            "type": "number",
+            "title": "Reorder Point"
+          },
+          "target_stock": {
+            "type": "number",
+            "title": "Target Stock"
+          },
+          "pending_receipts": {
+            "type": "number",
+            "title": "Pending Receipts"
+          },
+          "next_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Delivery Date"
+          },
+          "recommended_order_qty": {
+            "type": "number",
+            "title": "Recommended Order Qty"
+          },
+          "last_sold_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sold At"
+          },
+          "days_since_last_sale": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Since Last Sale"
+          },
+          "is_dead_stock": {
+            "type": "boolean",
+            "title": "Is Dead Stock"
+          },
+          "pack_info": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductPackInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "name",
+          "category",
+          "unit",
+          "cost_price",
+          "selling_price",
+          "margin_pct",
+          "stock_qty",
+          "stock_value_pkr",
+          "lead_time_days",
+          "safety_stock_days",
+          "supplier_id",
+          "supplier_name",
+          "image_url",
+          "average_daily_demand",
+          "units_sold_lookback",
+          "lookback_days",
+          "days_of_cover",
+          "effective_cover_days",
+          "stockout_risk",
+          "risk_reason",
+          "risk_reason_ur",
+          "is_out_of_stock",
+          "reorder_point",
+          "target_stock",
+          "pending_receipts",
+          "next_delivery_date",
+          "recommended_order_qty",
+          "last_sold_at",
+          "days_since_last_sale",
+          "is_dead_stock",
+          "pack_info"
+        ],
+        "title": "ProductResponse"
+      },
+      "PurchasePlanLine": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "pack_unit": {
+            "type": "string",
+            "title": "Pack Unit"
+          },
+          "units_per_pack": {
+            "type": "integer",
+            "title": "Units Per Pack"
+          },
+          "sell_unit": {
+            "type": "string",
+            "title": "Sell Unit"
+          },
+          "recommended_packs": {
+            "type": "integer",
+            "title": "Recommended Packs"
+          },
+          "needed_packs": {
+            "type": "integer",
+            "title": "Needed Packs"
+          },
+          "is_reduced_by_budget": {
+            "type": "boolean",
+            "title": "Is Reduced By Budget"
+          },
+          "total_units": {
+            "type": "number",
+            "title": "Total Units"
+          },
+          "estimated_unit_cost": {
+            "type": "number",
+            "title": "Estimated Unit Cost"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "line_total_cost_pkr": {
+            "type": "number",
+            "title": "Line Total Cost Pkr"
+          },
+          "stock_on_hand": {
+            "type": "number",
+            "title": "Stock On Hand"
+          },
+          "pending_receipts": {
+            "type": "number",
+            "title": "Pending Receipts"
+          },
+          "daily_demand": {
+            "type": "number",
+            "title": "Daily Demand"
+          },
+          "lead_time_days": {
+            "type": "integer",
+            "title": "Lead Time Days"
+          },
+          "days_of_cover_before": {
+            "type": "number",
+            "title": "Days Of Cover Before"
+          },
+          "projected_cover_after": {
+            "type": "number",
+            "title": "Projected Cover After"
+          },
+          "stockout_risk": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "ok",
+              "unknown"
+            ],
+            "title": "Stockout Risk"
+          },
+          "urgency_score": {
+            "type": "number",
+            "title": "Urgency Score"
+          },
+          "profit_score": {
+            "type": "number",
+            "title": "Profit Score"
+          },
+          "priority_score": {
+            "type": "number",
+            "title": "Priority Score"
+          },
+          "projected_revenue_pkr": {
+            "type": "number",
+            "title": "Projected Revenue Pkr"
+          },
+          "projected_gross_profit_pkr": {
+            "type": "number",
+            "title": "Projected Gross Profit Pkr"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "reasons_ur": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons Ur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "product_name",
+          "category",
+          "image_url",
+          "supplier_name",
+          "pack_unit",
+          "units_per_pack",
+          "sell_unit",
+          "recommended_packs",
+          "needed_packs",
+          "is_reduced_by_budget",
+          "total_units",
+          "estimated_unit_cost",
+          "selling_price",
+          "line_total_cost_pkr",
+          "stock_on_hand",
+          "pending_receipts",
+          "daily_demand",
+          "lead_time_days",
+          "days_of_cover_before",
+          "projected_cover_after",
+          "stockout_risk",
+          "urgency_score",
+          "profit_score",
+          "priority_score",
+          "projected_revenue_pkr",
+          "projected_gross_profit_pkr",
+          "rationale",
+          "reasons",
+          "reasons_ur"
+        ],
+        "title": "PurchasePlanLine"
+      },
+      "ReorderPlanResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "budget_entered_pkr": {
+            "type": "number",
+            "title": "Budget Entered Pkr"
+          },
+          "target_cover_days": {
+            "type": "integer",
+            "title": "Target Cover Days"
+          },
+          "total_allocated_spend_pkr": {
+            "type": "number",
+            "title": "Total Allocated Spend Pkr"
+          },
+          "remaining_unallocated_pkr": {
+            "type": "number",
+            "title": "Remaining Unallocated Pkr"
+          },
+          "budget_used_pct": {
+            "type": "number",
+            "title": "Budget Used Pct"
+          },
+          "budget_respected": {
+            "type": "boolean",
+            "title": "Budget Respected"
+          },
+          "total_skus_recommended": {
+            "type": "integer",
+            "title": "Total Skus Recommended"
+          },
+          "items_needing_reorder": {
+            "type": "integer",
+            "title": "Items Needing Reorder"
+          },
+          "items_fully_covered": {
+            "type": "integer",
+            "title": "Items Fully Covered"
+          },
+          "budget_to_cover_everything_pkr": {
+            "type": "number",
+            "title": "Budget To Cover Everything Pkr"
+          },
+          "products_with_unknown_demand": {
+            "type": "integer",
+            "title": "Products With Unknown Demand"
+          },
+          "projected_revenue_pkr": {
+            "type": "number",
+            "title": "Projected Revenue Pkr"
+          },
+          "projected_gross_profit_pkr": {
+            "type": "number",
+            "title": "Projected Gross Profit Pkr"
+          },
+          "ranking_rule": {
+            "type": "string",
+            "title": "Ranking Rule"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLine"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/SkippedItem"
+            },
+            "type": "array",
+            "title": "Skipped"
+          },
+          "skipped_count": {
+            "type": "integer",
+            "title": "Skipped Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "store_id",
+          "as_of",
+          "budget_entered_pkr",
+          "target_cover_days",
+          "total_allocated_spend_pkr",
+          "remaining_unallocated_pkr",
+          "budget_used_pct",
+          "budget_respected",
+          "total_skus_recommended",
+          "items_needing_reorder",
+          "items_fully_covered",
+          "budget_to_cover_everything_pkr",
+          "products_with_unknown_demand",
+          "projected_revenue_pkr",
+          "projected_gross_profit_pkr",
+          "ranking_rule",
+          "recommendations",
+          "skipped",
+          "skipped_count"
+        ],
+        "title": "ReorderPlanResponse"
+      },
+      "ReorderRequest": {
+        "properties": {
+          "budget_pkr": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Budget Pkr",
+            "description": "Purchase budget in PKR, e.g. 50000"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id",
+            "default": 1
+          },
+          "target_cover_days": {
+            "type": "integer",
+            "maximum": 60.0,
+            "minimum": 7.0,
+            "title": "Target Cover Days",
+            "default": 14
+          },
+          "save_draft": {
+            "type": "boolean",
+            "title": "Save Draft",
+            "description": "Also save the plan as a draft purchase plan",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "budget_pkr"
+        ],
+        "title": "ReorderRequest"
+      },
+      "RowError": {
+        "properties": {
+          "row_number": {
+            "type": "integer",
+            "title": "Row Number"
+          },
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "value": {
+            "title": "Value"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "row_number",
+          "field",
+          "value",
+          "error"
+        ],
+        "title": "RowError"
+      },
+      "ScoreFactor": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "points": {
+            "type": "number",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason",
+          "points"
+        ],
+        "title": "ScoreFactor"
+      },
+      "SkippedItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "needed_packs": {
+            "type": "integer",
+            "title": "Needed Packs"
+          },
+          "pack_unit": {
+            "type": "string",
+            "title": "Pack Unit"
+          },
+          "cost_of_one_pack_pkr": {
+            "type": "number",
+            "title": "Cost Of One Pack Pkr"
+          },
+          "priority_score": {
+            "type": "number",
+            "title": "Priority Score"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "product_name",
+          "needed_packs",
+          "pack_unit",
+          "cost_of_one_pack_pkr",
+          "priority_score",
+          "reason"
+        ],
+        "title": "SkippedItem"
+      },
+      "StockAdjustmentRequest": {
+        "properties": {
+          "quantity_change": {
+            "type": "number",
+            "title": "Quantity Change",
+            "description": "Positive for stock received, negative for damage or loss"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 150,
+            "title": "Reason",
+            "default": "Stock count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quantity_change"
+        ],
+        "title": "StockAdjustmentRequest"
+      },
+      "StockAdjustmentResponse": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "old_stock": {
+            "type": "number",
+            "title": "Old Stock"
+          },
+          "new_stock": {
+            "type": "number",
+            "title": "New Stock"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "old_stock",
+          "new_stock",
+          "message"
+        ],
+        "title": "StockAdjustmentResponse"
+      },
+      "StockMovementItem": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "movement_type": {
+            "type": "string",
+            "title": "Movement Type"
+          },
+          "qty_delta": {
+            "type": "number",
+            "title": "Qty Delta"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "movement_type",
+          "qty_delta",
+          "reason"
+        ],
+        "title": "StockMovementItem"
+      },
+      "StoreProfile": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "owner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Name"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "default_credit_term_days": {
+            "type": "integer",
+            "title": "Default Credit Term Days"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "data_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Start"
+          },
+          "data_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data End"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count"
+          },
+          "customer_count": {
+            "type": "integer",
+            "title": "Customer Count"
+          },
+          "supplier_count": {
+            "type": "integer",
+            "title": "Supplier Count"
+          },
+          "copilot": {
+            "$ref": "#/components/schemas/CopilotStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "name",
+          "location",
+          "owner_name",
+          "currency",
+          "timezone",
+          "default_credit_term_days",
+          "as_of",
+          "data_start",
+          "data_end",
+          "seed",
+          "product_count",
+          "customer_count",
+          "supplier_count",
+          "copilot"
+        ],
+        "title": "StoreProfile"
+      },
+      "SupplierPayableItem": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "contact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact"
+          },
+          "payment_terms_days": {
+            "type": "integer",
+            "title": "Payment Terms Days"
+          },
+          "total_payable_pkr": {
+            "type": "number",
+            "title": "Total Payable Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "due_within_horizon_pkr": {
+            "type": "number",
+            "title": "Due Within Horizon Pkr"
+          },
+          "next_due_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Due Date"
+          },
+          "open_invoices": {
+            "items": {
+              "$ref": "#/components/schemas/OpenInvoice"
+            },
+            "type": "array",
+            "title": "Open Invoices"
+          },
+          "pending_orders_count": {
+            "type": "integer",
+            "title": "Pending Orders Count"
+          },
+          "pending_orders_value_pkr": {
+            "type": "number",
+            "title": "Pending Orders Value Pkr"
+          },
+          "next_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Delivery Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "name",
+          "contact",
+          "payment_terms_days",
+          "total_payable_pkr",
+          "overdue_pkr",
+          "due_within_horizon_pkr",
+          "next_due_date",
+          "open_invoices",
+          "pending_orders_count",
+          "pending_orders_value_pkr",
+          "next_delivery_date"
+        ],
+        "title": "SupplierPayableItem"
+      },
+      "TodayActionsResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "store_name": {
+            "type": "string",
+            "title": "Store Name"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "ranking_rule": {
+            "type": "string",
+            "title": "Ranking Rule"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ActionItem"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_id",
+          "store_name",
+          "as_of",
+          "ranking_rule",
+          "actions"
+        ],
+        "title": "TodayActionsResponse"
+      },
+      "ToolCallExecution": {
+        "properties": {
+          "tool_name": {
+            "type": "string",
+            "title": "Tool Name"
+          },
+          "tool_label": {
+            "type": "string",
+            "title": "Tool Label"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parameters"
+          },
+          "result_summary": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Result Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool_name",
+          "tool_label",
+          "parameters",
+          "result_summary"
+        ],
+        "title": "ToolCallExecution"
+      },
+      "UpcomingEvent": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "date": {
+            "type": "string",
+            "title": "Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "date"
+        ],
+        "title": "UpcomingEvent"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

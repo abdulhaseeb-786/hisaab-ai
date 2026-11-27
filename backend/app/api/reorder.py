@@ -1,23 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.reorder.budget_optimizer import generate_budget_reorder_plan
-from app.schemas.reorder import ReorderRequest, ReorderPlanResponse
+from app.schemas.reorder import ReorderPlanResponse, ReorderRequest
 
 router = APIRouter(prefix="/reorder-plan", tags=["Reorder Planner (Hero Flow)"])
 
+
 @router.post("", response_model=ReorderPlanResponse)
 def create_budget_reorder_plan(request: ReorderRequest, db: Session = Depends(get_db)):
-    """POST /api/reorder-plan: Answers 'I have PKR 50,000. What should I buy today and why?'
-    Guarantees total spend never exceeds budget and rounds to wholesale packs (REC-01 to REC-04).
-    """
+    """'I have Rs 50,000. What should I buy today and why?' Whole packs, never over budget (REC-01..04)."""
     try:
-        plan = generate_budget_reorder_plan(
-            db,
-            budget_pkr=request.budget_pkr,
-            store_id=request.store_id,
-            target_cover_days=request.target_cover_days
+        return generate_budget_reorder_plan(
+            db, budget_pkr=request.budget_pkr, store_id=request.store_id,
+            target_cover_days=request.target_cover_days, save_draft=request.save_draft,
         )
-        return plan
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))

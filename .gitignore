@@ -48,3 +48,6 @@ build/
 # Local export and backup artifacts
 /frontend-anti.zip
 /hisaabai_retail_decision_intelligence.html
+
+# Raw public datasets (downloaded by hand, large)
+backend/datasets/raw/

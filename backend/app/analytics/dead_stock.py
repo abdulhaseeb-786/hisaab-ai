@@ -1,61 +1,50 @@
-"""Dead-Stock Signal Detector.
-Requirement INV-03, Section 5:
-- Stock quantity > 0
-- No sales within the configurable lookback window (default 30 days)
-- Labeled as a 'signal, not a certainty'
+"""Dead-stock signal: stock on the shelf with no sale in the lookback window.
+
+It is a signal, not a verdict: an item can be seasonal. The evidence shows exactly how
+long it has been since the last sale and how much money is tied up.
 """
 
-from datetime import datetime, timedelta, timezone
-from typing import List, Dict, Any
+from __future__ import annotations
+
+from typing import Any
+
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from app.models import Product, SaleLine, Sale
 
-def detect_dead_stock(db: Session, store_id: int = 1, lookback_days: int = 30) -> List[Dict[str, Any]]:
-    """Detect slow-moving or stagnant items that have positive stock but 0 sales."""
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
-    lookback_start = now - timedelta(days=lookback_days)
+from app.analytics.inventory_rules import DEAD_STOCK_DAYS, compute_inventory_health
 
-    # Find products that had at least one sale in lookback window
-    active_product_ids = (
-        db.query(SaleLine.product_id)
-        .join(Sale, Sale.sale_id == SaleLine.sale_id)
-        .filter(Sale.store_id == store_id, Sale.timestamp >= lookback_start)
-        .distinct()
-        .all()
-    )
-    active_set = {row[0] for row in active_product_ids}
 
-    # Products with stock > 0 that are NOT in active_set
-    stagnant_prods = (
-        db.query(Product)
-        .filter(
-            Product.store_id == store_id,
-            Product.active == True,
-            Product.stock_qty > 0.0,
-            ~Product.product_id.in_(active_set)
-        )
-        .all()
-    )
-
+def detect_dead_stock(
+    db: Session,
+    store_id: int = 1,
+    lookback_days: int = DEAD_STOCK_DAYS,
+    inventory: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    inventory = inventory if inventory is not None else compute_inventory_health(db, store_id=store_id)
     results = []
-    for p in stagnant_prods:
-        tied_up_capital = p.stock_qty * p.cost_price
+    for item in inventory:
+        days = item["days_since_last_sale"]
+        if item["stock_qty"] <= 0 or (days is not None and days < lookback_days):
+            continue
+        tied = item["stock_qty"] * item["cost_price"]
+        since = f"{days} days" if days is not None else "the start of the records"
         results.append({
-            "product_id": p.product_id,
-            "sku": p.sku,
-            "name": p.name,
-            "category": p.category,
-            "stock_qty": p.stock_qty,
-            "cost_price_pkr": p.cost_price,
-            "selling_price_pkr": p.selling_price,
-            "tied_up_capital_pkr": round(tied_up_capital, 2),
+            "product_id": item["product_id"],
+            "sku": item["sku"],
+            "name": item["name"],
+            "category": item["category"],
+            "image_url": item["image_url"],
+            "stock_qty": item["stock_qty"],
+            "cost_price_pkr": item["cost_price"],
+            "selling_price_pkr": item["selling_price"],
+            "tied_up_capital_pkr": round(tied, 2),
+            "days_since_last_sale": days,
+            "last_sold_at": item["last_sold_at"],
             "lookback_days": lookback_days,
-            "signal_status": "potential_dead_stock",
-            "evidence": f"Zero units sold in the last {lookback_days} days while holding {p.stock_qty:.0f} units in stock.",
-            "recommended_action": f"Bundle with fast-moving goods or discount by 10-15% to free up PKR {tied_up_capital:.0f} tied-up capital."
+            "evidence": f"No sale for {since} while {item['stock_qty']:.0f} units sit on the shelf.",
+            "recommended_action": (
+                f"Bundle it with a fast-moving item or give 10-15% off to free Rs {tied:,.0f}. "
+                "Do not reorder until it sells again."
+            ),
         })
-
-    # Sort descending by tied-up capital
     results.sort(key=lambda x: x["tied_up_capital_pkr"], reverse=True)
     return results
