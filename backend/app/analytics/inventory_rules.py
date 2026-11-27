@@ -12,11 +12,25 @@ Formulas:
 - Recommended Qty: max(0, Target Stock - Stock On Hand - Pending Receipts)
 """
 
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models import Product, SaleLine, Sale, PurchaseLine, Purchase
+
+CATEGORY_ICON_MAP = {
+    "Cooking Oil & Ghee": "cooking_oil.svg",
+    "Grains & Pulses": "grains_pulses.svg",
+    "Tea & Beverages": "tea_beverages.svg",
+    "Spices & Mixes": "spices_mixes.svg",
+    "Dairy & Breakfast": "dairy_breakfast.svg",
+    "Cleaning & Laundry": "cleaning_laundry.svg",
+    "Personal Care": "personal_care.svg",
+    "Snacks & Biscuits": "snacks_biscuits.svg",
+}
+
+STATIC_PRODUCTS_DIR = Path(__file__).resolve().parent.parent.parent / "static" / "images" / "products"
 
 def compute_inventory_health(
     db: Session,
@@ -96,6 +110,17 @@ def compute_inventory_health(
                 "sell_unit": p.pack.sell_unit
             }
 
+        # Check for real downloaded photograph first (png, jpg), then svg, then category icon
+        if (STATIC_PRODUCTS_DIR / f"{p.sku}.png").exists():
+            local_img = f"/static/images/products/{p.sku}.png"
+        elif (STATIC_PRODUCTS_DIR / f"{p.sku}.jpg").exists():
+            local_img = f"/static/images/products/{p.sku}.jpg"
+        elif (STATIC_PRODUCTS_DIR / f"{p.sku}.svg").exists():
+            local_img = f"/static/images/products/{p.sku}.svg"
+        else:
+            cat_icon = CATEGORY_ICON_MAP.get(p.category, "cooking_oil.svg")
+            local_img = f"/static/images/categories/{cat_icon}"
+
         health_records.append({
             "product_id": p.product_id,
             "sku": p.sku,
@@ -107,6 +132,8 @@ def compute_inventory_health(
             "stock_qty": p.stock_qty,
             "lead_time_days": lead_time,
             "safety_stock_days": safety_stock_days,
+            "image_url": p.image_url,
+            "local_image_url": local_img,
             "average_daily_demand": round(daily_demand, 2),
             "days_of_cover": round(days_of_cover, 1) if days_of_cover is not None else None,
             "stockout_risk": risk_status,

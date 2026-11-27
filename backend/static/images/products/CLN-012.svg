@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Background Container -->
+  <rect width="100" height="100" rx="16" fill="#f1f5f9"/>
+  <!-- Sparkle Floor Cleaner (Dead Stock Demo Product) -->
+  <path d="M 42 20 L 58 20 L 58 28 L 66 38 L 66 82 L 34 82 L 34 38 L 42 28 Z" fill="#10b981" stroke="#047857" stroke-width="2"/>
+  <rect x="44" y="16" width="12" height="6" fill="#047857"/>
+  <text x="50" y="52" font-size="7" font-family="Arial, sans-serif" font-weight="900" fill="#ffffff" text-anchor="middle">SPARKLE</text>
+  <text x="50" y="62" font-size="5" font-family="Arial, sans-serif" font-weight="bold" fill="#fef08a" text-anchor="middle">LEMON 1L</text>
+</svg>

@@ -92,7 +92,9 @@ def generate_budget_reorder_plan(
             "lead_time_days": lead_time,
             "urgency_score": round(composite_score, 3),
             "stock_on_hand": item["stock_qty"],
-            "daily_demand": demand
+            "daily_demand": demand,
+            "image_url": item.get("image_url"),
+            "local_image_url": item.get("local_image_url")
         })
 
     # Sort candidates by composite priority descending
@@ -147,7 +149,9 @@ def generate_budget_reorder_plan(
             "days_of_cover_before": round(cand["days_of_cover"], 1),
             "projected_cover_after": round(new_cover, 1),
             "urgency_score": cand["urgency_score"],
-            "rationale": rationale
+            "rationale": rationale,
+            "image_url": cand.get("image_url"),
+            "local_image_url": cand.get("local_image_url")
         })
 
         remaining_budget -= allocated_cost

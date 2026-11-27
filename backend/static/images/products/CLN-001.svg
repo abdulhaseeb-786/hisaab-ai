@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Background Container -->
+  <rect width="100" height="100" rx="16" fill="#ecfdf5"/>
+  <!-- Surf Excel Pouch -->
+  <polygon points="32,24 68,24 74,80 26,80" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+  <!-- Splash Shape -->
+  <circle cx="50" cy="48" r="14" fill="#facc15"/>
+  <text x="50" y="52" font-size="8" font-family="Arial, sans-serif" font-weight="900" fill="#e11d48" text-anchor="middle">SURF</text>
+  <text x="50" y="60" font-size="6" font-family="Arial, sans-serif" font-weight="900" fill="#0284c7" text-anchor="middle">EXCEL</text>
+  <text x="50" y="73" font-size="6" font-family="Arial, sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">1 KG</text>
+</svg>

@@ -47,9 +47,8 @@ def chat_with_copilot(
             from google.genai import types
 
             client = genai.Client(api_key=gemini_key)
-            # Use gemini-2.0-flash or gemini-1.5-flash
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model="gemini-1.5-flash",
                 contents=message,
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT + f"\nUser requested language: {language}",
@@ -75,7 +74,7 @@ def chat_with_copilot(
             from groq import Groq
             groq_client = Groq(api_key=groq_key)
             completion = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT + f"\nUser requested language: {language}"},
                     {"role": "user", "content": message}

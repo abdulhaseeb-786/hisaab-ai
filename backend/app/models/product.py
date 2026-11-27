@@ -18,6 +18,7 @@ class Product(Base):
     supplier_id = Column(Integer, ForeignKey("suppliers.supplier_id"), nullable=True)
     lead_time_days = Column(Integer, default=3)
     safety_stock_days = Column(Integer, default=2)
+    image_url = Column(String(500), nullable=True)
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

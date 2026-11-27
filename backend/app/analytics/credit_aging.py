@@ -117,6 +117,8 @@ def calculate_credit_summary(db: Session, store_id: int = 1) -> Dict[str, Any]:
             "credit_limit_pkr": c.credit_limit,
             "safe_mark_score": round(safe_mark, 1),
             "risk_level": risk_level,
+            "avatar_url": None,
+            "local_icon_url": "/static/images/icons/khata_ledger.svg",
             "last_payment_date": last_pay_date
         })
 

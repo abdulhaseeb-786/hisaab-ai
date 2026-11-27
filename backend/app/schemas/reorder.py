@@ -22,6 +22,8 @@ class PurchasePlanLineResponse(BaseModel):
     projected_cover_after: Optional[float]
     urgency_score: float
     rationale: str
+    image_url: Optional[str] = None
+    local_image_url: Optional[str] = None
 
 class ReorderPlanResponse(BaseModel):
     plan_id: Optional[int] = None

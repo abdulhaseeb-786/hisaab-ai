@@ -18,6 +18,8 @@ class CustomerKhataItem(BaseModel):
     credit_limit_pkr: float
     safe_mark_score: float  # 0 to 100 Safe Mark rating
     risk_level: str         # low, medium, high (safe mark flag)
+    avatar_url: Optional[str] = None
+    local_icon_url: Optional[str] = None
     last_payment_date: Optional[datetime]
 
 class CreditSummaryResponse(BaseModel):
@@ -45,3 +47,8 @@ class PayablesSummaryResponse(BaseModel):
     due_next_7_days_pkr: float
     suppliers: List[SupplierPayableItem]
     data_label: str = "Demo Data"
+
+class PaymentRecordRequest(BaseModel):
+    customer_id: int
+    amount: float
+    notes: Optional[str] = "Counter wasooli"

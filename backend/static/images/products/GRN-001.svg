@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="attaBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Container -->
+  <rect width="100" height="100" rx="16" fill="url(#attaBg)"/>
+  <!-- Sunridge Atta 10kg Bag -->
+  <path d="M 28 26 Q 50 20 72 26 L 76 82 Q 50 86 24 82 Z" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+  <rect x="32" y="34" width="36" height="34" rx="2" fill="#ffffff" opacity="0.95"/>
+  <text x="50" y="45" font-size="7" font-family="Arial, sans-serif" font-weight="900" fill="#b45309" text-anchor="middle">SUNRIDGE</text>
+  <text x="50" y="54" font-size="6" font-family="Arial, sans-serif" font-weight="bold" fill="#1e293b" text-anchor="middle">CHAKKI ATTA</text>
+  <text x="50" y="63" font-size="7" font-family="Arial, sans-serif" font-weight="bold" fill="#dc2626" text-anchor="middle">10 KG</text>
+  <path d="M 40 70 Q 50 75 60 70" stroke="#78350f" stroke-width="2" fill="none"/>
+</svg>

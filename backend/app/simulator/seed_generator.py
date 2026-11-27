@@ -98,6 +98,7 @@ def seed_store_digital_twin(db: Session, seed: int = 42) -> Store:
             supplier_id=item["supplier_id"],
             lead_time_days=item["lead_time"],
             safety_stock_days=2,
+            image_url=item.get("image_url"),
             active=True,
             created_at=start_date
         )

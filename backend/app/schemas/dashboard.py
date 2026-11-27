@@ -11,6 +11,8 @@ class ActionItem(BaseModel):
     evidence: Dict[str, Any]
     next_step: str
     urgency: str  # critical, high, medium
+    image_url: Optional[str] = None
+    local_image_url: Optional[str] = None
 
 class TodayActionsResponse(BaseModel):
     store_id: int

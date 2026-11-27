@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="420" height="100" fill="none">
+  <defs>
+    <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="50%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+
+    <linearGradient id="logoEmeraldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#6ee7b7" />
+    </linearGradient>
+
+    <linearGradient id="logoAiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="50%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#a7f3d0" />
+    </linearGradient>
+
+    <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fbbf24" />
+    </linearGradient>
+
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#022c22" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- LOGO ICON MARK (Left 80x80) -->
+  <g transform="translate(10, 10)">
+    <rect x="0" y="0" width="80" height="80" rx="20" fill="url(#logoBgGrad)" filter="url(#logoShadow)" stroke="#10b981" stroke-width="1.2" stroke-opacity="0.35" />
+    
+    <!-- Canopy Roof -->
+    <path d="M18 31 L40 20 L62 31 L56 35 L40 27 L24 35 Z" fill="url(#logoEmeraldGrad)" opacity="0.9" />
+
+    <!-- 3 Financial Growth Bars -->
+    <rect x="22" y="39" width="8" height="23" rx="4" fill="#10b981" fill-opacity="0.75" />
+    <rect x="36" y="32" width="8" height="30" rx="4" fill="url(#logoEmeraldGrad)" />
+    <rect x="50" y="24" width="8" height="38" rx="4" fill="#34d399" />
+
+    <!-- Trendline -->
+    <path d="M26 46 Q38 38 54 27" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95" />
+
+    <!-- Sparkle Node -->
+    <circle cx="54" cy="27" r="3.5" fill="url(#logoGoldGrad)" />
+    <path d="M54 21 L55 25.5 L60 26.5 L55 27.5 L54 32 L53 27.5 L48 26.5 L53 25.5 Z" fill="#ffffff" />
+  </g>
+
+  <!-- TYPOGRAPHY: HisaabAI -->
+  <!-- "Hisaab" -->
+  <text x="106" y="58" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="40" font-weight="800" fill="#0f172a" letter-spacing="-0.8">
+    Hisaab
+  </text>
+
+  <!-- "AI" -->
+  <text x="245" y="58" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="40" font-weight="900" fill="url(#logoAiGrad)" letter-spacing="-0.5">
+    AI
+  </text>
+
+  <!-- AI Accent Sparkle on dot -->
+  <circle cx="282" cy="30" r="3" fill="#f59e0b" />
+
+  <!-- Subtitle Tagline -->
+  <text x="108" y="78" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="12" font-weight="600" fill="#64748b" letter-spacing="1.2">
+    RETAIL DECISION INTELLIGENCE
+  </text>
+
+  <!-- Pakistan FinTech Pill Badge -->
+  <g transform="translate(325, 38)">
+    <rect x="0" y="0" width="78" height="22" rx="11" fill="#ecfdf5" stroke="#10b981" stroke-width="0.8" />
+    <circle cx="10" cy="11" r="3.5" fill="#10b981" />
+    <text x="19" y="15" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="10" font-weight="700" fill="#065f46">
+      PKR • SME
+    </text>
+  </g>
+</svg>

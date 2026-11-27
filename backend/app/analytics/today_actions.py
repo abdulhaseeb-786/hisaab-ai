@@ -32,6 +32,8 @@ def get_today_three_actions(db: Session, store_id: int = 1) -> List[Dict[str, An
             "priority": 1,
             "category": "inventory",
             "urgency": "critical",
+            "image_url": "https://pictures.grocerapps.com/original/grocerapp-dalda-cooking-oil-standing-pouch-65a387b5afc3d.png",
+            "local_image_url": "/static/images/products/OIL-001.png",
             "title": f"Critical Stockout: Reorder {top_stock['name']}",
             "summary": f"Only {top_stock['stock_qty']:.0f} units remaining ({cover:.1f} days of cover). Supplier lead time is {lead_time} days.",
             "evidence": {
@@ -54,6 +56,8 @@ def get_today_three_actions(db: Session, store_id: int = 1) -> List[Dict[str, An
             "priority": 2,
             "category": "margin",
             "urgency": "high",
+            "image_url": "https://pictures.grocerapps.com/original/grocerapp-sufi-canola-oil-pouch-619f4893d0283.jpeg",
+            "local_image_url": "/static/images/products/OIL-004.jpg",
             "title": f"Margin Squeeze: Update price on {top_squeeze['name']}",
             "summary": f"Wholesale cost rose by PKR {top_squeeze['cost_increase_pkr']:.0f}, but shelf price remained at PKR {top_squeeze['shelf_selling_price_pkr']:.0f}. Margin dropped from {top_squeeze['previous_margin_pct']}% to {top_squeeze['current_margin_pct']}%.",
             "evidence": {
@@ -76,6 +80,8 @@ def get_today_three_actions(db: Session, store_id: int = 1) -> List[Dict[str, An
             "priority": 3,
             "category": "credit",
             "urgency": "medium",
+            "image_url": None,
+            "local_image_url": "/static/images/icons/khata_ledger.svg",
             "title": f"Khata Recovery: Call {top_defaulter['name']}",
             "summary": f"Outstanding balance of PKR {top_defaulter['total_balance_pkr']:.0f} is {top_defaulter['days_overdue']} days overdue. Safe Mark rating degraded to {top_defaulter['safe_mark_score']:.0f}/100.",
             "evidence": {
