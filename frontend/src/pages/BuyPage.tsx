@@ -1,0 +1,336 @@
+import confetti from 'canvas-confetti';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, ChevronDown, Copy, Send, SlidersHorizontal } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useReorderPlan, useStore } from '@/api/queries';
+import type { ReorderLine, ReorderPlan, StoreProfile } from '@/api/types';
+import { useUi } from '@/app/UiContext';
+import { Button, ButtonLink } from '@/components/ui/Button';
+import { Money } from '@/components/ui/Money';
+import { ProductImage } from '@/components/ui/ProductImage';
+import { EmptyState, ErrorBox, Skeleton } from '@/components/ui/QueryState';
+import { PageTitle, Section } from '@/components/ui/Section';
+import { Segmented } from '@/components/ui/Segmented';
+import { StockStatus } from '@/components/ui/Status';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { cn, formatNumber, formatPKR } from '@/lib/format';
+import { useDebounced } from '@/lib/useDebounced';
+import { copyText, whatsappShareUrl } from '@/lib/whatsapp';
+
+const PRESETS = [25_000, 50_000, 75_000, 100_000];
+const MIN = 1_000;
+const MAX = 10_000_000;
+
+function orderText(lines: ReorderLine[], store: StoreProfile | undefined, supplier?: string): string {
+  const groups = new Map<string, ReorderLine[]>();
+  for (const l of lines) groups.set(l.supplier_name, [...(groups.get(l.supplier_name) ?? []), l]);
+  const date = new Date().toLocaleDateString('en-PK');
+  const blocks = [...groups.entries()].map(([name, items]) => {
+    const total = items.reduce((s, l) => s + l.line_total_cost_pkr, 0);
+    return [`*${name}*`, ...items.map((l) => `- ${l.product_name}: ${l.recommended_packs} ${l.pack_unit}`), `Andazan: ${formatPKR(total)}`].join('\n');
+  });
+  return [`*Order: ${store?.name ?? ''}*`, `${store?.location ?? ''}, ${date}`, '', ...blocks.flatMap((b) => [b, '']), supplier ? '' : `*Kul: ${formatPKR(lines.reduce((s, l) => s + l.line_total_cost_pkr, 0))}*`]
+    .join('\n')
+    .trim();
+}
+
+function Line({ line }: { line: ReorderLine }) {
+  const { pick, language } = useLanguage();
+  const ui = useUi();
+  const [open, setOpen] = useState(false);
+  const reasons = language === 'roman_urdu' ? line.reasons_ur : line.reasons;
+  return (
+    <motion.li
+      layout="position"
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 12, transition: { duration: 0.15 } }}
+      transition={{ duration: 0.25 }}
+      className="py-4 first:pt-0 last:pb-0"
+    >
+      <div className="flex items-start gap-3">
+        <button onClick={() => ui.openProduct(line.product_id)} className="shrink-0" aria-label={line.product_name}>
+          <ProductImage src={line.image_url} alt="" className="w-14 h-14" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <button onClick={() => ui.openProduct(line.product_id)} className="text-left font-bold text-ink leading-snug hover:underline">
+            {line.product_name}
+          </button>
+          <p className="text-sm text-ink-muted mt-0.5">
+            {pick('Stock lasts', 'Stock')} {formatNumber(line.days_of_cover_before, 1)} {pick('days now', 'din ka')}, {pick('then', 'phir')}{' '}
+            <strong className="text-sabz-dark">{formatNumber(line.projected_cover_after)} {pick('days', 'din')}</strong>
+          </p>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-lg font-extrabold text-ink tabular">
+            {line.recommended_packs} {line.pack_unit}
+          </p>
+          <p className="text-sm text-ink-muted tabular">{formatPKR(line.line_total_cost_pkr)}</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mt-2 pl-[4.25rem]">
+        <StockStatus risk={line.stockout_risk} />
+        {line.is_reduced_by_budget && (
+          <span className="text-sm text-haldi-dark font-bold">
+            {pick(`${line.recommended_packs} of ${line.needed_packs} fit the budget`, `${line.needed_packs} mein se ${line.recommended_packs} budget mein`)}
+          </span>
+        )}
+        <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="ml-auto min-h-[44px] px-2 inline-flex items-center gap-1 text-sm font-bold text-ink-muted hover:text-ink">
+          {pick('Why?', 'Kyun?')}
+          <ChevronDown className={cn('w-4 h-4 transition-transform', open && 'rotate-180')} />
+        </button>
+      </div>
+      {open && (
+        <ul className="mt-1 ml-[4.25rem] p-3 rounded-xl bg-paper border border-line space-y-1 text-base text-ink-soft list-disc list-inside">
+          {reasons.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+      )}
+    </motion.li>
+  );
+}
+
+function SendButtons({ text, compact }: { text: string; compact?: boolean }) {
+  const { pick } = useLanguage();
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex gap-2">
+      <Button
+        variant="secondary"
+        size={compact ? 'sm' : 'md'}
+        icon={copied ? <Check className="w-5 h-5 text-sabz" /> : <Copy className="w-5 h-5" />}
+        onClick={async () => {
+          if (await copyText(text)) {
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+          }
+        }}
+      >
+        {copied ? pick('Copied', 'Copy ho gaya') : pick('Copy', 'Copy')}
+      </Button>
+      <ButtonLink href={whatsappShareUrl(text)} target="_blank" rel="noreferrer" size={compact ? 'sm' : 'md'} icon={<Send className="w-5 h-5" />} onClick={() => confetti({ particleCount: 60, spread: 70, origin: { y: 0.8 } })}>
+        WhatsApp
+      </ButtonLink>
+    </div>
+  );
+}
+
+function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
+  const { pick } = useLanguage();
+  const store = useStore();
+  const [view, setView] = useState<'urgency' | 'supplier'>('urgency');
+  const lines = plan.recommendations;
+  const bySupplier = useMemo(() => {
+    const m = new Map<string, ReorderLine[]>();
+    for (const l of lines) m.set(l.supplier_name, [...(m.get(l.supplier_name) ?? []), l]);
+    return [...m.entries()];
+  }, [lines]);
+  const fullText = useMemo(() => orderText(lines, store.data), [lines, store.data]);
+
+  if (!lines.length) {
+    return (
+      <EmptyState icon={<Check className="w-7 h-7" />} title={plan.items_needing_reorder ? pick('No whole pack fits this budget', 'Is budget mein koi poora pack nahi aata') : pick('Nothing needs buying right now', 'Abhi kuch khareedne ki zaroorat nahi')}>
+        {plan.items_needing_reorder ? pick('Try a bigger amount.', 'Zyada raqam likh kar dekhein.') : null}
+      </EmptyState>
+    );
+  }
+
+  return (
+    <div className={cn('space-y-6 transition-opacity', stale && 'opacity-60')}>
+      <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
+        <p className="text-xl font-extrabold leading-snug">
+          {pick(
+            `${plan.total_skus_recommended} items for `,
+            `${plan.total_skus_recommended} cheezein, `,
+          )}
+          <Money value={plan.total_allocated_spend_pkr} className="tabular" />
+          {pick('.', ' mein.')}{' '}
+          <span className="text-ink-muted font-bold">
+            {pick(`${formatPKR(plan.remaining_unallocated_pkr)} stays with you.`, `${formatPKR(plan.remaining_unallocated_pkr)} bachein ge.`)}
+          </span>
+        </p>
+        <div className="h-3 rounded-full bg-ink/[0.07] overflow-hidden" role="progressbar" aria-valuenow={Math.round(plan.budget_used_pct)} aria-valuemin={0} aria-valuemax={100} aria-label={pick('Budget used', 'Budget istemal')}>
+          <motion.div className="h-full bg-sabz rounded-full" initial={false} animate={{ width: `${Math.min(100, plan.budget_used_pct)}%` }} transition={{ duration: 0.5 }} />
+        </div>
+        <ul className="text-base text-ink-soft space-y-1">
+          <li>
+            {pick('When it sells, this stock brings in about', 'Yeh maal bik kar takreeban')} <strong className="text-ink">{formatPKR(plan.projected_revenue_pkr)}</strong>
+            {pick(', with', ' laye ga, jis mein')} <strong className="text-sabz-dark">{formatPKR(plan.projected_gross_profit_pkr)}</strong> {pick('gross profit.', 'gross munafa.')}
+          </li>
+          {plan.budget_to_cover_everything_pkr > plan.budget_entered_pkr && (
+            <li>
+              {pick(
+                `To stock all ${plan.items_needing_reorder} items that need it would take about ${formatPKR(plan.budget_to_cover_everything_pkr)}.`,
+                `Sab ${plan.items_needing_reorder} zaroori items poore karne ke liye takreeban ${formatPKR(plan.budget_to_cover_everything_pkr)} chahiye.`,
+              )}
+            </li>
+          )}
+        </ul>
+      </div>
+
+      <Section
+        title={pick('Your order', 'Aap ka order')}
+        action={
+          <Segmented
+            label={pick('Sort the order', 'Order ki tarteeb')}
+            value={view}
+            onChange={setView}
+            options={[
+              { value: 'urgency', label: pick('Most urgent', 'Zaroori pehle') },
+              { value: 'supplier', label: pick('By supplier', 'Supplier wise') },
+            ]}
+          />
+        }
+      >
+        {view === 'urgency' ? (
+          <div className="bg-card rounded-2xl border border-line shadow-card p-4 sm:p-5">
+            <ol className="divide-y divide-line">
+              <AnimatePresence initial={false}>
+                {lines.map((l) => (
+                  <Line key={l.product_id} line={l} />
+                ))}
+              </AnimatePresence>
+            </ol>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {bySupplier.map(([name, items]) => (
+              <div key={name} className="bg-card rounded-2xl border border-line shadow-card p-4 sm:p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-line">
+                  <div>
+                    <p className="text-lg font-extrabold">{name}</p>
+                    <p className="text-sm text-ink-muted">
+                      {items.length} {pick('items', 'items')}, {formatPKR(items.reduce((s, l) => s + l.line_total_cost_pkr, 0))}
+                    </p>
+                  </div>
+                  <SendButtons text={orderText(items, store.data, name)} compact />
+                </div>
+                <ol className="divide-y divide-line">
+                  {items.map((l) => (
+                    <Line key={l.product_id} line={l} />
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {plan.skipped_count > 0 && (
+        <details className="bg-card rounded-2xl border border-line p-5 group">
+          <summary className="cursor-pointer font-bold text-ink-soft list-none flex items-center gap-2 min-h-[44px]">
+            <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" />
+            {pick(`${plan.skipped_count} more items need stock but did not fit`, `${plan.skipped_count} aur items ko stock chahiye, budget mein nahi aaye`)}
+          </summary>
+          <ul className="mt-2 divide-y divide-line">
+            {plan.skipped.map((s) => (
+              <li key={s.product_id} className="flex justify-between gap-3 py-2 text-base">
+                <span>{s.product_name}</span>
+                <span className="text-ink-muted shrink-0 tabular">
+                  {formatPKR(s.cost_of_one_pack_pkr)} / {s.pack_unit}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      <details className="text-sm text-ink-muted">
+        <summary className="cursor-pointer font-bold min-h-[44px] flex items-center">{pick('How is the list made?', 'List kaise banti hai?')}</summary>
+        <p className="mt-1">{plan.ranking_rule}</p>
+      </details>
+
+      {/* Phone: keep the total and the send button in thumb reach. */}
+      <div className="lg:hidden fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 bg-card border-t border-line px-4 py-3 flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-ink-muted">{pick('Total order', 'Kul order')}</p>
+          <p className="text-lg font-extrabold tabular">{formatPKR(plan.total_allocated_spend_pkr)}</p>
+        </div>
+        <ButtonLink href={whatsappShareUrl(fullText)} target="_blank" rel="noreferrer" icon={<Send className="w-5 h-5" />}>
+          {pick('Send order', 'Order bhejein')}
+        </ButtonLink>
+      </div>
+      <div className="hidden lg:flex items-center justify-between gap-4 bg-card rounded-2xl border border-line p-5">
+        <p className="text-lg font-extrabold">
+          {pick('Whole order', 'Poora order')}: <span className="tabular">{formatPKR(plan.total_allocated_spend_pkr)}</span>
+        </p>
+        <SendButtons text={fullText} />
+      </div>
+    </div>
+  );
+}
+
+export default function BuyPage() {
+  const { pick } = useLanguage();
+  const [input, setInput] = useState('50000');
+  const [cover, setCover] = useState(14);
+  const [options, setOptions] = useState(false);
+  const amount = Number(input.replace(/\D/g, ''));
+  const valid = amount >= MIN && amount <= MAX;
+  const budget = useDebounced(valid ? amount : 0, 400);
+  const plan = useReorderPlan(budget, cover);
+  const stale = plan.isFetching || (valid && budget !== amount);
+
+  return (
+    <div className="space-y-6">
+      <PageTitle
+        title={pick('What should I buy today?', 'Aaj kya khareedun?')}
+        subtitle={pick('Type your budget. You get a list in whole cartons, most urgent first, never over budget.', 'Budget likhein. Poore carton ki list milegi, zaroori maal pehle, budget se zyada kabhi nahi.')}
+      />
+
+      <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
+        <label htmlFor="budget" className="block text-lg font-bold">
+          {pick('How much can you spend today?', 'Aaj kitna kharch kar sakte hain?')}
+        </label>
+        <div className={cn('flex items-center rounded-2xl border-2 bg-paper px-4 focus-within:border-sabz', valid ? 'border-line-strong' : 'border-lal')}>
+          <span className="text-2xl font-extrabold text-ink-muted">Rs</span>
+          <input
+            id="budget"
+            inputMode="numeric"
+            autoComplete="off"
+            value={input ? formatNumber(amount) : ''}
+            onChange={(e) => setInput(e.target.value)}
+            aria-invalid={!valid}
+            aria-describedby="budget-help"
+            className="w-full bg-transparent outline-none px-3 py-3 text-3xl font-extrabold tabular"
+          />
+        </div>
+        <p id="budget-help" className={cn('text-sm', valid ? 'text-ink-muted' : 'text-lal-dark font-bold')}>
+          {valid ? pick('Or pick an amount:', 'Ya raqam chunein:') : pick('Type an amount between Rs 1,000 and Rs 10,000,000.', 'Rs 1,000 se Rs 10,000,000 ke darmiyan raqam likhein.')}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {PRESETS.map((p) => (
+            <button
+              key={p}
+              onClick={() => setInput(String(p))}
+              aria-pressed={amount === p}
+              className={cn('min-h-[44px] px-4 rounded-xl font-bold border-2 tabular', amount === p ? 'bg-sabz-tint border-sabz text-sabz-dark' : 'bg-card border-line text-ink-soft hover:border-ink-muted')}
+            >
+              {p === 100_000 ? pick('Rs 1 lakh', 'Rs 1 lakh') : formatPKR(p)}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setOptions((v) => !v)} aria-expanded={options} className="inline-flex items-center gap-2 min-h-[44px] font-bold text-ink-muted hover:text-ink">
+          <SlidersHorizontal className="w-5 h-5" />
+          {pick('Options', 'Options')}
+        </button>
+        {options && (
+          <div className="space-y-2">
+            <p className="font-bold">{pick('Buy enough stock for', 'Kitne din ka stock khareedein')}</p>
+            <Segmented
+              label={pick('Days of stock', 'Kitne din')}
+              value={cover}
+              onChange={setCover}
+              options={[7, 14, 21].map((d) => ({ value: d, label: pick(`${d} days`, `${d} din`) }))}
+            />
+          </div>
+        )}
+      </div>
+
+      {plan.isError && <ErrorBox error={plan.error} onRetry={() => plan.refetch()} />}
+      {!plan.data && !plan.isError && valid && <Skeleton className="h-80" />}
+      {plan.data && <Plan plan={plan.data} stale={stale} />}
+    </div>
+  );
+}

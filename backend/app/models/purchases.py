@@ -40,6 +40,8 @@ class Purchase(Base):
     supplier_id = Column(Integer, ForeignKey("suppliers.supplier_id"), nullable=False, index=True)
     date = Column(DateTime, nullable=False, index=True)
     status = Column(String(30), default="received")  # pending, received, cancelled
+    expected_date = Column(DateTime, nullable=True)  # when a pending order should arrive
+    received_date = Column(DateTime, nullable=True)
     total = Column(Float, nullable=False, default=0.0)
 
     store = relationship("Store", back_populates="purchases")

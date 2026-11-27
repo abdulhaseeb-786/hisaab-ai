@@ -1,489 +1,620 @@
-"""Deterministic Pakistani General Store Digital Twin Simulator.
-Seeds 120 SKUs, 8 categories, 9 months of sales/purchases, Ramadan/Eid surges,
-customer khata, supplier payables, operating expenses, and 5 curated demo scenarios.
-Fixed seed 42 for 100% reproducibility and high-speed in-memory bulk insertions.
+"""Deterministic simulator for one Pakistani general store ("digital twin").
+
+What it simulates, day by day, for the last `DEMO_HISTORY_DAYS` days up to *now*:
+
+* Product demand: a base daily rate per product (demand_profiles.py) multiplied by
+  weekday, salary week, summer/winter, Ramadan, Chaand Raat and both Eids. Sales are
+  capped by stock on the shelf, so a stockout really loses sales.
+* Customers: baskets of 1-4 lines spread over opening hours.
+* Khata: 15 regular customers who buy on credit. Each follows a payment habit
+  (pays monthly, pays weekly, pays part, pays late, or has stopped paying).
+* Distributors: each visits on fixed route days. The shopkeeper orders up to a target
+  cover; goods arrive after the supplier's lead time, so some orders are still pending
+  today. Every delivery creates a supplier invoice that is paid on its due date, in
+  cash, if the drawer has enough money.
+* Cash: rent, salary, electricity, transport, small daily costs, the owner's weekly
+  household money and bank deposits. The drawer balance is never invented; analytics
+  derive it from these records.
+
+A few demo scenarios are curated on top (see `_apply_demo_scenarios`). Each one is
+recorded as a normal business event (a stock count, a price change) with a clear reason.
+
+The run is deterministic for a given seed and end date. Everything is written with bulk
+inserts, so a full reset takes a few seconds.
 """
 
+from __future__ import annotations
+
+import math
 import random
-from datetime import datetime, timedelta, timezone
+from collections import defaultdict, deque
+from dataclasses import dataclass, field
+from datetime import date, datetime, time, timedelta
+
+from sqlalchemy import insert
 from sqlalchemy.orm import Session
+
+from app.core.calendar_pk import day_context
+from app.core.clock import store_now
 from app.core.config import settings
 from app.models import (
-    Store, Product, ProductPack, PriceHistory,
-    Sale, SaleLine, StockMovement,
-    Supplier, SupplierProduct, Purchase, PurchaseLine,
-    Customer, LedgerEntry, SupplierLedgerEntry,
-    Expense
+    AppMeta, Customer, Expense, LedgerEntry, PriceHistory, Product, ProductPack, Purchase,
+    PurchaseLine, Sale, SaleLine, StockMovement, Store, Supplier, SupplierLedgerEntry,
+    SupplierProduct,
 )
 from app.simulator.catalog_pakistan import CATALOG_ITEMS, SUPPLIERS
+from app.simulator.demand_profiles import (
+    BASE_DAILY_UNITS, HOUR_WEIGHTS, demand_multiplier, expected_line_quantity,
+    line_quantity_options,
+)
 
-CUSTOMERS_DATA = [
-    {"name": "Tariq Mahmood (Tariq Bhai)", "phone": "0300-9876541", "credit_limit": 20000.0, "safe_mark": 42.0}, # Overdue demo scenario
-    {"name": "Chaudhry Akram", "phone": "0321-7654321", "credit_limit": 35000.0, "safe_mark": 92.0},
-    {"name": "Haji Abdul Rasheed", "phone": "0333-1122334", "credit_limit": 30000.0, "safe_mark": 88.0},
-    {"name": "Imran Butt", "phone": "0345-5566778", "credit_limit": 15000.0, "safe_mark": 65.0},
-    {"name": "Dr. Salman Qureshi", "phone": "0312-3344556", "credit_limit": 40000.0, "safe_mark": 95.0},
-    {"name": "Bibi Zainab (Mohallah)", "phone": "0302-9988776", "credit_limit": 12000.0, "safe_mark": 78.0},
-    {"name": "Master Aslam (School Teacher)", "phone": "0322-4455667", "credit_limit": 15000.0, "safe_mark": 82.0},
-    {"name": "Rana Tanveer", "phone": "0301-6677889", "credit_limit": 25000.0, "safe_mark": 55.0},
-    {"name": "Malik Waqas", "phone": "0334-8899001", "credit_limit": 20000.0, "safe_mark": 70.0},
-    {"name": "Sheikh Farhan", "phone": "0307-2233445", "credit_limit": 30000.0, "safe_mark": 90.0},
-    {"name": "Baji Shazia", "phone": "0346-7788992", "credit_limit": 10000.0, "safe_mark": 74.0},
-    {"name": "Nadeem Electrician", "phone": "0313-1144778", "credit_limit": 12000.0, "safe_mark": 60.0},
-    {"name": "Qari Sahab", "phone": "0323-5588991", "credit_limit": 15000.0, "safe_mark": 96.0},
-    {"name": "Zahid Tailor", "phone": "0305-6699223", "credit_limit": 15000.0, "safe_mark": 80.0},
-    {"name": "Mirza Bilal", "phone": "0335-3366990", "credit_limit": 20000.0, "safe_mark": 72.0},
+SCHEMA_VERSION = "3"
+STORE_ID = 1
+OPENING_CASH = 150_000.0
+
+# Distributor route days (Monday=0). Fresh goods come more often.
+SUPPLIER_VISIT_DAYS: dict[int, list[int]] = {
+    1: [0, 3],        # Oils: Monday, Thursday
+    2: [1, 4],        # Grains mandi: Tuesday, Friday
+    3: [2],           # National Foods: Wednesday
+    4: [0, 2, 4],     # Dairy: Mon, Wed, Fri
+    5: [3],           # Unilever: Thursday
+    6: [1],           # Reckitt: Tuesday
+    7: [5],           # Tapal: Saturday
+    8: [0, 2, 4, 5],  # EBM, bread, drinks: Mon, Wed, Fri, Sat
+}
+# Some distributors are paid a few days late, as happens in practice.
+SUPPLIER_PAYMENT_DELAY_DAYS: dict[int, int] = {3: 4, 6: 2}
+
+SAFETY_DAYS = 2
+
+
+@dataclass
+class CustomerProfile:
+    name: str
+    phone: str
+    credit_limit: float
+    habit: str  # monthly, weekly, partial, late, defaulter, gone
+    visit_prob: float
+    pay_day: int = 3  # day of month (monthly/partial) or weekday (weekly)
+    stop_buying_days_ago: int | None = None
+    stop_paying_days_ago: int | None = None
+
+
+# Phone numbers are fictional placeholders (0300-00000xx) so a demo click can never
+# message a real person.
+CUSTOMERS: list[CustomerProfile] = [
+    CustomerProfile("Tariq Mahmood (Tariq Bhai)", "0300-0000101", 20000, "defaulter", 0.55, 4,
+                    stop_buying_days_ago=16, stop_paying_days_ago=96),
+    CustomerProfile("Chaudhry Akram", "0300-0000102", 35000, "monthly", 0.35, 2),
+    CustomerProfile("Haji Abdul Rasheed", "0300-0000103", 30000, "monthly", 0.30, 5),
+    CustomerProfile("Imran Butt", "0300-0000104", 15000, "partial", 0.35, 6),
+    CustomerProfile("Dr. Salman Qureshi", "0300-0000105", 40000, "monthly", 0.20, 1),
+    CustomerProfile("Bibi Zainab (Mohallah)", "0300-0000106", 12000, "weekly", 0.30, 6),
+    CustomerProfile("Master Aslam (School Teacher)", "0300-0000107", 15000, "monthly", 0.30, 2),
+    CustomerProfile("Rana Tanveer", "0300-0000108", 25000, "gone", 0.30, 7,
+                    stop_buying_days_ago=112, stop_paying_days_ago=112),
+    CustomerProfile("Malik Waqas", "0300-0000109", 20000, "partial", 0.30, 8),
+    CustomerProfile("Sheikh Farhan", "0300-0000110", 30000, "weekly", 0.25, 5),
+    CustomerProfile("Baji Shazia", "0300-0000111", 10000, "weekly", 0.30, 0),
+    CustomerProfile("Nadeem Electrician", "0300-0000112", 12000, "late", 0.30, 10),
+    CustomerProfile("Qari Sahab", "0300-0000113", 15000, "monthly", 0.20, 3),
+    CustomerProfile("Zahid Tailor", "0300-0000114", 15000, "partial", 0.25, 9),
+    CustomerProfile("Mirza Bilal", "0300-0000115", 20000, "monthly", 0.25, 4),
 ]
 
-def seed_store_digital_twin(db: Session, seed: int = 42) -> Store:
-    """Generate the complete deterministic retail digital twin in seconds."""
-    random.seed(seed)
-    
-    # 1. Create Store
-    store = Store(
-        store_id=1,
-        name=settings.STORE_NAME,
-        timezone="Asia/Karachi",
-        currency="PKR",
-        default_credit_term_days=settings.DEFAULT_CREDIT_TERM_DAYS,
-        created_at=datetime(2026, 3, 1, 8, 0, tzinfo=timezone.utc)
-    )
-    db.add(store)
-    db.flush()
 
-    # 2. Add Suppliers
-    supplier_map = {}
-    for sup_data in SUPPLIERS:
-        sup = Supplier(
-            supplier_id=sup_data["supplier_id"],
-            store_id=store.store_id,
-            name=sup_data["name"],
-            contact=sup_data["contact"],
-            payment_terms_days=sup_data["payment_terms_days"]
-        )
-        db.add(sup)
-        supplier_map[sup_data["supplier_id"]] = sup
-    db.flush()
+@dataclass
+class ProductState:
+    product_id: int
+    sku: str
+    name: str
+    category: str
+    unit: str
+    supplier_id: int
+    lead_time: int
+    units_per_pack: int
+    moq: int
+    cost: float
+    price: float
+    base_rate: float
+    stock: float = 0.0
+    pending: float = 0.0
+    recent_sales: deque = field(default_factory=lambda: deque(maxlen=21))
 
-    # 3. Add Customers (Khata holders)
-    customer_objs = []
-    for cust in CUSTOMERS_DATA:
-        c = Customer(
-            store_id=store.store_id,
-            name=cust["name"],
-            phone=cust["phone"],
-            credit_limit=cust["credit_limit"],
-            safe_mark_score=cust["safe_mark"],
-            created_at=datetime(2026, 3, 1, 9, 0, tzinfo=timezone.utc)
-        )
-        db.add(c)
-        customer_objs.append(c)
-    db.flush()
+    def estimated_rate(self) -> float:
+        """What the shopkeeper believes daily demand is: the last three weeks' average."""
+        if len(self.recent_sales) >= 7:
+            return sum(self.recent_sales) / len(self.recent_sales)
+        return self.base_rate
 
-    # 4. Add Products, ProductPacks, and PriceHistory
-    product_objs = {}
-    start_date = datetime(2026, 3, 1, 0, 0, tzinfo=timezone.utc)
-    end_date = datetime(2026, 11, 26, 0, 0, tzinfo=timezone.utc)
 
+@dataclass
+class PriceEvent:
+    sku: str
+    days_ago: int
+    new_cost: float
+    new_price: float | None  # None: shelf price not changed (a margin squeeze)
+    reason: str
+
+
+# Price changes. Two are not passed on to the shelf price (margin squeezes); the others
+# are normal changes that the shopkeeper did pass on, so the detector has to tell them apart.
+PRICE_EVENTS = [
+    PriceEvent("GRN-001", 130, 1180.0, 1320.0, "Atta rate cut after wheat harvest"),
+    PriceEvent("GRN-003", 62, 148.0, 165.0, "Sugar mill rate increase"),
+    PriceEvent("SPC-009", 45, 225.0, 270.0, "Distributor price list revision"),
+    PriceEvent("TEA-001", 10, 735.0, None, "Tapal trade price increase"),
+    PriceEvent("OIL-004", 14, 540.0, None, "Distributor price revision (+Rs 60 per pouch)"),
+]
+
+# Sparkle floor cleaner stopped selling when customers switched to a cheaper brand.
+DEAD_STOCK_SKU = "CLN-012"
+DEAD_STOCK_STOPPED_DAYS_AGO = 80
+DEAD_STOCK_SCHEME_DAYS_AGO = 92  # bought two cartons on a trade scheme just before sales stopped
+
+
+class _Ids:
+    def __init__(self) -> None:
+        self._next: dict[str, int] = defaultdict(lambda: 1)
+
+    def next(self, table: str) -> int:
+        value = self._next[table]
+        self._next[table] = value + 1
+        return value
+
+
+def _poisson(rng: random.Random, lam: float) -> int:
+    if lam <= 0:
+        return 0
+    if lam > 30:  # normal approximation is plenty for large rates
+        return max(0, int(round(rng.gauss(lam, math.sqrt(lam)))))
+    threshold, k, p = math.exp(-lam), 0, 1.0
+    while True:
+        p *= rng.random()
+        if p <= threshold:
+            return k
+        k += 1
+
+
+def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = None) -> dict:
+    """Generate the whole store history into an empty schema. Returns a short summary."""
+    rng = random.Random(seed)
+    now = now or store_now()
+    today = now.date()
+    start_day = today - timedelta(days=settings.DEMO_HISTORY_DAYS)
+    start_dt = datetime.combine(start_day, time(8, 0))
+    ids = _Ids()
+
+    def happened(ts: datetime) -> bool:
+        return ts <= now
+
+    rows: dict[type, list[dict]] = defaultdict(list)
+
+    # ---- Store, suppliers, customers -------------------------------------------------
+    rows[Store].append({
+        "store_id": STORE_ID, "name": settings.STORE_NAME, "location": settings.STORE_LOCATION,
+        "owner_name": settings.STORE_OWNER, "timezone": settings.STORE_TIMEZONE,
+        "currency": "PKR", "default_credit_term_days": settings.DEFAULT_CREDIT_TERM_DAYS,
+        "opening_cash_pkr": OPENING_CASH, "opening_cash_date": start_dt, "created_at": start_dt,
+    })
+    suppliers = {s["supplier_id"]: s for s in SUPPLIERS}
+    for s in SUPPLIERS:
+        rows[Supplier].append({
+            "supplier_id": s["supplier_id"], "store_id": STORE_ID, "name": s["name"],
+            "contact": s["contact"], "payment_terms_days": s["payment_terms_days"],
+        })
+
+    customer_ids: list[int] = []
+    for profile in CUSTOMERS:
+        cid = ids.next("customer")
+        customer_ids.append(cid)
+        rows[Customer].append({
+            "customer_id": cid, "store_id": STORE_ID, "name": profile.name,
+            "phone": profile.phone, "credit_limit": profile.credit_limit, "created_at": start_dt,
+        })
+
+    # ---- Products ----------------------------------------------------------------------
+    products: dict[str, ProductState] = {}
     for item in CATALOG_ITEMS:
-        prod = Product(
-            store_id=store.store_id,
-            sku=item["sku"],
-            name=item["name"],
-            category=item["category"],
-            unit=item["unit"],
-            cost_price=item["cost"],
-            selling_price=item["price"],
-            stock_qty=0.0,
-            supplier_id=item["supplier_id"],
-            lead_time_days=item["lead_time"],
-            safety_stock_days=2,
-            image_url=item.get("image_url"),
-            active=True,
-            created_at=start_date
+        pid = ids.next("product")
+        state = ProductState(
+            product_id=pid, sku=item["sku"], name=item["name"], category=item["category"],
+            unit=item["unit"], supplier_id=item["supplier_id"], lead_time=item["lead_time"],
+            units_per_pack=item["units_per_pack"], moq=item.get("moq", 1),
+            cost=item["cost"], price=item["price"], base_rate=BASE_DAILY_UNITS.get(item["sku"], 0.5),
         )
-        db.add(prod)
-        product_objs[item["sku"]] = prod
+        products[item["sku"]] = state
+        rows[ProductPack].append({
+            "pack_id": pid, "product_id": pid, "pack_unit": item["pack_unit"],
+            "units_per_pack": item["units_per_pack"], "sell_unit": item["unit"],
+        })
+        rows[SupplierProduct].append({
+            "supplier_product_id": pid, "supplier_id": item["supplier_id"], "product_id": pid,
+            "unit_cost": item["cost"], "lead_time_days": item["lead_time"],
+            "moq": item.get("moq", 1), "pack_size": item["units_per_pack"], "updated_at": start_dt,
+        })
+        rows[PriceHistory].append({
+            "history_id": ids.next("price"), "product_id": pid, "effective_date": start_dt,
+            "cost_price": item["cost"], "selling_price": item["price"], "reason": "Opening price list",
+        })
+        # Opening stock: two to three weeks of cover, at least one pack.
+        opening = max(float(item["units_per_pack"]), round(state.base_rate * rng.uniform(14, 21)))
+        state.stock = opening
+        rows[StockMovement].append({
+            "movement_id": ids.next("movement"), "store_id": STORE_ID, "product_id": pid,
+            "timestamp": start_dt, "movement_type": "opening_stock", "qty_delta": opening,
+            "reference_id": "OPENING", "reason": "Opening stock count",
+        })
 
-    db.flush()
+    price_events_by_day: dict[date, list[PriceEvent]] = defaultdict(list)
+    for ev in PRICE_EVENTS:
+        price_events_by_day[today - timedelta(days=ev.days_ago)].append(ev)
 
-    for item in CATALOG_ITEMS:
-        prod = product_objs[item["sku"]]
-        pack = ProductPack(
-            product_id=prod.product_id,
-            pack_unit=item["pack_unit"],
-            units_per_pack=item["units_per_pack"],
-            sell_unit=item["unit"]
-        )
-        db.add(pack)
+    # ---- Running state -----------------------------------------------------------------
+    pending_deliveries: dict[date, list[int]] = defaultdict(list)  # day -> purchase ids
+    purchase_lines_by_purchase: dict[int, list[tuple[ProductState, float]]] = defaultdict(list)
+    purchase_rows: dict[int, dict] = {}
+    purchase_line_rows: dict[int, list[dict]] = defaultdict(list)
+    open_supplier_invoices: dict[int, list[list]] = defaultdict(list)  # [due_date, amount, ref]
+    customer_balance: dict[int, float] = {cid: 0.0 for cid in customer_ids}
+    drawer = OPENING_CASH
 
-        sp = SupplierProduct(
-            supplier_id=item["supplier_id"],
-            product_id=prod.product_id,
-            unit_cost=item["cost"],
-            lead_time_days=item["lead_time"],
-            moq=item["moq"],
-            pack_size=item["units_per_pack"],
-            updated_at=start_date
-        )
-        db.add(sp)
+    hours = list(HOUR_WEIGHTS)
+    hour_weights = [HOUR_WEIGHTS[h] for h in hours]
+    total_hour_weight = sum(hour_weights)
 
-        ph = PriceHistory(
-            product_id=prod.product_id,
-            effective_date=start_date,
-            cost_price=item["cost"],
-            selling_price=item["price"],
-            reason="initial_catalog_setup"
-        )
-        db.add(ph)
+    day = start_day
+    while day <= today:
+        ctx = day_context(day)
+        is_today = day == today
+        days_ago = (today - day).days
 
-    db.flush()
+        # 1. Deliveries arrive at 10:00 and create a supplier invoice.
+        for purchase_id in pending_deliveries.pop(day, []):
+            arrival = datetime.combine(day, time(10, 0))
+            if not happened(arrival):
+                continue  # still on the way
+            prow = purchase_rows[purchase_id]
+            prow["status"], prow["received_date"] = "received", arrival
+            for state, qty in purchase_lines_by_purchase[purchase_id]:
+                state.stock += qty
+                state.pending -= qty
+                rows[StockMovement].append({
+                    "movement_id": ids.next("movement"), "store_id": STORE_ID,
+                    "product_id": state.product_id, "timestamp": arrival,
+                    "movement_type": "purchase", "qty_delta": qty,
+                    "reference_id": f"PO-{purchase_id}", "reason": "Distributor delivery",
+                })
+            for line in purchase_line_rows[purchase_id]:
+                line["received_qty"] = line["qty"]
+            terms = suppliers[prow["supplier_id"]]["payment_terms_days"]
+            ref = f"INV-{purchase_id}"
+            due = datetime.combine(day + timedelta(days=terms), time(12, 0))
+            rows[SupplierLedgerEntry].append({
+                "entry_id": ids.next("supplier_ledger"), "store_id": STORE_ID,
+                "supplier_id": prow["supplier_id"], "timestamp": arrival, "debit": 0.0,
+                "credit": prow["total"], "due_date": due, "reference": ref,
+                "description": f"Invoice for delivery PO-{purchase_id}",
+            })
+            open_supplier_invoices[prow["supplier_id"]].append([due.date(), prow["total"], ref])
 
-    # 5. Opening Inventory
-    initial_purchase = Purchase(
-        store_id=store.store_id,
-        supplier_id=1,
-        date=start_date,
-        status="received",
-        total=0.0
-    )
-    db.add(initial_purchase)
-    db.flush()
+        # 2. Price list changes take effect at opening time.
+        for ev in price_events_by_day.get(day, []):
+            state = products[ev.sku]
+            state.cost = ev.new_cost
+            if ev.new_price is not None:
+                state.price = ev.new_price
+            rows[PriceHistory].append({
+                "history_id": ids.next("price"), "product_id": state.product_id,
+                "effective_date": datetime.combine(day, time(8, 0)), "cost_price": state.cost,
+                "selling_price": state.price, "reason": ev.reason,
+            })
 
-    total_init_cost = 0.0
-    for sku, prod in product_objs.items():
-        init_qty = float(random.randint(30, 80))
-        prod.stock_qty = init_qty
-        
-        pline = PurchaseLine(
-            purchase_id=initial_purchase.purchase_id,
-            product_id=prod.product_id,
-            qty=init_qty,
-            received_qty=init_qty,
-            unit_cost=prod.cost_price
-        )
-        db.add(pline)
-        total_init_cost += init_qty * prod.cost_price
+        # 3. Demand. On the current day only the hours that have already passed count.
+        if is_today:
+            open_hours = [h for h in hours if h < now.hour]
+            day_fraction = sum(HOUR_WEIGHTS[h] for h in open_hours) / total_hour_weight
+        else:
+            open_hours, day_fraction = hours, 1.0
+        store_noise = max(0.6, rng.gauss(1.0, 0.08))
 
-        sm = StockMovement(
-            store_id=store.store_id,
-            product_id=prod.product_id,
-            timestamp=start_date,
-            movement_type="purchase",
-            qty_delta=init_qty,
-            reference_id=f"INIT-{initial_purchase.purchase_id}",
-            reason="Opening stock intake"
-        )
-        db.add(sm)
+        lines: list[tuple[ProductState, float]] = []
+        for state in products.values():
+            rate = state.base_rate
+            if state.sku == DEAD_STOCK_SKU and days_ago <= DEAD_STOCK_STOPPED_DAYS_AGO:
+                rate = 0.0
+            expected_units = rate * demand_multiplier(state.sku, state.category, ctx) * store_noise * day_fraction
+            values, weights = line_quantity_options(state.unit, state.sku)
+            n_lines = _poisson(rng, expected_units / expected_line_quantity(state.unit, state.sku))
+            sold_today = 0.0
+            for _ in range(n_lines):
+                qty = float(rng.choices(values, weights)[0])
+                qty = min(qty, state.stock)
+                if qty <= 0:
+                    break  # out of stock: the sale is lost
+                state.stock -= qty
+                sold_today += qty
+                lines.append((state, qty))
+            if not is_today:
+                state.recent_sales.append(sold_today)
 
-    initial_purchase.total = total_init_cost
-    db.flush()
+        # 4. Group lines into customer baskets.
+        rng.shuffle(lines)
+        baskets: list[list[tuple[ProductState, float]]] = []
+        i = 0
+        while i < len(lines):
+            size = rng.choices([1, 2, 3, 4], [0.38, 0.32, 0.2, 0.1])[0]
+            baskets.append(lines[i:i + size])
+            i += size
 
-    # 6. Simulate 9 Months of Daily Transactions
-    current_date = start_date + timedelta(days=1)
-    ramadan_start = datetime(2026, 3, 15, tzinfo=timezone.utc)
-    ramadan_end = datetime(2026, 4, 14, tzinfo=timezone.utc)
-    eid_window = (datetime(2026, 4, 15, tzinfo=timezone.utc), datetime(2026, 4, 18, tzinfo=timezone.utc))
+        # 5. Khata customers take some baskets on credit.
+        basket_owner: dict[int, int] = {}
+        free = list(range(len(baskets)))
+        rng.shuffle(free)
+        for cid, profile in zip(customer_ids, CUSTOMERS):
+            if profile.stop_buying_days_ago is not None and days_ago <= profile.stop_buying_days_ago:
+                continue
+            if free and rng.random() < profile.visit_prob * day_fraction:
+                basket_owner[free.pop()] = cid
 
-    daily_sales_skus = list(product_objs.values())
-    customer_balances = {c.customer_id: 0.0 for c in customer_objs}
-    
-    # Fast moving items that appear frequently in Pakistani grocery baskets
-    fast_moving_skus = {"OIL-001", "GRN-001", "GRN-003", "TEA-001", "DRY-001", "DRY-014", "CLN-001", "BSK-001"}
-    dead_stock_sku = "CLN-012"
-    
-    # Exclude dead stock from general sampling pool
-    general_pool = [p for p in daily_sales_skus if p.sku != dead_stock_sku]
-    fast_pool = [p for p in daily_sales_skus if p.sku in fast_moving_skus]
+        cash_sales_today = 0.0
+        for b_index, basket in enumerate(baskets):
+            hour = rng.choices(open_hours, [HOUR_WEIGHTS[h] for h in open_hours])[0]
+            ts = datetime.combine(day, time(hour, rng.randint(0, 59), rng.randint(0, 59)))
+            if is_today and not happened(ts):
+                ts = now - timedelta(minutes=rng.randint(1, 50))
+            sale_id = ids.next("sale")
+            cid = basket_owner.get(b_index)
+            total = 0.0
+            for state, qty in basket:
+                total += qty * state.price
+                rows[SaleLine].append({
+                    "sale_line_id": ids.next("sale_line"), "sale_id": sale_id,
+                    "product_id": state.product_id, "qty": qty, "unit_price": state.price,
+                    "unit_cost_snapshot": state.cost, "discount": 0.0,
+                })
+                rows[StockMovement].append({
+                    "movement_id": ids.next("movement"), "store_id": STORE_ID,
+                    "product_id": state.product_id, "timestamp": ts, "movement_type": "sale",
+                    "qty_delta": -qty, "reference_id": f"SALE-{sale_id}", "reason": "Customer sale",
+                })
+            total = round(total, 2)
+            rows[Sale].append({
+                "sale_id": sale_id, "store_id": STORE_ID, "timestamp": ts, "customer_id": cid,
+                "payment_type": "udhaar" if cid else "cash", "status": "completed",
+                "total": total, "discount": 0.0,
+            })
+            if cid:
+                customer_balance[cid] += total
+                rows[LedgerEntry].append({
+                    "entry_id": ids.next("ledger"), "store_id": STORE_ID, "customer_id": cid,
+                    "timestamp": ts, "debit": total, "credit": 0.0,
+                    "due_date": ts + timedelta(days=settings.DEFAULT_CREDIT_TERM_DAYS),
+                    "reference": f"SALE-{sale_id}", "description": "Groceries on khata",
+                })
+            else:
+                cash_sales_today += total
+        drawer += cash_sales_today
 
-    day_idx = 0
-    while current_date < end_date:
-        is_friday = (current_date.weekday() == 4)
-        is_sunday = (current_date.weekday() == 6)
-        is_ramadan = (ramadan_start <= current_date <= ramadan_end)
-        is_eid = (eid_window[0] <= current_date <= eid_window[1])
+        # 6. Khata repayments (wasooli), in the evening.
+        for cid, profile in zip(customer_ids, CUSTOMERS):
+            balance = customer_balance[cid]
+            if balance < 300:
+                continue
+            pay_ts = datetime.combine(day, time(19, rng.randint(0, 59)))
+            if not happened(pay_ts):
+                continue
+            stopped = profile.stop_paying_days_ago is not None and days_ago <= profile.stop_paying_days_ago
+            amount = 0.0
+            if profile.habit == "monthly" and day.day == profile.pay_day:
+                amount = balance
+            elif profile.habit == "weekly" and day.weekday() == profile.pay_day:
+                amount = balance
+            elif profile.habit == "partial" and day.day == profile.pay_day:
+                amount = balance * rng.uniform(0.6, 0.8)
+            elif profile.habit == "late" and day.day == profile.pay_day and day.month % 2 == 0:
+                amount = balance * rng.uniform(0.7, 0.9)  # pays every second month
+            elif profile.habit == "defaulter":
+                if not stopped and day.day == profile.pay_day:
+                    amount = balance
+                elif stopped and days_ago == 52:
+                    amount = 3000.0  # a small token payment, then nothing
+            elif profile.habit == "gone":
+                if not stopped and day.day == profile.pay_day:
+                    amount = balance * 0.7
+            amount = round(balance, 2) if amount >= balance else math.floor(amount / 10) * 10
+            if amount <= 0:
+                continue
+            customer_balance[cid] -= amount
+            drawer += amount
+            rows[LedgerEntry].append({
+                "entry_id": ids.next("ledger"), "store_id": STORE_ID, "customer_id": cid,
+                "timestamp": pay_ts, "debit": 0.0, "credit": amount, "due_date": None,
+                "reference": "WASOOLI", "description": "Cash repayment (wasooli)",
+            })
 
-        # Realistic transactions per day: 15 to 25
-        daily_tx_count = random.randint(15, 25)
-        if is_ramadan:
-            daily_tx_count = int(daily_tx_count * 1.35)
-        elif is_eid:
-            daily_tx_count = int(daily_tx_count * 1.5)
-        elif is_friday or is_sunday:
-            daily_tx_count = int(daily_tx_count * 1.2)
+        # 7. Distributor visits: order up to target cover; delivery after the lead time.
+        def place_order(supplier_id: int, order: list[tuple[ProductState, float]], order_ts: datetime) -> None:
+            lead = max(s.lead_time for s, _ in order)
+            purchase_id = ids.next("purchase")
+            arrival_day = day + timedelta(days=lead)
+            total = round(sum(q * s.cost for s, q in order), 2)
+            purchase_rows[purchase_id] = {
+                "purchase_id": purchase_id, "store_id": STORE_ID, "supplier_id": supplier_id,
+                "date": order_ts, "status": "pending", "total": total,
+                "expected_date": datetime.combine(arrival_day, time(10, 0)), "received_date": None,
+            }
+            for state, qty in order:
+                state.pending += qty
+                purchase_lines_by_purchase[purchase_id].append((state, qty))
+                line_row = {
+                    "purchase_line_id": ids.next("purchase_line"), "purchase_id": purchase_id,
+                    "product_id": state.product_id, "qty": qty, "received_qty": 0.0,
+                    "unit_cost": state.cost,
+                }
+                rows[PurchaseLine].append(line_row)
+                purchase_line_rows[purchase_id].append(line_row)
+            pending_deliveries[arrival_day].append(purchase_id)
 
-        for _ in range(daily_tx_count):
-            tx_hour = random.choice([9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21])
-            tx_minute = random.randint(0, 59)
-            tx_time = current_date.replace(hour=tx_hour, minute=tx_minute)
+        if days_ago == DEAD_STOCK_SCHEME_DAYS_AGO:
+            # The distributor's trade scheme: two extra cartons of Sparkle at the usual rate.
+            sparkle = products[DEAD_STOCK_SKU]
+            place_order(sparkle.supplier_id, [(sparkle, float(2 * sparkle.units_per_pack))],
+                        datetime.combine(day, time(11, 0)))
 
-            is_credit = (random.random() < 0.20)
-            assigned_customer = random.choice(customer_objs) if is_credit else None
+        for supplier_id, visit_days in SUPPLIER_VISIT_DAYS.items():
+            if day.weekday() not in visit_days:
+                continue
+            order_ts = datetime.combine(day, time(11, 30))
+            if not happened(order_ts):
+                continue
+            review_days = min(((d - day.weekday()) % 7) or 7 for d in visit_days)
+            order: list[tuple[ProductState, float]] = []
+            for state in products.values():
+                if state.supplier_id != supplier_id:
+                    continue
+                rate = state.estimated_rate()
+                if rate <= 0.02:
+                    continue
+                position = state.stock + state.pending
+                trigger = rate * (review_days + state.lead_time + 1)
+                target = rate * (review_days + state.lead_time + SAFETY_DAYS + 3)
+                if position >= trigger:
+                    continue
+                packs = max(state.moq, math.ceil((target - position) / state.units_per_pack))
+                order.append((state, float(packs * state.units_per_pack)))
+            if order:
+                place_order(supplier_id, order, order_ts)
 
-            num_lines = random.choices([1, 2, 3], weights=[0.45, 0.40, 0.15])[0]
-            
-            # High probability of including a fast-moving item in each transaction
-            sampled_prods = []
-            if random.random() < 0.65:
-                sampled_prods.append(random.choice(fast_pool))
-            
-            remaining_slots = num_lines - len(sampled_prods)
-            if remaining_slots > 0:
-                sampled_prods.extend(random.sample(general_pool, remaining_slots))
-            
-            # Ensure unique in line items
-            sampled_prods = list({p.product_id: p for p in sampled_prods}.values())
+        # 8. Pay supplier invoices that are due (cash permitting).
+        pay_ts = datetime.combine(day, time(12, 30))
+        if happened(pay_ts):
+            for supplier_id, invoices in open_supplier_invoices.items():
+                delay = SUPPLIER_PAYMENT_DELAY_DAYS.get(supplier_id, 0)
+                still_open = []
+                for due_day, amount, ref in invoices:
+                    if day >= due_day + timedelta(days=delay) and drawer - amount >= 20_000:
+                        drawer -= amount
+                        rows[SupplierLedgerEntry].append({
+                            "entry_id": ids.next("supplier_ledger"), "store_id": STORE_ID,
+                            "supplier_id": supplier_id, "timestamp": pay_ts, "debit": amount,
+                            "credit": 0.0, "due_date": None, "reference": f"PAY-{ref}",
+                            "description": f"Cash payment for {ref}",
+                        })
+                    else:
+                        still_open.append([due_day, amount, ref])
+                open_supplier_invoices[supplier_id] = still_open
 
-            sale = Sale(
-                store_id=store.store_id,
-                timestamp=tx_time,
-                customer_id=assigned_customer.customer_id if assigned_customer else None,
-                payment_type="udhaar" if is_credit else "cash",
-                status="completed",
-                total=0.0,
-                discount=0.0
-            )
-            db.add(sale)
+        # 9. Cash expenses.
+        def spend(category: str, amount: float, at: time, description: str) -> None:
+            nonlocal drawer
+            ts = datetime.combine(day, at)
+            if not happened(ts):
+                return
+            drawer -= amount
+            rows[Expense].append({
+                "expense_id": ids.next("expense"), "store_id": STORE_ID, "date": ts,
+                "category": category, "amount": round(amount, 2), "description": description,
+            })
 
-            sale_total = 0.0
-            for sprod in sampled_prods:
-                if sprod.category in ("Grains & Pulses", "Cooking Oil & Ghee"):
-                    qty = float(random.choices([1, 2], weights=[0.75, 0.25])[0])
-                else:
-                    qty = float(random.choices([1, 2, 3], weights=[0.8, 0.15, 0.05])[0])
+        if day.day == 1:
+            spend("rent", 35_000, time(10, 30), "Shop rent")
+            spend("salaries", 25_000, time(21, 0), "Salary for one shop helper")
+        if day.day == 10:
+            bill = 26_000 if ctx.is_summer else 12_000 if ctx.is_winter else 17_000
+            spend("electricity", bill, time(11, 0), "IESCO electricity bill")
+        if day.weekday() == 5:
+            spend("transport", 1_500, time(16, 0), "Loader rickshaw for mandi goods")
+        spend("general", round(rng.uniform(150, 400), -1), time(21, 30), "Shopping bags, chai, small items")
+        if day.weekday() == 6:
+            spend("owner_drawings", round(rng.uniform(12_000, 16_000), -2), time(22, 0), "Ghar ka kharcha (owner household money)")
+        if day.weekday() == 0 and drawer > 450_000:
+            spend("bank_deposit", round(drawer - 300_000, -3), time(13, 0), "Cash deposited to bank")
 
-                if is_ramadan and any(k in sprod.name for k in ("Rooh Afza", "Besan", "Tang", "Oil")):
-                    qty *= 1.5
+        day += timedelta(days=1)
 
-                sprod.stock_qty = max(0.0, sprod.stock_qty - qty)
-                line_total = qty * sprod.selling_price
-                sale_total += line_total
+    for prow in purchase_rows.values():
+        rows[Purchase].append(prow)
 
-                sline = SaleLine(
-                    sale=sale,
-                    product_id=sprod.product_id,
-                    qty=qty,
-                    unit_price=sprod.selling_price,
-                    unit_cost_snapshot=sprod.cost_price,
-                    discount=0.0
-                )
-                db.add(sline)
+    _apply_demo_scenarios(rows, products, ids, now)
 
-                sm = StockMovement(
-                    store_id=store.store_id,
-                    product_id=sprod.product_id,
-                    timestamp=tx_time,
-                    movement_type="sale",
-                    qty_delta=-qty,
-                    reference_id="SALE",
-                    reason="Customer sale"
-                )
-                db.add(sm)
+    # ---- Products with their final stock and prices -----------------------------------
+    for state in products.values():
+        rows[Product].append({
+            "product_id": state.product_id, "store_id": STORE_ID, "sku": state.sku,
+            "name": state.name, "category": state.category, "unit": state.unit,
+            "cost_price": state.cost, "selling_price": state.price,
+            "stock_qty": round(state.stock, 2), "supplier_id": state.supplier_id,
+            "lead_time_days": state.lead_time, "safety_stock_days": SAFETY_DAYS,
+            "image_url": None, "active": True, "created_at": start_dt,
+        })
 
-            sale.total = sale_total
+    rows[AppMeta].extend([
+        {"key": "schema_version", "value": SCHEMA_VERSION},
+        {"key": "seed", "value": str(seed)},
+        {"key": "seeded_at", "value": now.isoformat()},
+        {"key": "data_start", "value": start_day.isoformat()},
+        {"key": "data_end", "value": today.isoformat()},
+    ])
 
-            if is_credit and assigned_customer:
-                due_dt = tx_time + timedelta(days=settings.DEFAULT_CREDIT_TERM_DAYS)
-                le = LedgerEntry(
-                    store_id=store.store_id,
-                    customer_id=assigned_customer.customer_id,
-                    timestamp=tx_time,
-                    debit=sale_total,
-                    credit=0.0,
-                    due_date=due_dt,
-                    reference=f"SALE-TX",
-                    description=f"Grocery credit purchase"
-                )
-                db.add(le)
-                customer_balances[assigned_customer.customer_id] += sale_total
-
-        # Wasooli / partial repayments
-        if day_idx % 4 == 0:
-            repaying_cust = random.choice(customer_objs)
-            curr_bal = customer_balances[repaying_cust.customer_id]
-            if curr_bal > 1500.0:
-                payment_amt = round(random.uniform(500.0, min(curr_bal, 6000.0)), -1)
-                le_pay = LedgerEntry(
-                    store_id=store.store_id,
-                    customer_id=repaying_cust.customer_id,
-                    timestamp=current_date.replace(hour=17, minute=30),
-                    debit=0.0,
-                    credit=payment_amt,
-                    due_date=None,
-                    reference=f"PAY-{day_idx}",
-                    description="Cash repayment (wasooli)"
-                )
-                db.add(le_pay)
-                customer_balances[repaying_cust.customer_id] -= payment_amt
-
-        # Restocks on Mondays
-        if current_date.weekday() == 0:
-            low_stock_items = [p for p in daily_sales_skus if p.stock_qty < 20.0]
-            if low_stock_items:
-                sup_items = {}
-                for p in low_stock_items:
-                    sup_items.setdefault(p.supplier_id, []).append(p)
-
-                for sup_id, prods in sup_items.items():
-                    restock_purchase = Purchase(
-                        store_id=store.store_id,
-                        supplier_id=sup_id,
-                        date=current_date.replace(hour=11, minute=0),
-                        status="received",
-                        total=0.0
-                    )
-                    db.add(restock_purchase)
-
-                    purchase_sum = 0.0
-                    for p in prods:
-                        reorder_packs = random.randint(2, 4)
-                        pack_units = 12
-                        if p.pack:
-                            pack_units = p.pack.units_per_pack
-                        added_units = float(reorder_packs * pack_units)
-                        p.stock_qty += added_units
-                        cost = added_units * p.cost_price
-                        purchase_sum += cost
-
-                        pline = PurchaseLine(
-                            purchase=restock_purchase,
-                            product_id=p.product_id,
-                            qty=added_units,
-                            received_qty=added_units,
-                            unit_cost=p.cost_price
-                        )
-                        db.add(pline)
-
-                        sm_p = StockMovement(
-                            store_id=store.store_id,
-                            product_id=p.product_id,
-                            timestamp=current_date.replace(hour=11, minute=0),
-                            movement_type="purchase",
-                            qty_delta=added_units,
-                            reference_id="RESTOCK",
-                            reason="Supplier stock restock"
-                        )
-                        db.add(sm_p)
-
-                    restock_purchase.total = purchase_sum
-
-                    sup_entry = SupplierLedgerEntry(
-                        store_id=store.store_id,
-                        supplier_id=sup_id,
-                        timestamp=current_date.replace(hour=11, minute=0),
-                        debit=0.0,
-                        credit=purchase_sum,
-                        due_date=current_date + timedelta(days=supplier_map[sup_id].payment_terms_days),
-                        reference="PO-RESTOCK",
-                        description=f"Supplier stock invoice"
-                    )
-                    db.add(sup_entry)
-
-                    # Store clears 80% of older payables
-                    if day_idx > 14 and random.random() < 0.80:
-                        sup_pay = SupplierLedgerEntry(
-                            store_id=store.store_id,
-                            supplier_id=sup_id,
-                            timestamp=current_date + timedelta(days=supplier_map[sup_id].payment_terms_days),
-                            debit=purchase_sum,
-                            credit=0.0,
-                            due_date=None,
-                            reference=f"PAY-SUP-{sup_id}",
-                            description="Payment cleared to distributor"
-                        )
-                        db.add(sup_pay)
-
-        # Monthly Expenses (1st of each month)
-        if current_date.day == 1:
-            month_date = current_date.replace(hour=10, minute=0)
-            db.add(Expense(store_id=store.store_id, date=month_date, category="rent", amount=45000.0, description="Shop monthly rent"))
-            db.add(Expense(store_id=store.store_id, date=month_date, category="salaries", amount=50000.0, description="2 sales boys salaries"))
-            db.add(Expense(store_id=store.store_id, date=month_date, category="transport", amount=8500.0, description="Mandi goods carriage"))
-            elec_bill = 48000.0 if current_date.month in (6, 7, 8, 9) else 24000.0
-            db.add(Expense(store_id=store.store_id, date=month_date, category="electricity", amount=elec_bill, description="WAPDA / IESCO electricity bill"))
-            db.add(Expense(store_id=store.store_id, date=month_date, category="generator", amount=14000.0, description="Load-shedding generator petrol"))
-
-        # Commit every 14 days to keep memory small and transaction batches fast
-        if day_idx % 14 == 0:
-            db.flush()
-
-        current_date += timedelta(days=1)
-        day_idx += 1
-
-    db.flush()
-
-    # -------------------------------------------------------------
-    # 7. INJECT CURATED HACKATHON DEMO SCENARIOS
-    # -------------------------------------------------------------
-    
-    # Scenario 1 (Impending Stockout): Dalda Cooking Oil 1L Pouch (OIL-001)
-    oil_prod = product_objs["OIL-001"]
-    oil_stock_delta = 8.0 - oil_prod.stock_qty
-    oil_prod.stock_qty = 8.0
-    db.add(StockMovement(
-        store_id=store.store_id,
-        product_id=oil_prod.product_id,
-        timestamp=end_date - timedelta(hours=2),
-        movement_type="adjustment",
-        qty_delta=oil_stock_delta,
-        reference_id="SCENARIO-1-STOCKOUT",
-        reason="Demo Calibration: Cooking oil impending stockout scenario"
-    ))
-
-    # Scenario 2 (Margin Squeeze): Sufi Canola Cooking Oil 1L Pouch (OIL-004)
-    sufi_oil = product_objs["OIL-004"]
-    cost_hike_date = end_date - timedelta(days=14)
-    sufi_oil.cost_price = 540.0
-    sufi_oil.selling_price = 560.0
-    db.add(PriceHistory(
-        product_id=sufi_oil.product_id,
-        effective_date=cost_hike_date,
-        cost_price=540.0,
-        selling_price=560.0,
-        reason="Distributor price revision (wholesale price hike PKR +60)"
-    ))
-
-    # Scenario 3 (Dead Stock): Sparkle Lemon Floor Cleaner 1L (CLN-012)
-    dead_stock_prod = product_objs["CLN-012"]
-    dead_delta = 18.0 - dead_stock_prod.stock_qty
-    dead_stock_prod.stock_qty = 18.0
-    db.add(StockMovement(
-        store_id=store.store_id,
-        product_id=dead_stock_prod.product_id,
-        timestamp=end_date - timedelta(days=45),
-        movement_type="adjustment",
-        qty_delta=dead_delta,
-        reference_id="SCENARIO-3-DEADSTOCK",
-        reason="Demo Calibration: Dead stock product intake"
-    ))
-
-    # Scenario 4 (Overdue Khata Customer): Tariq Bhai (Customer 1)
-    tariq = customer_objs[0]
-    tariq_sale_date = datetime(2026, 10, 8, 18, 0, tzinfo=timezone.utc)
-    tariq_due_date = tariq_sale_date + timedelta(days=30)
-    db.add(LedgerEntry(
-        store_id=store.store_id,
-        customer_id=tariq.customer_id,
-        timestamp=tariq_sale_date,
-        debit=14200.0,
-        credit=0.0,
-        due_date=tariq_due_date,
-        reference="SCENARIO-4-UDHAAR",
-        description="Monthly household grocery bill on credit"
-    ))
-    tariq.safe_mark_score = 42.0
-
-    # Scenario 5 (Supplier Payable Upcoming): Metro / Dalda Wholesale
-    db.add(SupplierLedgerEntry(
-        store_id=store.store_id,
-        supplier_id=1,
-        timestamp=end_date - timedelta(days=4),
-        debit=0.0,
-        credit=45000.0,
-        due_date=end_date + timedelta(days=3),
-        reference="SCENARIO-5-PAYABLE",
-        description="Bulk Ghee & Cooking Oil carton shipment due payment"
-    ))
-
+    # FK order matters for SQLite with foreign keys on.
+    for model in (Store, AppMeta, Supplier, Customer, Product, ProductPack, SupplierProduct,
+                  PriceHistory, Purchase, PurchaseLine, Sale, SaleLine, StockMovement,
+                  LedgerEntry, SupplierLedgerEntry, Expense):
+        batch = rows.get(model)
+        if batch:
+            db.execute(insert(model), batch)
     db.commit()
-    return store
+
+    return {
+        "store_id": STORE_ID,
+        "store_name": settings.STORE_NAME,
+        "seed": seed,
+        "data_start": start_day.isoformat(),
+        "data_end": today.isoformat(),
+        "products": len(rows[Product]),
+        "sales": len(rows[Sale]),
+        "sale_lines": len(rows[SaleLine]),
+        "customers": len(rows[Customer]),
+        "purchases": len(rows[Purchase]),
+    }
+
+
+def _apply_demo_scenarios(rows: dict, products: dict[str, ProductState], ids: _Ids, now: datetime) -> None:
+    """Curated demo moments, each recorded as an ordinary business event.
+
+    1. Dalda 1L pouch is nearly out: yesterday's stock count found leaking pouches, and
+       no order is on the way, so stock is below lead-time demand.
+    The margin squeezes (Sufi canola, Tapal Danedar), the dead stock (Sparkle) and the
+    khata defaulter (Tariq Bhai) come from PRICE_EVENTS, DEAD_STOCK_SKU and CUSTOMERS.
+    """
+    dalda = products["OIL-001"]
+    # Remove Dalda from any order that has not arrived yet (the order booker missed it).
+    pending_ids = {p["purchase_id"] for p in rows[Purchase] if p["status"] == "pending"}
+    kept = []
+    for line in rows[PurchaseLine]:
+        if line["purchase_id"] in pending_ids and line["product_id"] == dalda.product_id:
+            dalda.pending -= line["qty"]
+            for p in rows[Purchase]:
+                if p["purchase_id"] == line["purchase_id"]:
+                    p["total"] = round(p["total"] - line["qty"] * line["unit_cost"], 2)
+            continue
+        kept.append(line)
+    rows[PurchaseLine][:] = kept
+    rows[Purchase][:] = [
+        p for p in rows[Purchase]
+        if p["status"] != "pending" or any(l["purchase_id"] == p["purchase_id"] for l in kept)
+    ]
+
+    target_stock = 8.0
+    delta = target_stock - dalda.stock
+    if abs(delta) > 0.01:
+        when = datetime.combine(now.date() - timedelta(days=1), time(21, 40))
+        rows[StockMovement].append({
+            "movement_id": ids.next("movement"), "store_id": STORE_ID,
+            "product_id": dalda.product_id, "timestamp": when, "movement_type": "adjustment",
+            "qty_delta": delta, "reference_id": "STOCK-COUNT",
+            "reason": "Stock count: leaking pouches written off" if delta < 0 else "Stock count correction",
+        })
+        dalda.stock = target_stock

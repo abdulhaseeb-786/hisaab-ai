@@ -1,25 +1,21 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.analytics.cash_outlook import calculate_cash_outlook
-from app.schemas.credit import PayablesSummaryResponse
 
-router = APIRouter(prefix="/payables", tags=["Supplier Payables & Cash Outlook"])
+from app.analytics.cash_outlook import calculate_cash_outlook
+from app.analytics.payables import calculate_payables
+from app.core.database import get_db
+from app.schemas.credit import CashOutlookResponse, PayablesSummaryResponse
+
+router = APIRouter(prefix="/payables", tags=["Supplier Payables & Cash"])
+
 
 @router.get("/summary", response_model=PayablesSummaryResponse)
-def get_payables_summary_endpoint(store_id: int = 1, db: Session = Depends(get_db)):
-    """GET /api/payables/summary: Supplier balances due in next 7 days (Should requirement)."""
-    outlook = calculate_cash_outlook(db, store_id=store_id)
-    return {
-        "store_id": store_id,
-        "as_of": outlook["as_of"],
-        "total_payables_pkr": outlook["projected_outflows"]["supplier_payables_due_pkr"],
-        "due_next_7_days_pkr": outlook["projected_outflows"]["supplier_payables_due_pkr"],
-        "suppliers": outlook["suppliers"],
-        "data_label": "Demo Data"
-    }
+def get_payables_summary(days: int = Query(default=7, ge=1, le=30), store_id: int = 1, db: Session = Depends(get_db)):
+    """What the shop owes each distributor: overdue, due soon, and orders still on the way."""
+    return calculate_payables(db, store_id=store_id, horizon_days=days)
 
-@router.get("/cash-outlook")
-def get_cash_outlook_endpoint(days: int = 7, store_id: int = 1, db: Session = Depends(get_db)):
-    """GET /api/payables/cash-outlook: 7-day projected cash position (inflows - outflows)."""
+
+@router.get("/cash-outlook", response_model=CashOutlookResponse)
+def get_cash_outlook(days: int = Query(default=7, ge=1, le=14), store_id: int = 1, db: Session = Depends(get_db)):
+    """Day-by-day cash for the next week from today's real cash in hand, with every assumption listed (CASH-01)."""
     return calculate_cash_outlook(db, store_id=store_id, days_ahead=days)

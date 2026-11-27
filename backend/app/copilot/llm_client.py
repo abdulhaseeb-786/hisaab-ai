@@ -1,100 +1,221 @@
-"""Multi-tier Copilot Client.
-Hierarchy:
-Tier 1: Google Gemini API (gemini-2.0-flash / gemini-1.5-flash)
-Tier 2: Groq API (llama-3.3-70b-versatile / llama-3.1-8b-instant)
-Tier 3: Deterministic Rule-Based Fallback Engine (Offline, 0-cost, 100% resilient)
+"""Copilot with three tiers: Gemini -> Groq -> offline engine (COP-01..04).
+
+The LLM never sees the database. It can only call the allow-listed tools in tools.py,
+and it must take every number from their results. Two guards keep it honest:
+
+1. Tool calling: the model asks for a tool, we run it, and we hand back the result.
+2. Number check: if the model answers with numbers without having called any tool, the
+   answer is thrown away and the offline engine answers instead (it is always grounded).
+
+If a provider is missing, slow or fails, the next tier answers. The app never breaks
+because an LLM is down.
 """
 
-import os
+from __future__ import annotations
+
 import json
 import logging
-from typing import Dict, Any, List
+import re
+from typing import Any
+
 from sqlalchemy.orm import Session
-from app.core.config import settings
-from app.copilot.tools import AVAILABLE_TOOLS_SCHEMA, execute_tool
+
 from app.copilot.fallback_engine import run_deterministic_copilot
+from app.copilot.tools import TOOL_LABELS, TOOLS, execute_tool, to_json, tool_declarations
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are HisaabAI Copilot, a sharp, trustworthy retail business advisor for Pakistani general store owners.
-Your core rules:
-1. NUMBERS ARE COMPUTED BY TOOLS ONLY: You must NEVER invent or hallucinate metrics, prices, stock quantities, or margins.
-2. If asked what to buy or reorder, invoke the `generate_reorder_plan` tool.
-3. If asked about stock status, invoke `get_inventory_health` or `get_today_actions`.
-4. If asked about prices or profit drop, invoke `get_margin_insights`.
-5. If asked about customer balances or udhaar, invoke `get_credit_summary`.
-6. Language: If the user writes in Roman Urdu or Urdu, respond in natural, friendly Roman Urdu (e.g. "Aap ke paas PKR 50,000 ka budget hai. Sab se pehle Dalda Cooking Oil ki 3 petiyan khareedein..."). If the user writes in English, reply in concise English.
-7. Always provide evidence and an actionable next step for the shopkeeper.
-"""
+MAX_TOOL_ROUNDS = 4
+MAX_HISTORY = 8
 
-def chat_with_copilot(
+SYSTEM_PROMPT = """You are HisaabAI, a friendly and sharp business helper for a Pakistani general store (karyana) owner.
+
+Rules you must always follow:
+1. Every number you say (rupees, units, days, percentages) must come from a tool result in this conversation. Never estimate, round up or invent numbers. If you need a number, call a tool.
+2. If no tool can answer, say plainly that the shop's records do not have that data. Do not guess.
+3. You can only read data. You cannot change prices, record payments or place orders; tell the owner which screen to use.
+4. Keep answers short and practical: the answer first, then the reason, then one clear next step. Use short bullet points. Use **bold** for key numbers.
+5. Money is in Pakistani rupees, written like Rs 12,500.
+6. Language: {language_rule}
+7. Gross profit is not net profit (rent, salaries and bills are not deducted). Say so if it matters."""
+
+LANGUAGE_RULES = {
+    "roman_urdu": "Reply in simple, natural Roman Urdu (Urdu written in English letters), the way a shopkeeper in Islamabad talks. Product names stay as they are.",
+    "english": "Reply in simple English.",
+    "urdu": "Reply in Urdu script.",
+}
+
+NUMBER_PATTERN = re.compile(r"\d[\d,]*(?:\.\d+)?")
+
+
+def _system_prompt(language: str) -> str:
+    return SYSTEM_PROMPT.format(language_rule=LANGUAGE_RULES.get(language, LANGUAGE_RULES["english"]))
+
+
+def _summary(result: dict[str, Any]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for k, v in result.items():
+        if isinstance(v, (int, float, str, bool)) or v is None:
+            out[k] = v
+        elif isinstance(v, list):
+            out[f"{k}_count"] = len(v)
+    return dict(list(out.items())[:8])
+
+
+def _invented_numbers(text: str, tool_calls: list[dict[str, Any]]) -> bool:
+    return not tool_calls and bool(NUMBER_PATTERN.search(text))
+
+
+# ---- Gemini ---------------------------------------------------------------------------------
+
+def _chat_gemini(db: Session, message: str, language: str, history: list[dict[str, str]], store_id: int) -> dict[str, Any] | None:
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(
+        api_key=settings.GEMINI_API_KEY,
+        http_options=types.HttpOptions(timeout=int(settings.LLM_TIMEOUT_SECONDS * 1000)),
+    )
+    declarations = [
+        types.FunctionDeclaration(name=t["name"], description=t["description"], parameters_json_schema=t["parameters"])
+        for t in tool_declarations()
+    ]
+    config = types.GenerateContentConfig(
+        system_instruction=_system_prompt(language),
+        tools=[types.Tool(function_declarations=declarations)],
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+        temperature=0.2,
+    )
+    contents: list[Any] = []
+    for turn in history[-MAX_HISTORY:]:
+        role = "model" if turn["role"] == "assistant" else "user"
+        contents.append(types.Content(role=role, parts=[types.Part.from_text(text=turn["content"])]))
+    contents.append(types.Content(role="user", parts=[types.Part.from_text(text=message)]))
+
+    calls: list[dict[str, Any]] = []
+    for _ in range(MAX_TOOL_ROUNDS):
+        resp = client.models.generate_content(model=settings.GEMINI_MODEL, contents=contents, config=config)
+        function_calls = resp.function_calls or []
+        if not function_calls:
+            text = (resp.text or "").strip()
+            return {"text": text, "calls": calls} if text else None
+        contents.append(resp.candidates[0].content)
+        parts = []
+        for fc in function_calls:
+            args = dict(fc.args or {})
+            result = execute_tool(db, fc.name, args, store_id=store_id)
+            calls.append({"tool_name": fc.name, "parameters": args, "result_summary": _summary(result)})
+            parts.append(types.Part.from_function_response(name=fc.name, response={"result": json.loads(to_json(result))}))
+        contents.append(types.Content(role="user", parts=parts))
+    return None
+
+
+# ---- Groq -----------------------------------------------------------------------------------
+
+def _chat_groq(db: Session, message: str, language: str, history: list[dict[str, str]], store_id: int) -> dict[str, Any] | None:
+    from groq import Groq
+
+    client = Groq(api_key=settings.GROQ_API_KEY, timeout=settings.LLM_TIMEOUT_SECONDS, max_retries=1)
+    tools = [{"type": "function", "function": t} for t in tool_declarations()]
+    messages: list[dict[str, Any]] = [{"role": "system", "content": _system_prompt(language)}]
+    for turn in history[-MAX_HISTORY:]:
+        messages.append({"role": "assistant" if turn["role"] == "assistant" else "user", "content": turn["content"]})
+    messages.append({"role": "user", "content": message})
+
+    calls: list[dict[str, Any]] = []
+    for _ in range(MAX_TOOL_ROUNDS):
+        completion = client.chat.completions.create(
+            model=settings.GROQ_MODEL, messages=messages, tools=tools, tool_choice="auto",
+            temperature=0.2, max_tokens=900,
+        )
+        msg = completion.choices[0].message
+        if not msg.tool_calls:
+            text = (msg.content or "").strip()
+            return {"text": text, "calls": calls} if text else None
+        messages.append({
+            "role": "assistant", "content": msg.content or "",
+            "tool_calls": [{"id": tc.id, "type": "function",
+                            "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+                           for tc in msg.tool_calls],
+        })
+        for tc in msg.tool_calls:
+            try:
+                args = json.loads(tc.function.arguments or "{}")
+            except json.JSONDecodeError:
+                args = {}
+            result = execute_tool(db, tc.function.name, args, store_id=store_id)
+            calls.append({"tool_name": tc.function.name, "parameters": args, "result_summary": _summary(result)})
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": to_json(result)})
+    return None
+
+
+PROVIDERS = (
+    ("gemini", lambda: bool(settings.GEMINI_API_KEY.strip()), _chat_gemini),
+    ("groq", lambda: bool(settings.GROQ_API_KEY.strip()), _chat_groq),
+)
+
+
+def provider_status() -> dict[str, Any]:
+    """Which tiers are configured (never the keys themselves)."""
+    return {
+        "mode": settings.COPILOT_MODE,
+        "gemini_configured": bool(settings.GEMINI_API_KEY.strip()),
+        "groq_configured": bool(settings.GROQ_API_KEY.strip()),
+        "offline_available": True,
+    }
+
+
+def chat_with_copilot(db: Session, message: str, language: str = "roman_urdu",
+                      history: list[dict[str, str]] | None = None, store_id: int = 1) -> dict[str, Any]:
+    """Answer one copilot message. See the module docstring for the tiers and guards."""
+    return _label_calls(_chat(db, message, language, history, store_id))
+
+
+def _chat(
     db: Session,
     message: str,
     language: str = "roman_urdu",
-    history: List[dict] = None,
-    store_id: int = 1
-) -> Dict[str, Any]:
-    """Execute 3-tier copilot query with automatic graceful fallback."""
-    gemini_key = os.getenv("GEMINI_API_KEY") or settings.GEMINI_API_KEY
-    groq_key = os.getenv("GROQ_API_KEY") or settings.GROQ_API_KEY
+    history: list[dict[str, str]] | None = None,
+    store_id: int = 1,
+) -> dict[str, Any]:
+    history = history or []
+    notes: list[str] = []
+    if settings.COPILOT_MODE != "offline":
+        for name, configured, fn in PROVIDERS:
+            if not configured():
+                continue
+            try:
+                out = fn(db, message, language, history, store_id)
+            except Exception as exc:  # network, quota, bad model name...
+                logger.warning("Copilot tier %s failed: %s", name, exc.__class__.__name__)
+                notes.append(f"{name} unavailable")
+                continue
+            if not out:
+                notes.append(f"{name} gave no answer")
+                continue
+            if _invented_numbers(out["text"], out["calls"]):
+                logger.warning("Copilot tier %s answered with numbers but no tool call; discarded", name)
+                notes.append(f"{name} answer discarded (numbers without data)")
+                continue
+            return {
+                "response": out["text"],
+                "language": language,
+                "tool_calls": out["calls"],
+                "provider_used": name,
+                "grounded": True,
+                "notes": notes,
+            }
 
-    # -------------------------------------------------------------
-    # TIER 1: GOOGLE GEMINI API
-    # -------------------------------------------------------------
-    if gemini_key and len(gemini_key.strip()) > 10:
-        try:
-            from google import genai
-            from google.genai import types
+    result = run_deterministic_copilot(db, message=message, language=language, store_id=store_id)
+    result["notes"] = notes
+    return result
 
-            client = genai.Client(api_key=gemini_key)
-            response = client.models.generate_content(
-                model="gemini-1.5-flash",
-                contents=message,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT + f"\nUser requested language: {language}",
-                    temperature=0.2
-                )
-            )
-            if response and response.text:
-                return {
-                    "response": response.text,
-                    "language": language,
-                    "tool_calls": [],
-                    "provider_used": "gemini",
-                    "grounded": True
-                }
-        except Exception as e:
-            logger.warning(f"Tier 1 (Gemini) failed: {e}. Falling back to Tier 2 (Groq)...")
 
-    # -------------------------------------------------------------
-    # TIER 2: GROQ API
-    # -------------------------------------------------------------
-    if groq_key and len(groq_key.strip()) > 10:
-        try:
-            from groq import Groq
-            groq_client = Groq(api_key=groq_key)
-            completion = groq_client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT + f"\nUser requested language: {language}"},
-                    {"role": "user", "content": message}
-                ],
-                temperature=0.2,
-                max_tokens=800
-            )
-            reply = completion.choices[0].message.content
-            if reply:
-                return {
-                    "response": reply,
-                    "language": language,
-                    "tool_calls": [],
-                    "provider_used": "groq",
-                    "grounded": True
-                }
-        except Exception as e:
-            logger.warning(f"Tier 2 (Groq) failed: {e}. Falling back to Tier 3 (Deterministic)...")
+def _label_calls(result: dict[str, Any]) -> dict[str, Any]:
+    for call in result.get("tool_calls", []):
+        call["tool_label"] = TOOL_LABELS.get(call["tool_name"], call["tool_name"])
+    return result
 
-    # -------------------------------------------------------------
-    # TIER 3: DETERMINISTIC OFFLINE FALLBACK ENGINE
-    # -------------------------------------------------------------
-    return run_deterministic_copilot(db, message=message, language=language, store_id=store_id)
+
+__all__ = ["chat_with_copilot", "provider_status", "TOOLS"]

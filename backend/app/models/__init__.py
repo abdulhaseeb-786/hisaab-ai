@@ -1,4 +1,4 @@
-from .store import Store
+from .store import Store, AppMeta
 from .product import Product, ProductPack, PriceHistory
 from .sales import Sale, SaleLine, StockMovement
 from .purchases import Supplier, SupplierProduct, Purchase, PurchaseLine
@@ -7,6 +7,7 @@ from .analytics import Expense, Insight, Forecast, PurchasePlan, PurchasePlanLin
 
 __all__ = [
     "Store",
+    "AppMeta",
     "Product",
     "ProductPack",
     "PriceHistory",

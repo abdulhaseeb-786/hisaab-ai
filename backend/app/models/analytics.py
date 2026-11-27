@@ -9,7 +9,10 @@ class Expense(Base):
     expense_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     store_id = Column(Integer, ForeignKey("stores.store_id"), nullable=False, index=True)
     date = Column(DateTime, nullable=False, index=True)
-    category = Column(String(60), nullable=False)  # rent, electricity, salaries, transport, general
+    # Every cash outflow that is not a supplier payment. Operating expenses: rent,
+    # electricity, salaries, transport, general. Non-operating: owner_drawings (household
+    # money the owner takes) and bank_deposit (cash moved from the drawer to the bank).
+    category = Column(String(60), nullable=False)
     amount = Column(Float, nullable=False)
     description = Column(String(250), nullable=True)
 

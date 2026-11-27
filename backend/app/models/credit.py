@@ -10,8 +10,7 @@ class Customer(Base):
     store_id = Column(Integer, ForeignKey("stores.store_id"), nullable=False, index=True)
     name = Column(String(120), nullable=False, index=True)
     phone = Column(String(30), nullable=True)
-    credit_limit = Column(Float, default=15000.0)  # Safe Mark credit ceiling
-    safe_mark_score = Column(Float, default=85.0)  # 0 to 100 Safe Mark rating
+    credit_limit = Column(Float, default=15000.0)  # how much udhaar the shop allows
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     store = relationship("Store", back_populates="customers")

@@ -1,24 +1,35 @@
+from __future__ import annotations
+
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+
+Language = Literal["roman_urdu", "english", "urdu"]
+
 
 class ChatMessage(BaseModel):
-    role: str  # user, assistant, system
-    content: str
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=4000)
+
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., min_length=1)
+    message: str = Field(..., min_length=1, max_length=1000)
     store_id: int = 1
-    language: str = Field(default="roman_urdu")  # roman_urdu, urdu, english
-    history: List[ChatMessage] = []
+    language: Language = "roman_urdu"
+    history: list[ChatMessage] = Field(default_factory=list, max_length=20)
+
 
 class ToolCallExecution(BaseModel):
     tool_name: str
-    parameters: Dict[str, Any]
-    result_summary: Dict[str, Any]
+    tool_label: str
+    parameters: dict[str, Any]
+    result_summary: dict[str, Any]
+
 
 class ChatResponse(BaseModel):
     response: str
-    language: str
-    tool_calls: List[ToolCallExecution] = []
-    provider_used: str  # gemini, groq, or deterministic_fallback
-    grounded: bool = True
+    language: Language
+    tool_calls: list[ToolCallExecution]
+    provider_used: Literal["gemini", "groq", "offline"]
+    grounded: bool
+    notes: list[str] = Field(default_factory=list)

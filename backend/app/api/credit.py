@@ -1,53 +1,54 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+
+from app.analytics.credit_aging import calculate_credit_summary, customer_ledger
+from app.core.clock import store_now
 from app.core.database import get_db
 from app.models import Customer, LedgerEntry
-from app.analytics.credit_aging import calculate_credit_summary
-from app.schemas.credit import CreditSummaryResponse, PaymentRecordRequest
+from app.schemas.credit import (
+    CreditSummaryResponse, CustomerLedgerResponse, PaymentRecordRequest, PaymentRecordResponse,
+)
 
-router = APIRouter(prefix="/credit", tags=["Customer Credit & Khata"])
+router = APIRouter(prefix="/credit", tags=["Customer Khata"])
+
 
 @router.get("/summary", response_model=CreditSummaryResponse)
-def get_credit_summary_endpoint(store_id: int = 1, db: Session = Depends(get_db)):
-    """GET /api/credit/summary: Receivables, aging buckets, overdue list, and Safe Mark scores (CRED-01)."""
+def get_credit_summary(store_id: int = 1, db: Session = Depends(get_db)):
+    """Khata balances, aging by days past due, and Safe Mark scores with reasons (CRED-01)."""
     return calculate_credit_summary(db, store_id=store_id)
 
-@router.post("/payment")
-def record_customer_payment(
-    payload: PaymentRecordRequest,
-    store_id: int = 1,
-    db: Session = Depends(get_db)
-):
-    """Records real-time Khata payment, reducing customer balance and logging ledger entry."""
-    cust = db.query(Customer).filter(Customer.customer_id == payload.customer_id).first()
+
+@router.get("/customers/{customer_id}", response_model=CustomerLedgerResponse)
+def get_customer_ledger(customer_id: int, store_id: int = 1, db: Session = Depends(get_db)):
+    """One customer's khata page with a running balance."""
+    data = customer_ledger(db, customer_id, store_id=store_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Customer not found.")
+    return data
+
+
+@router.post("/payment", response_model=PaymentRecordResponse)
+def record_customer_payment(payload: PaymentRecordRequest, db: Session = Depends(get_db)):
+    """Record a repayment (wasooli). It cannot be more than the customer owes."""
+    cust = db.get(Customer, payload.customer_id)
     if not cust:
         raise HTTPException(status_code=404, detail="Customer not found.")
-    
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
-    
-    entry = LedgerEntry(
-        store_id=cust.store_id,
-        customer_id=payload.customer_id,
-        timestamp=now,
-        debit=0.0,
-        credit=payload.amount,
-        reference="wasooli_counter",
-        description=payload.notes or "Counter wasooli"
-    )
-    db.add(entry)
+    debit, credit = db.query(
+        func.coalesce(func.sum(LedgerEntry.debit), 0.0), func.coalesce(func.sum(LedgerEntry.credit), 0.0)
+    ).filter(LedgerEntry.customer_id == cust.customer_id).one()
+    balance = round(float(debit) - float(credit), 2)
+    if payload.amount > balance + 0.01:
+        raise HTTPException(status_code=422, detail=f"{cust.name} only owes Rs {balance:,.0f}.")
+    db.add(LedgerEntry(store_id=cust.store_id, customer_id=cust.customer_id, timestamp=store_now(),
+                       debit=0.0, credit=round(payload.amount, 2), reference="WASOOLI", description=payload.notes))
     db.commit()
-
-    from sqlalchemy import func
-    debits = db.query(func.sum(LedgerEntry.debit)).filter(LedgerEntry.customer_id == payload.customer_id).scalar() or 0.0
-    credits = db.query(func.sum(LedgerEntry.credit)).filter(LedgerEntry.customer_id == payload.customer_id).scalar() or 0.0
-    new_balance = max(0.0, debits - credits)
-
+    new_balance = round(balance - payload.amount, 2)
     return {
-        "message": "Payment recorded successfully",
         "customer_id": cust.customer_id,
         "name": cust.name,
         "amount_received": payload.amount,
-        "new_balance": new_balance
+        "previous_balance": balance,
+        "new_balance": new_balance,
+        "message": f"Rs {payload.amount:,.0f} received from {cust.name}. Balance now Rs {new_balance:,.0f}.",
     }
-
