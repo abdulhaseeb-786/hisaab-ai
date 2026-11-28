@@ -21,10 +21,10 @@ function Galla() {
   if (!d) return <Skeleton className="h-72" />;
   return (
     <div className="grid lg:grid-cols-[1fr_1.1fr] gap-4">
-      <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
+      <div className="bg-haldi-50 rounded-2xl border-2 border-haldi-200 shadow-card p-5 space-y-4">
         <div>
-          <p className="text-base text-ink-muted">{pick('Should be in the cash box now', 'Abhi cash box mein hone chahiye')}</p>
-          <p className="text-4xl font-extrabold tabular">
+          <p className="text-base font-bold text-haldi-800">{pick('Should be in the cash box now', 'Abhi cash box mein hone chahiye')}</p>
+          <p className="text-4xl font-extrabold tabular text-haldi-950">
             <Money value={d.cash_in_drawer_expected_pkr} />
           </p>
           <p className="text-sm text-ink-muted mt-1">
@@ -164,15 +164,15 @@ export default function HisaabPage() {
 
       <Bills />
 
-      <Link to="/app/report" className="group flex items-center gap-4 bg-ink text-white rounded-2xl p-5 hover:bg-ink-soft" data-tour="report-link">
-        <span className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+      <Link to="/app/report" className="group flex items-center gap-4 bg-sabz-900 border-2 border-haldi-400 text-white rounded-2xl p-5 hover:bg-sabz-800 transition-colors" data-tour="report-link">
+        <span className="w-12 h-12 rounded-full bg-haldi-400 text-sabz-950 flex items-center justify-center shrink-0">
           <FileText className="w-6 h-6" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-lg font-extrabold">{pick('Business report for a loan', 'Loan ke liye karobar ki report')}</span>
-          <span className="block text-sm text-white/75">{pick('Six months of sales, profit after costs, khata and bills, ready to print for a bank or microfinance officer.', 'Chhe mahine ki sale, kharche ke baad munafa, khata aur bill, bank ya microfinance ke liye print karne ko tayyar.')}</span>
+          <span className="block text-sm text-sabz-200">{pick('Six months of sales, profit after costs, khata and bills, ready to print for a bank or microfinance officer.', 'Chhe mahine ki sale, kharche ke baad munafa, khata aur bill, bank ya microfinance ke liye print karne ko tayyar.')}</span>
         </span>
-        <ChevronRight className={cn('w-6 h-6 text-white/60 group-hover:text-white')} />
+        <ChevronRight className={cn('w-6 h-6 text-haldi-300 group-hover:text-white')} />
       </Link>
 
       <History />

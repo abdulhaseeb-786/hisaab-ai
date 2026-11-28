@@ -18,7 +18,7 @@ function Row({ item, value, onChange }: { item: CountSheetItem; value: string | 
   const counted = value !== undefined && value !== '';
   const diff = counted ? Number(value) - item.expected_qty : 0;
   return (
-    <li className={cn('p-3 sm:p-4 flex flex-wrap items-center gap-3', counted && 'bg-sabz-tint/40')}>
+    <li className={cn('p-3 sm:p-4 flex flex-wrap items-center gap-3', counted && 'bg-sabz-50/70')}>
       <ProductImage src={item.image_url} alt="" className="w-12 h-12 shrink-0" />
       <div className="min-w-0 flex-1 basis-40">
         <p className="font-bold leading-snug">{item.name}</p>
@@ -171,7 +171,7 @@ export default function CountPage() {
                   role="tab"
                   aria-selected={category === c.category}
                   onClick={() => setCategory(c.category)}
-                  className={cn('min-h-[44px] px-4 rounded-full border-2 font-bold whitespace-nowrap', category === c.category ? 'bg-ink text-white border-ink' : 'bg-card border-line text-ink-soft hover:border-ink-muted')}
+                  className={cn('min-h-[44px] px-4 rounded-full border-2 font-bold whitespace-nowrap', category === c.category ? 'bg-neela-700 text-white border-neela-700' : 'bg-card border-line text-ink-soft hover:border-neela-300')}
                 >
                   {c.category} <span className="opacity-70">{c.items}</span>
                 </button>

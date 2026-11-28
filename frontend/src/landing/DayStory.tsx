@@ -203,7 +203,7 @@ export function DayStory() {
   const Screen = SCREENS[step]!;
 
   return (
-    <section ref={ref} className="relative bg-card border-y border-line" style={{ height: `${STEPS.length * 90 + 30}vh` }} aria-label={pick('A day with HisaabAI', 'HisaabAI ke saath ek din')}>
+    <section ref={ref} className="relative bg-paper bg-scribbles border-b border-line" style={{ height: `${STEPS.length * 90 + 30}vh` }} aria-label={pick('A day with HisaabAI', 'HisaabAI ke saath ek din')}>
       <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         <div className="max-w-6xl mx-auto h-full px-4 sm:px-6 grid lg:grid-cols-[1fr_auto] content-start lg:content-center gap-3 lg:gap-16 items-start lg:items-center">
           <div className="order-1 pt-6 lg:pt-0">
@@ -211,14 +211,15 @@ export function DayStory() {
             <div className="relative pl-10">
               {/* The day's timeline: it fills as you scroll. */}
               <div className="absolute left-[0.6rem] top-1 bottom-1 w-1 rounded-full bg-line" aria-hidden />
-              <motion.div className="absolute left-[0.6rem] top-1 w-1 rounded-full bg-sabz origin-top" style={{ height: reduce ? '100%' : lineHeight }} aria-hidden />
+              <motion.div className="absolute left-[0.6rem] top-1 w-1 rounded-full bg-sabz-600 origin-top" style={{ height: reduce ? '100%' : lineHeight }} aria-hidden />
               <ol className="space-y-6 lg:space-y-8">
                 {STEPS.map((s, i) => {
                   const active = i === step;
+                  const timeColor = ['text-sabz-700', 'text-neela-700', 'text-lal-600', 'text-haldi-700'][i] ?? 'text-sabz-700';
                   return (
                     <li key={s.time[0]} className={cn('relative transition-opacity duration-300', active ? 'opacity-100' : 'opacity-35 hidden lg:block')}>
-                      <span className={cn('absolute -left-10 top-1 w-[1.45rem] h-[1.45rem] rounded-full border-4 border-card transition-colors', i <= step ? 'bg-sabz' : 'bg-line-strong')} aria-hidden />
-                      <p className="text-sm font-bold text-sabz">{pick(...s.time)}</p>
+                      <span className={cn('absolute -left-10 top-1 w-[1.45rem] h-[1.45rem] rounded-full border-4 border-paper transition-colors', i <= step ? 'bg-sabz-600' : 'bg-ink-300')} aria-hidden />
+                      <p className={cn('text-sm font-bold', timeColor)}>{pick(...s.time)}</p>
                       <h3 className="text-xl lg:text-2xl font-extrabold leading-tight">{pick(...s.title)}</h3>
                       <p className={cn('text-sm lg:text-base text-ink-soft mt-1.5 max-w-md', !active && 'lg:hidden')}>{pick(...s.body)}</p>
                     </li>

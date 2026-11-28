@@ -7,6 +7,7 @@ import { useDashboard, useDayToday, useOrders, useStore, useTodayActions } from 
 import type { ActionType, KpiSummary, TodayAction } from '@/api/types';
 import storeImg from '@/assets/store-isometric.jpg';
 import { RegisterBook } from '@/components/RegisterBook';
+import { HUES, type Hue } from '@/app/areas';
 import { useUi } from '@/app/UiContext';
 import { TomorrowBrief } from '@/components/day/DaySheet';
 import { Button } from '@/components/ui/Button';
@@ -227,26 +228,26 @@ function DayBar() {
 
   if (d.state === 'not_opened') {
     return (
-      <button data-tour="day-bar" onClick={() => ui.openDay('open')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-haldi-tint border-2 border-haldi/60 text-left hover:brightness-[0.98]">
-        <span className="w-12 h-12 rounded-full bg-haldi text-ink flex items-center justify-center shrink-0 animate-pulse-ring">
+      <button data-tour="day-bar" onClick={() => ui.openDay('open')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-haldi-50 border-2 border-haldi-300 text-left hover:bg-haldi-100/70 transition-colors">
+        <span className="w-12 h-12 rounded-full bg-haldi-400 text-haldi-950 flex items-center justify-center shrink-0 animate-pulse-ring">
           <DoorOpen className="w-6 h-6" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-lg font-extrabold">{pick('Open the shop', 'Dukaan kholein')}</span>
+          <span className="block text-lg font-extrabold text-haldi-950">{pick('Open the shop', 'Dukaan kholein')}</span>
           <span className="block text-sm text-ink-soft">{pick('Count the cash box first, so tonight the cash adds up.', 'Pehle cash box gin lein, taake raat ko hisaab barabar ho.')}</span>
         </span>
-        <ChevronRight className="w-6 h-6 text-ink-faint" />
+        <ChevronRight className="w-6 h-6 text-haldi-700" />
       </button>
     );
   }
   if (d.state === 'closed') {
     const diff = d.session?.closing_difference_pkr ?? 0;
     return (
-      <div data-tour="day-bar" className="flex flex-wrap items-center gap-3 p-4 rounded-2xl bg-card border border-line">
-        <DoorClosed className="w-6 h-6 text-ink-muted" />
+      <div data-tour="day-bar" className="flex flex-wrap items-center gap-3 p-4 rounded-2xl bg-ink-100/70 border border-ink-200">
+        <DoorClosed className="w-6 h-6 text-ink-600" />
         <p className="flex-1 font-bold">
           {pick(`Day closed at ${formatDateTime(d.session?.closed_at)}.`, `Din ${formatDateTime(d.session?.closed_at)} par band hua.`)}{' '}
-          <span className={cn('font-normal', Math.abs(diff) < 0.5 ? 'text-sabz-dark' : 'text-lal-dark')}>
+          <span className={cn('font-normal', Math.abs(diff) < 0.5 ? 'text-sabz-700' : 'text-lal-600')}>
             {Math.abs(diff) < 0.5 ? pick('Cash Box matched.', 'Cash Box barabar tha.') : diff < 0 ? pick(`${formatPKR(-diff)} short.`, `${formatPKR(-diff)} kam.`) : pick(`${formatPKR(diff)} extra.`, `${formatPKR(diff)} zyada.`)}
           </span>
         </p>
@@ -255,13 +256,13 @@ function DayBar() {
     );
   }
   return (
-    <div data-tour="day-bar" className={cn('flex flex-wrap items-center gap-3 p-4 rounded-2xl border-2', evening ? 'bg-neela-tint border-neela/40' : 'bg-card border-line')}>
+    <div data-tour="day-bar" className={cn('flex flex-wrap items-center gap-3 p-4 rounded-2xl border-2', evening ? 'bg-neela-50 border-neela-300' : 'bg-sabz-50/70 border-sabz-200')}>
       <span className="relative flex w-3 h-3 shrink-0" aria-hidden>
-        <span className="absolute inline-flex h-full w-full rounded-full bg-sabz opacity-60 motion-safe:animate-ping" />
-        <span className="relative inline-flex w-3 h-3 rounded-full bg-sabz" />
+        <span className="absolute inline-flex h-full w-full rounded-full bg-sabz-500 opacity-60 motion-safe:animate-ping" />
+        <span className="relative inline-flex w-3 h-3 rounded-full bg-sabz-600" />
       </span>
       <p className="flex-1 min-w-0 basis-48">
-        <span className="font-extrabold">{pick('Shop is open', 'Dukaan khuli hai')}</span>{' '}
+        <span className="font-extrabold text-sabz-900">{pick('Shop is open', 'Dukaan khuli hai')}</span>{' '}
         <span className="text-ink-soft">
           {pick(`since ${formatDateTime(d.session?.opened_at)}. Cash Box should have `, `${formatDateTime(d.session?.opened_at)} se. Cash box mein hone chahiye `)}
           <strong className="text-ink tabular">{formatPKR(d.cash_in_drawer_expected_pkr)}</strong>
@@ -274,7 +275,7 @@ function DayBar() {
   );
 }
 
-function QuickAction({ icon, label, hint, onClick, primary, tour, wide }: { icon: ReactNode; label: string; hint?: string; onClick: () => void; primary?: boolean; tour?: string; wide?: boolean }) {
+function QuickAction({ icon, label, hint, onClick, primary, hue = 'sabz', tour, wide }: { icon: ReactNode; label: string; hint?: string; onClick: () => void; primary?: boolean; hue?: Hue; tour?: string; wide?: boolean }) {
   return (
     <button
       onClick={onClick}
@@ -282,13 +283,13 @@ function QuickAction({ icon, label, hint, onClick, primary, tour, wide }: { icon
       className={cn(
         'flex gap-2 p-3.5 sm:p-4 rounded-2xl border-2 text-left transition-colors',
         wide ? 'col-span-2 sm:col-span-1 flex-row items-center sm:flex-col sm:items-start min-h-[64px] sm:min-h-[112px]' : 'flex-col items-start min-h-[100px] sm:min-h-[112px]',
-        primary ? 'bg-sabz text-white border-sabz hover:bg-sabz-dark' : 'bg-card border-line hover:border-ink-muted',
+        primary ? 'bg-sabz-600 text-white border-sabz-700 hover:bg-sabz-700' : 'bg-card border-line hover:border-ink-300',
       )}
     >
-      <span className={cn('w-11 h-11 rounded-full flex items-center justify-center shrink-0', primary ? 'bg-white/15' : 'bg-sabz-tint text-sabz')}>{icon}</span>
+      <span className={cn('w-11 h-11 rounded-full flex items-center justify-center shrink-0', primary ? 'bg-white/15 text-white' : HUES[hue].soft)}>{icon}</span>
       <span className={cn('min-w-0', wide && 'flex-1 flex items-baseline gap-2 sm:block')}>
         <span className="block text-lg font-extrabold leading-tight">{label}</span>
-        {hint && <span className={cn('block text-sm leading-snug', primary ? 'text-white/80' : 'text-ink-muted')}>{hint}</span>}
+        {hint && <span className={cn('block text-sm leading-snug', primary ? 'text-sabz-100' : 'text-ink-muted')}>{hint}</span>}
       </span>
     </button>
   );
@@ -303,10 +304,10 @@ function QuickActions() {
   return (
     <section aria-label={pick('Quick actions', 'Fori kaam')} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" data-tour="quick-actions">
       <QuickAction primary icon={<NotebookPen className="w-6 h-6" />} label="+ Udhaar" hint={pick('Who took what', 'Kis ne kya liya')} onClick={() => ui.openUdhaar()} tour="quick-udhaar" />
-      <QuickAction icon={<HandCoins className="w-6 h-6" />} label="+ Wasooli" hint={pick('Money received', 'Raqam aayi')} onClick={() => ui.openWasooli()} />
-      <QuickAction icon={<ClipboardList className="w-6 h-6" />} label={pick('Order booker', 'Order booker aaya')} hint={pick('What to order', 'Kya mangwayein')} onClick={() => navigate('/app/order')} />
-      <QuickAction icon={<PackageCheck className="w-6 h-6" />} label={pick('Delivery came', 'Maal aaya')} hint={onTheWay ? pick(`${onTheWay} on the way`, `${onTheWay} raste mein`) : pick('Check the bill', 'Bill milayein')} onClick={() => ui.openReceive()} />
-      <QuickAction wide icon={<Receipt className="w-6 h-6" />} label="Kharcha" hint={pick('Paid from the cash box', 'Cash box se diya')} onClick={ui.openExpense} />
+      <QuickAction hue="haldi" icon={<HandCoins className="w-6 h-6" />} label="+ Wasooli" hint={pick('Money received', 'Raqam aayi')} onClick={() => ui.openWasooli()} />
+      <QuickAction hue="neela" icon={<ClipboardList className="w-6 h-6" />} label={pick('Order booker', 'Order booker aaya')} hint={pick('What to order', 'Kya mangwayein')} onClick={() => navigate('/app/order')} />
+      <QuickAction hue="neela" icon={<PackageCheck className="w-6 h-6" />} label={pick('Delivery came', 'Maal aaya')} hint={onTheWay ? pick(`${onTheWay} on the way`, `${onTheWay} raste mein`) : pick('Check the bill', 'Bill milayein')} onClick={() => ui.openReceive()} />
+      <QuickAction wide hue="haldi" icon={<Receipt className="w-6 h-6" />} label="Kharcha" hint={pick('Paid from the cash box', 'Cash box se diya')} onClick={ui.openExpense} />
     </section>
   );
 }
@@ -318,18 +319,18 @@ function SalesTrend({ k }: { k: KpiSummary }) {
   const w = 100 / Math.max(1, points.length - 1);
   const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${(i * w).toFixed(2)},${(38 - (p.revenue_pkr / max) * 34).toFixed(2)}`).join(' ');
   return (
-    <div className="bg-card rounded-2xl border border-line shadow-card p-5">
+    <div className="bg-card rounded-2xl border border-sabz-200 shadow-card p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <p className="text-base text-ink-soft">
           {pick('Sales in the last 30 days', 'Pichle 30 din ki sale')}: <strong className="text-ink tabular">{formatPKR(k.revenue_pkr)}</strong>
         </p>
-        <p className={cn('text-sm font-bold', (k.revenue_change_pct ?? 0) < 0 ? 'text-lal-dark' : 'text-sabz')}>
+        <p className={cn('text-sm font-bold', (k.revenue_change_pct ?? 0) < 0 ? 'text-lal-600' : 'text-sabz-700')}>
           {formatChange(k.revenue_change_pct)} {pick('vs the 30 days before', 'pichle 30 din se')}
         </p>
       </div>
       <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-20 mt-3" role="img" aria-label={pick('Daily sales, last 30 days', 'Rozana sale, pichle 30 din')}>
-        <path d={`${path} L100,40 L0,40 Z`} className="fill-sabz-tint" />
-        <path d={path} className="stroke-sabz fill-none" strokeWidth={0.8} vectorEffect="non-scaling-stroke" />
+        <path d={`${path} L100,40 L0,40 Z`} className="fill-sabz-100" />
+        <path d={path} className="stroke-sabz-600 fill-none" strokeWidth={0.8} vectorEffect="non-scaling-stroke" />
       </svg>
       <p className="text-sm text-ink-muted mt-2">
         {pick(
@@ -348,7 +349,7 @@ function TomorrowCard() {
   const t = day.data?.tomorrow;
   if (!t) return null;
   return (
-    <div className="bg-neela-tint/60 border-2 border-neela/30 rounded-2xl p-4 sm:p-5" data-tour="tomorrow">
+    <div className="bg-neela-50 border-2 border-neela-200 rounded-2xl p-4 sm:p-5" data-tour="tomorrow">
       <TomorrowBrief t={t} />
     </div>
   );
@@ -400,7 +401,7 @@ export default function TodayPage() {
 
       <Section title={pick('How sales are going', 'Sale ka rujhaan')}>{month.data ? <SalesTrend k={month.data} /> : <Skeleton className="h-40" />}</Section>
 
-      <Link to="/app/store-map" className="group flex items-center gap-4 bg-card rounded-2xl border border-line shadow-card overflow-hidden hover:border-ink-muted">
+      <Link to="/app/store-map" className="group flex items-center gap-4 bg-card rounded-2xl border border-neela-200 shadow-card overflow-hidden hover:border-neela-400">
         <img src={storeImg} alt="" className="w-28 sm:w-40 h-24 sm:h-28 object-cover shrink-0" />
         <div className="py-3 pr-2 min-w-0">
           <p className="text-lg font-extrabold">{pick('Walk through your shop', 'Dukaan ka chakkar lagayein')}</p>

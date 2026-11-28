@@ -27,15 +27,15 @@ function AgingBar({ d }: { d: CreditSummary }) {
   const a = d.aging;
   const total = Math.max(1, a.total_outstanding_pkr);
   const parts = [
-    { value: a.not_due_pkr, cls: 'bg-sabz', en: 'Not due yet', ur: 'Abhi waqt hai' },
-    { value: a.overdue_1_30_days_pkr, cls: 'bg-haldi', en: 'Up to 30 days late', ur: '30 din tak late' },
-    { value: a.overdue_31_60_days_pkr + a.overdue_61_plus_days_pkr, cls: 'bg-lal', en: 'More than 30 days late', ur: '30 din se zyada late' },
+    { value: a.not_due_pkr, cls: 'bg-sabz-500', en: 'Not due yet', ur: 'Abhi waqt hai' },
+    { value: a.overdue_1_30_days_pkr, cls: 'bg-haldi-400', en: 'Up to 30 days late', ur: '30 din tak late' },
+    { value: a.overdue_31_60_days_pkr + a.overdue_61_plus_days_pkr, cls: 'bg-lal-500', en: 'More than 30 days late', ur: '30 din se zyada late' },
   ];
   return (
-    <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
+    <div className="bg-card rounded-2xl border border-lal-100 shadow-card p-5 space-y-4">
       <div>
         <p className="text-base text-ink-muted">{pick('Customers owe you', 'Customers ka kul udhaar')}</p>
-        <p className="text-3xl font-extrabold tabular">
+        <p className={cn('text-3xl font-extrabold tabular', d.total_overdue_customers > 0 ? 'text-lal-700' : 'text-ink')}>
           <Money value={a.total_outstanding_pkr} />
         </p>
         <p className="text-base text-ink-soft">
@@ -64,14 +64,14 @@ function CustomerRow({ c }: { c: KhataCustomer }) {
   const late = c.overdue_amount_pkr > 0;
   return (
     <li>
-      <button onClick={() => ui.openReminder(c.customer_id)} className="w-full text-left flex items-start gap-3 p-4 hover:bg-paper">
-        <span className={cn('w-12 h-12 rounded-full flex items-center justify-center font-extrabold shrink-0', late ? 'bg-lal-tint text-lal-dark' : 'bg-sabz-tint text-sabz-dark')} aria-hidden>
+      <button onClick={() => ui.openReminder(c.customer_id)} className="w-full text-left flex items-start gap-3 p-4 hover:bg-lal-50/40">
+        <span className={cn('w-12 h-12 rounded-full flex items-center justify-center font-extrabold shrink-0', late ? 'bg-lal-100 text-lal-700' : 'bg-sabz-100 text-sabz-700')} aria-hidden>
           {initials(c.name)}
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-bold text-ink leading-snug">{c.name}</p>
           {late ? (
-            <p className="text-sm text-lal-dark font-bold">
+            <p className="text-sm text-lal-600 font-bold">
               {pick(`${formatPKR(c.overdue_amount_pkr)} late, oldest bill ${c.days_overdue} days`, `${formatPKR(c.overdue_amount_pkr)} late, purana bill ${c.days_overdue} din`)}
             </p>
           ) : (
@@ -129,7 +129,7 @@ export default function KhataPage() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={pick('Find a customer', 'Customer dhoondein')}
             aria-label={pick('Find a customer', 'Customer dhoondein')}
-            className="w-full min-h-[52px] pl-12 pr-4 rounded-2xl bg-card border-2 border-line focus:border-sabz outline-none text-base"
+            className="w-full min-h-[52px] pl-12 pr-4 rounded-2xl bg-card border-2 border-line focus:border-lal-500 outline-none text-base"
           />
         </div>
       )}

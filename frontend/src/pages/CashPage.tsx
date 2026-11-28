@@ -20,11 +20,11 @@ export function Verdict({ o }: { o: CashOutlook }) {
   const { pick } = useLanguage();
   const ok = !o.shortfall_warning;
   return (
-    <div className={cn('rounded-2xl p-5 sm:p-6 border-2', ok ? 'bg-sabz-tint border-sabz-mid' : 'bg-lal-tint border-lal/40')}>
+    <div className={cn('rounded-2xl p-5 sm:p-6 border-2', ok ? 'bg-sabz-50 border-sabz-300' : 'bg-lal-50 border-lal-300')}>
       <div className="flex items-start gap-3">
-        {ok ? <CheckCircle2 className="w-8 h-8 text-sabz shrink-0" /> : <AlertTriangle className="w-8 h-8 text-lal shrink-0" />}
+        {ok ? <CheckCircle2 className="w-8 h-8 text-sabz-600 shrink-0" /> : <AlertTriangle className="w-8 h-8 text-lal-500 shrink-0" />}
         <div>
-          <p className={cn('text-2xl font-extrabold leading-tight', ok ? 'text-sabz-dark' : 'text-lal-dark')}>
+          <p className={cn('text-2xl font-extrabold leading-tight', ok ? 'text-sabz-800' : 'text-lal-700')}>
             {ok
               ? pick('You will have enough cash for the next 7 days.', 'Agle 7 din ke liye cash kaafi hai.')
               : pick(`Cash may run short on ${formatDate(o.shortfall_date)}.`, `${formatDate(o.shortfall_date)} ko cash kam par sakta hai.`)}

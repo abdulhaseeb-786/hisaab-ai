@@ -53,15 +53,15 @@ export default function StockPage() {
         subtitle={pick('Items that will run out soonest are at the top.', 'Jo maal jaldi khatam hoga woh sab se upar hai.')}
       />
 
-      <Link to="/app/stock/count" data-tour="ginti" className="group flex items-center gap-4 p-4 rounded-2xl bg-card border-2 border-line hover:border-ink-muted">
-        <span className="w-12 h-12 rounded-full bg-neela-tint text-neela flex items-center justify-center shrink-0">
+      <Link to="/app/stock/count" data-tour="ginti" className="group flex items-center gap-4 p-4 rounded-2xl bg-neela-50 border-2 border-neela-200 hover:border-neela-400 transition-colors">
+        <span className="w-12 h-12 rounded-full bg-neela-600 text-white flex items-center justify-center shrink-0">
           <ClipboardCheck className="w-6 h-6" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-lg font-extrabold">{pick('Ginti: count a shelf', 'Ginti: shelf ginein')}</span>
-          <span className="block text-sm text-ink-muted">{pick('Fix the stock to what is really there, and see what went missing.', 'Stock ko asal ke mutabiq karein, aur dekhein kya kam hua.')}</span>
+          <span className="block text-lg font-extrabold text-neela-950">{pick('Ginti: count a shelf', 'Ginti: shelf ginein')}</span>
+          <span className="block text-sm text-ink-soft">{pick('Fix the stock to what is really there, and see what went missing.', 'Stock ko asal ke mutabiq karein, aur dekhein kya kam hua.')}</span>
         </span>
-        <ChevronRight className="w-6 h-6 text-ink-faint group-hover:text-ink" />
+        <ChevronRight className="w-6 h-6 text-neela-600 group-hover:text-neela-900" />
       </Link>
 
       <div className="relative">
@@ -72,7 +72,7 @@ export default function StockPage() {
           onChange={(e) => set('q', e.target.value)}
           placeholder={pick('Search, e.g. Dalda, Surf, atta', 'Talash karein, e.g. Dalda, Surf, atta')}
           aria-label={pick('Search products', 'Product talash karein')}
-          className="w-full min-h-[56px] pl-12 pr-4 rounded-2xl bg-card border-2 border-line focus:border-sabz outline-none text-lg"
+          className="w-full min-h-[56px] pl-12 pr-4 rounded-2xl bg-card border-2 border-line focus:border-neela-600 outline-none text-lg"
         />
       </div>
 
@@ -88,7 +88,7 @@ export default function StockPage() {
               onClick={() => set('status', f.id)}
               className={cn(
                 'shrink-0 min-h-[44px] px-4 rounded-full font-bold border-2 whitespace-nowrap',
-                active ? 'bg-ink text-white border-ink' : 'bg-card text-ink-soft border-line hover:border-ink-muted',
+                active ? 'bg-neela-700 text-white border-neela-700' : 'bg-card text-ink-soft border-line hover:border-neela-300',
               )}
             >
               {pick(f.en, f.ur)} <span className={cn('ml-1 tabular', active ? 'text-white/70' : 'text-ink-faint')}>{count}</span>

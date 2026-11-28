@@ -26,11 +26,11 @@ interface Spot {
 }
 
 const PIN_BG: Record<Tone, string> = {
-  urgent: 'bg-lal',
-  watch: 'bg-haldi',
-  ok: 'bg-sabz',
-  neutral: 'bg-ink-muted',
-  info: 'bg-neela',
+  urgent: 'bg-lal-500',
+  watch: 'bg-haldi-500',
+  ok: 'bg-sabz-600',
+  neutral: 'bg-ink-500',
+  info: 'bg-neela-600',
 };
 
 export default function StoreMapPage() {
@@ -111,7 +111,7 @@ export default function StoreMapPage() {
 
       {d && (
         <>
-          <div className="relative rounded-2xl overflow-hidden border border-line shadow-card bg-card">
+          <div className="relative rounded-2xl overflow-hidden border-2 border-neela-200 shadow-card bg-card">
             <img src={storeImg} alt={pick('Drawing of the shop', 'Dukaan ki tasveer')} className="w-full aspect-[16/9] object-cover" />
             {spots.map((s) => (
               <button

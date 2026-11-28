@@ -59,6 +59,24 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+  /* Subtle notebook textures for landing sections. */
+  .bg-ledger-dots {
+    background-image: radial-gradient(rgba(168, 111, 7, 0.13) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .bg-ledger-grid {
+    background-image:
+      linear-gradient(to right, rgba(168, 111, 7, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(168, 111, 7, 0.05) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+  .bg-board-lines {
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 39px, rgba(255, 255, 255, 0.03) 39px, rgba(255, 255, 255, 0.03) 40px);
+  }
+  .bg-scribbles {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='360' viewBox='0 0 420 360'%3E%3Cg fill='none' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.34'%3E%3Cg transform='translate(28 28) rotate(-8)'%3E%3Crect x='0' y='0' width='40' height='52' rx='4' stroke='%23567BB2'/%3E%3Cline x1='9' y1='0' x2='9' y2='52' stroke='%23C75B4E'/%3E%3Cline x1='14' y1='14' x2='33' y2='14' stroke='%238C826E'/%3E%3Cline x1='14' y1='24' x2='31' y2='24' stroke='%238C826E'/%3E%3Cpath d='M15 37 Q22 33 30 37' stroke='%233B8059'/%3E%3C/g%3E%3Cg transform='translate(245 36) rotate(26)'%3E%3Crect x='0' y='0' width='9' height='38' rx='2' stroke='%23C98A1A'/%3E%3Cpolygon points='0,38 9,38 4.5,47' stroke='%23C98A1A'/%3E%3Cline x1='0' y1='9' x2='9' y2='9' stroke='%23C98A1A'/%3E%3C/g%3E%3Cg transform='translate(335 205) rotate(7)'%3E%3Cpath d='M0 0 H36 V44 L30 39 L24 44 L18 39 L12 44 L6 39 L0 44 Z' stroke='%233B8059'/%3E%3Cline x1='7' y1='12' x2='28' y2='12' stroke='%238C826E'/%3E%3Cline x1='7' y1='21' x2='24' y2='21' stroke='%238C826E'/%3E%3C/g%3E%3Cg transform='translate(115 245) rotate(-11)'%3E%3Ccircle cx='15' cy='15' r='13' stroke='%23C75B4E'/%3E%3Cpath d='M10 10 H19 M10 15 H18 M10 10 V22 M13 15 L19 22' stroke='%23C75B4E'/%3E%3C/g%3E%3Cpath d='M185 162 Q200 154 215 162 T245 162' stroke='%23567BB2'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 420px 360px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

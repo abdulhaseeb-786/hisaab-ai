@@ -29,9 +29,9 @@ function SupplierCard({ s, selected, onSelect }: { s: SupplierOverview; selected
   const { pick, language } = useLanguage();
   const ui = useUi();
   return (
-    <li className={cn('bg-card rounded-2xl border-2 shadow-card p-4 space-y-3', selected ? 'border-sabz' : 'border-line')}>
+    <li className={cn('bg-card rounded-2xl border-2 shadow-card p-4 space-y-3', selected ? 'border-neela-600 bg-neela-50/30' : 'border-line')}>
       <div className="flex items-start gap-3">
-        <span className={cn('w-11 h-11 rounded-full flex items-center justify-center shrink-0', s.visits_today ? 'bg-haldi-tint text-haldi-dark' : 'bg-ink/5 text-ink-muted')}>
+        <span className={cn('w-11 h-11 rounded-full flex items-center justify-center shrink-0', s.visits_today ? 'bg-haldi-100 text-haldi-800' : 'bg-neela-100 text-neela-700')}>
           <Truck className="w-6 h-6" />
         </span>
         <div className="min-w-0 flex-1">
@@ -43,14 +43,14 @@ function SupplierCard({ s, selected, onSelect }: { s: SupplierOverview; selected
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <div className="p-2.5 rounded-xl bg-paper">
+        <div className="p-2.5 rounded-xl bg-haldi-50 border border-haldi-100">
           <p className="text-ink-muted">{pick('You owe them', 'Un ke dene hain')}</p>
           <p className="font-extrabold text-base tabular">{formatPKR(s.total_payable_pkr)}</p>
-          {s.overdue_pkr > 0 && <p className="text-lal-dark font-bold">{pick(`${formatPKR(s.overdue_pkr)} late`, `${formatPKR(s.overdue_pkr)} late`)}</p>}
+          {s.overdue_pkr > 0 && <p className="text-lal-600 font-bold">{pick(`${formatPKR(s.overdue_pkr)} late`, `${formatPKR(s.overdue_pkr)} late`)}</p>}
         </div>
-        <div className="p-2.5 rounded-xl bg-paper">
+        <div className="p-2.5 rounded-xl bg-sabz-50 border border-sabz-100">
           <p className="text-ink-muted">{pick('Safe to order', 'Mehfooz order')}</p>
-          <p className="font-extrabold text-base tabular text-sabz-dark">{formatPKR(s.suggested_budget_pkr)}</p>
+          <p className="font-extrabold text-base tabular text-sabz-700">{formatPKR(s.suggested_budget_pkr)}</p>
           {s.pending_orders_count > 0 && <p className="text-ink-muted">{pick(`${s.pending_orders_count} on the way`, `${s.pending_orders_count} raste mein`)}</p>}
         </div>
       </div>
@@ -277,7 +277,7 @@ function OnTheWay() {
   const shown = all ? sorted : sorted.slice(0, 3);
   return (
     <Section title={pick(`On the way (${sorted.length})`, `Raste mein (${sorted.length})`)} hint={pick('Tap "Maal aaya" when the delivery comes', 'Maal aaye to "Maal aaya" dabayein')}>
-      <ul className="bg-card rounded-2xl border border-line shadow-card divide-y divide-line">
+      <ul className="bg-neela-50/50 rounded-2xl border-2 border-neela-200 shadow-card divide-y divide-neela-100">
         {shown.map((o) => (
           <li key={o.purchase_id} className="p-4 flex flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1 basis-48">

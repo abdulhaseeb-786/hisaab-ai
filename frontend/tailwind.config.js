@@ -1,18 +1,48 @@
 /** @type {import('tailwindcss').Config} */
 // HisaabAI design tokens. Light, high-contrast, built for a bright shop and tired eyes.
+//
+// Five colour families, each a full scale (50 lightest ... 950 darkest), taken from the shop:
+//   sabz   the painted signboard green   the shop, actions, "Aaj"
+//   haldi  turmeric                       money: cash box, wasooli, "Hisaab"
+//   lal    the red khata register cloth   credit and urgency: "Khata", late money
+//   neela  register ruling ink            goods and records: "Order", "Stock", tomorrow
+//   ink    ledger paper to ink            neutrals: page, lines, text
+// The old names (sabz.dark, lal.tint, ink.muted, ...) stay as aliases onto the scales.
+
+const sabz = {
+  50: '#EEF7F1', 100: '#D7EDDF', 200: '#B2DBC1', 300: '#82C29C', 400: '#4FA374', 500: '#1F8553',
+  600: '#0E6B3F', 700: '#0A5532', 800: '#084227', 900: '#06301D', 950: '#031C11',
+};
+const haldi = {
+  50: '#FEF8EC', 100: '#FCEDCC', 200: '#F9DB99', 300: '#F4C35F', 400: '#E8A317', 500: '#CC8A0C',
+  600: '#A86F07', 700: '#865606', 800: '#654107', 900: '#4A3008', 950: '#2B1B03',
+};
+const lal = {
+  50: '#FDF1EF', 100: '#FADDD9', 200: '#F4B9B1', 300: '#EA8B7F', 400: '#DC5F51', 500: '#C0392B',
+  600: '#A02E22', 700: '#84261C', 800: '#681E17', 900: '#4E1712', 950: '#2E0C09',
+};
+const neela = {
+  50: '#EFF4FB', 100: '#DCE6F6', 200: '#B9CDEC', 300: '#8DADDF', 400: '#5E88CC', 500: '#3C6BB9',
+  600: '#2A5BA8', 700: '#22488A', 800: '#1D3A6E', 900: '#182F57', 950: '#0E1B34',
+};
+const ink = {
+  50: '#FAF5EC', 100: '#F2EBD9', 200: '#E4DAC6', 300: '#CFC3AB', 400: '#A19887', 500: '#7A7265',
+  600: '#595349', 700: '#413D35', 800: '#2E2B25', 900: '#1B1915', 950: '#0F0E0B',
+};
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        paper: '#F6F7F3', // page background: register-paper white
+        paper: ink[50], // page background: register-paper white
         card: '#FFFFFF',
-        ink: { DEFAULT: '#17201B', soft: '#2F3A33', muted: '#56605A', faint: '#7C867F' },
-        line: { DEFAULT: '#DCE1D9', strong: '#C4CCC1' },
-        sabz: { DEFAULT: '#0E6B3F', dark: '#0A4F2E', tint: '#E4F1E8', mid: '#BFDDC9' },
-        haldi: { DEFAULT: '#E8A317', dark: '#9A5B00', tint: '#FDF3DC' },
-        lal: { DEFAULT: '#C0392B', dark: '#962D22', tint: '#FCE9E7' },
-        neela: { DEFAULT: '#2A5BA8', tint: '#E6EEF9' }, // register ruling blue
+        ink: { ...ink, DEFAULT: ink[900], soft: ink[800], muted: ink[600], faint: ink[500] },
+        line: { DEFAULT: ink[200], strong: ink[300] },
+        sabz: { ...sabz, DEFAULT: sabz[600], dark: sabz[800], tint: sabz[50], mid: sabz[200] },
+        haldi: { ...haldi, DEFAULT: haldi[400], dark: haldi[700], tint: haldi[50] },
+        lal: { ...lal, DEFAULT: lal[500], dark: lal[600], tint: lal[50] },
+        neela: { ...neela, DEFAULT: neela[600], dark: neela[800], tint: neela[50] },
       },
       fontFamily: {
         sans: ['"Atkinson Hyperlegible Next"', '"Atkinson Hyperlegible"', 'system-ui', 'sans-serif'],
@@ -35,6 +65,8 @@ export default {
         card: '0 1px 0 rgba(23,32,27,0.04), 0 1px 3px rgba(23,32,27,0.06)',
         lift: '0 8px 28px -8px rgba(23,32,27,0.18)',
         slip: '0 1px 0 rgba(23,32,27,0.05), 0 10px 30px -12px rgba(14,107,63,0.25)',
+        // The register lying on the signboard: a deep, green-tinted shadow.
+        board: '0 30px 60px -24px rgba(3,28,17,0.65), 0 12px 24px -12px rgba(3,28,17,0.5)',
       },
       keyframes: {
         'pulse-ring': { '0%': { boxShadow: '0 0 0 0 rgba(232,163,23,0.55)' }, '100%': { boxShadow: '0 0 0 14px rgba(232,163,23,0)' } },

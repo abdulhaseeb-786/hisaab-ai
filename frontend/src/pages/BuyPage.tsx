@@ -129,20 +129,20 @@ function Plan({ plan, stale, onSave, saving }: { plan: ReorderPlan; stale: boole
 
   return (
     <div className={cn('space-y-6 transition-opacity', stale && 'opacity-60')}>
-      <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
+      <div className="bg-card rounded-2xl border-2 border-neela-200 shadow-card p-5 space-y-4">
         <p className="text-xl font-extrabold leading-snug">
           {pick(
             `${plan.total_skus_recommended} items for `,
             `${plan.total_skus_recommended} cheezein, `,
           )}
-          <Money value={plan.total_allocated_spend_pkr} className="tabular" />
+          <Money value={plan.total_allocated_spend_pkr} className="tabular text-sabz-700" />
           {pick('.', ' mein.')}{' '}
           <span className="text-ink-muted font-bold">
             {pick(`${formatPKR(plan.remaining_unallocated_pkr)} stays with you.`, `${formatPKR(plan.remaining_unallocated_pkr)} bachein ge.`)}
           </span>
         </p>
-        <div className="h-3 rounded-full bg-ink/[0.07] overflow-hidden" role="progressbar" aria-valuenow={Math.round(plan.budget_used_pct)} aria-valuemin={0} aria-valuemax={100} aria-label={pick('Budget used', 'Budget istemal')}>
-          <motion.div className="h-full bg-sabz rounded-full" initial={false} animate={{ width: `${Math.min(100, plan.budget_used_pct)}%` }} transition={{ duration: 0.5 }} />
+        <div className="h-3 rounded-full bg-neela-100 overflow-hidden" role="progressbar" aria-valuenow={Math.round(plan.budget_used_pct)} aria-valuemin={0} aria-valuemax={100} aria-label={pick('Budget used', 'Budget istemal')}>
+          <motion.div className="h-full bg-sabz-600 rounded-full" initial={false} animate={{ width: `${Math.min(100, plan.budget_used_pct)}%` }} transition={{ duration: 0.5 }} />
         </div>
         <ul className="text-base text-ink-soft space-y-1">
           <li>
@@ -301,11 +301,11 @@ export function BudgetPlanner() {
         {pick('Going to the market yourself? Type your budget: a list in whole cartons for the whole shop, most urgent first, never over budget.', 'Khud market ja rahe hain? Budget likhein: poori dukaan ki list poore carton mein, zaroori maal pehle, budget se zyada kabhi nahi.')}
       </p>
 
-      <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
+      <div className="bg-card rounded-2xl border-2 border-neela-200 shadow-card p-5 space-y-4">
         <label htmlFor="budget" className="block text-lg font-bold">
           {pick('How much can you spend today?', 'Aaj kitna kharch kar sakte hain?')}
         </label>
-        <div className={cn('flex items-center rounded-2xl border-2 bg-paper px-4 focus-within:border-sabz', valid ? 'border-line-strong' : 'border-lal')}>
+        <div className={cn('flex items-center rounded-2xl border-2 bg-paper px-4 focus-within:border-neela-600', valid ? 'border-line-strong' : 'border-lal-500')}>
           <span className="text-2xl font-extrabold text-ink-muted">Rs</span>
           <input
             id="budget"
@@ -327,7 +327,7 @@ export function BudgetPlanner() {
               key={p}
               onClick={() => setInput(String(p))}
               aria-pressed={amount === p}
-              className={cn('min-h-[44px] px-4 rounded-xl font-bold border-2 tabular', amount === p ? 'bg-sabz-tint border-sabz text-sabz-dark' : 'bg-card border-line text-ink-soft hover:border-ink-muted')}
+              className={cn('min-h-[44px] px-4 rounded-xl font-bold border-2 tabular', amount === p ? 'bg-neela-50 border-neela-600 text-neela-800' : 'bg-card border-line text-ink-soft hover:border-ink-muted')}
             >
               {p === 100_000 ? pick('Rs 1 lakh', 'Rs 1 lakh') : formatPKR(p)}
             </button>
