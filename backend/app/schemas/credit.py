@@ -58,6 +58,15 @@ class CreditSummaryResponse(DataLabelled):
     customers: list[CustomerKhataItem]
 
 
+class ItemLine(BaseModel):
+    product_id: int
+    name: str
+    unit: str
+    qty: float
+    unit_price: float
+    line_total: float
+
+
 class LedgerLine(BaseModel):
     entry_id: int
     timestamp: datetime
@@ -65,6 +74,9 @@ class LedgerLine(BaseModel):
     amount_pkr: float
     due_date: Optional[datetime]
     description: Optional[str]
+    method: Optional[Literal["cash", "easypaisa", "jazzcash", "bank"]] = Field(
+        default=None, description="How a repayment was made. Empty for udhaar.")
+    items: list[ItemLine] = Field(default_factory=list, description="What was bought on this udhaar, when known.")
     running_balance_pkr: float
 
 
@@ -78,19 +90,100 @@ class CustomerLedgerResponse(DataLabelled):
     total_entries: int
 
 
+PaymentMethod = Literal["cash", "easypaisa", "jazzcash", "bank"]
+
+
+class MessageDraft(BaseModel):
+    """A message the shopkeeper can read out, show, or copy. HisaabAI never sends it."""
+    roman_urdu: str
+    english: str
+
+
 class PaymentRecordRequest(BaseModel):
     customer_id: int
     amount: float = Field(gt=0, le=10_000_000)
-    notes: str = Field(default="Counter wasooli", max_length=200)
+    method: PaymentMethod = "cash"
+    notes: Optional[str] = Field(default=None, max_length=200)
 
 
 class PaymentRecordResponse(BaseModel):
     customer_id: int
     name: str
     amount_received: float
+    method: PaymentMethod
     previous_balance: float
     new_balance: float
     message: str
+    receipt: MessageDraft
+
+
+class CustomerItem(BaseModel):
+    customer_id: int
+    name: str
+    phone: Optional[str]
+    credit_limit_pkr: float
+    balance_pkr: float
+    overdue_pkr: float
+    safe_mark_score: float
+    risk_level: Literal["low", "medium", "high"]
+    last_activity: Optional[datetime]
+
+
+class CustomerCreateRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    phone: Optional[str] = Field(default=None, max_length=30)
+    credit_limit: float = Field(default=5000, ge=0, le=10_000_000)
+
+
+class Bilingual(BaseModel):
+    en: str
+    ur: str
+
+
+class CreditCheckRequest(BaseModel):
+    customer_id: int
+    amount: float = Field(ge=0, le=10_000_000)
+
+
+class CreditCheckResponse(BaseModel):
+    customer_id: int
+    name: str
+    amount_pkr: float
+    decision: Literal["yes", "careful", "no"]
+    balance_pkr: float
+    balance_after_pkr: float
+    overdue_pkr: float
+    days_overdue: int
+    credit_limit_pkr: float
+    safe_mark_score: float
+    safe_amount_pkr: float = Field(description="How much more credit fits in the limit. 0 if a bill is over 30 days late.")
+    reasons: list[Bilingual]
+
+
+class UdhaarItemIn(BaseModel):
+    product_id: int
+    qty: float = Field(gt=0, le=10_000)
+
+
+class UdhaarRequest(BaseModel):
+    customer_id: int
+    items: list[UdhaarItemIn] = Field(default_factory=list, max_length=50)
+    extra_amount: float = Field(default=0, ge=0, le=10_000_000, description="Money or items not in the catalogue.")
+    note: Optional[str] = Field(default=None, max_length=120)
+
+
+class UdhaarResponse(BaseModel):
+    entry_id: int
+    customer_id: int
+    name: str
+    timestamp: datetime
+    items: list[ItemLine]
+    extra_amount_pkr: float
+    note: Optional[str]
+    total_pkr: float
+    due_date: datetime
+    balance_pkr: float
+    receipt: MessageDraft
 
 
 class OpenInvoice(BaseModel):
@@ -137,6 +230,7 @@ class CashPosition(BaseModel):
     wasooli_pkr: float
     supplier_payments_pkr: float
     expenses_pkr: float
+    galla_differences_pkr: float
     cash_in_hand_pkr: float
 
 

@@ -8,6 +8,12 @@ import ComboSheet from '@/components/ComboSheet';
 import { Logo } from '@/components/Logo';
 import ProductSheet from '@/components/ProductSheet';
 import CustomerSheet from '@/components/CustomerSheet';
+import DaySheet from '@/components/day/DaySheet';
+import ExpenseSheet from '@/components/day/ExpenseSheet';
+import UdhaarSheet from '@/components/khata/UdhaarSheet';
+import WasooliSheet from '@/components/khata/WasooliSheet';
+import PaySupplierSheet from '@/components/orders/PaySupplierSheet';
+import ReceiveSheet from '@/components/orders/ReceiveSheet';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { cn } from '@/lib/format';
 import { useOnboarding } from '@/onboarding/OnboardingContext';
@@ -45,7 +51,7 @@ function Sidebar() {
   const [menu, setMenu] = useState(false);
 
   return (
-    <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-line bg-card px-4 py-5">
+    <aside className="print:hidden hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-line bg-card px-4 py-5">
       <Logo className="px-2" />
       <p className="px-2 mt-4 text-sm text-ink-muted leading-snug">
         {store.data?.name}
@@ -107,7 +113,7 @@ function MobileTopBar() {
   const store = useStore();
   const [menu, setMenu] = useState(false);
   return (
-    <header className="lg:hidden sticky top-0 z-30 bg-paper/95 backdrop-blur border-b border-line">
+    <header className="print:hidden lg:hidden sticky top-0 z-30 bg-paper/95 backdrop-blur border-b border-line">
       <div className="flex items-center gap-2 px-4 h-16">
         <Logo compact />
         <div className="min-w-0 flex-1 leading-tight">
@@ -133,7 +139,7 @@ function BottomNav() {
   return (
     <nav
       aria-label={pick('Main', 'Main')}
-      className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-card border-t border-line pb-[env(safe-area-inset-bottom)]"
+      className="print:hidden lg:hidden fixed bottom-0 inset-x-0 z-30 bg-card border-t border-line pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="grid grid-cols-5">
         {PRIMARY_NAV.map((item) => (
@@ -174,7 +180,7 @@ function AskButton() {
     <button
       data-tour="ask"
       onClick={() => ui.openCopilot()}
-      className="lg:hidden fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-ink text-white font-bold shadow-lift"
+      className="print:hidden lg:hidden fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-ink text-white font-bold shadow-lift"
     >
       <MessageCircleQuestion className="w-6 h-6" />
       {pick('Ask', 'Poochein')}
@@ -191,8 +197,8 @@ export function AppShell() {
       </a>
       <Sidebar />
       <MobileTopBar />
-      <main id="main" className="lg:pl-64">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 pt-5 pb-40 lg:py-10">
+      <main id="main" className="lg:pl-64 print:pl-0">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 pt-5 pb-40 lg:py-10 print:p-0 print:max-w-none">
           <Outlet />
         </div>
       </main>
@@ -204,6 +210,12 @@ export function AppShell() {
       <ComboSheet productId={ui.comboProductId} onClose={ui.closeCombo} />
       <CopilotSheet open={ui.copilot.open} initialPrompt={ui.copilot.prompt} onClose={ui.closeCopilot} />
       <CsvSheet open={ui.csvOpen} onClose={ui.closeCsv} />
+      <DaySheet />
+      <ExpenseSheet />
+      <UdhaarSheet />
+      <WasooliSheet />
+      <ReceiveSheet />
+      <PaySupplierSheet />
     </div>
   );
 }

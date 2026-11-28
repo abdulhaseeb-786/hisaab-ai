@@ -5,15 +5,35 @@ stock, khata (customer credit) and supplier bills, and answers one question ever
 morning: **what should I do today, and why?** Built for Capital Youth Expo 2026,
 Track 3: FinTech & Financial Inclusion.
 
-* **Today's 3 actions:** the most urgent stock, price and khata problems, each with the
-  numbers behind it and one next step.
-* **"I have PKR 50,000. What should I buy?"** A plan in whole cartons, most urgent first,
-  that never goes over budget and explains every line.
-* **Margin squeeze:** spots supplier price rises that were never passed on to the shelf.
-* **Khata:** who owes what, how late, and a Safe Mark score that lists its reasons.
-* **Cash for the next 7 days:** from today's real cash, with every assumption shown.
-* **Copilot in Roman Urdu and English:** answers only from the shop's own records
-  through read-only tools, and works offline when no LLM is available.
+It follows the shopkeeper's real day:
+
+* **Open the shop:** count the galla (cash drawer). Any difference from the records is
+  written down, so every cash number afterwards is real.
+* **At the counter:** `+ Udhaar` records who took what: the items, prices and due date
+  come out of stock and onto that customer's khata. Before saving, **"Udhaar dun?"**
+  answers yes / careful / no with the reasons. `+ Wasooli` records repayments and how
+  they came (cash, Easypaisa, JazzCash, bank); only cash goes into the galla.
+* **When the order booker visits:** HisaabAI shows the distributors due today, what the
+  shop owes them, and **how much it can safely order**: the lowest cash expected in the
+  week after that bill falls due. It suggests the order in whole cartons, most urgent
+  first, with reasons.
+* **When the delivery comes (Maal aaya):** check it against the bill. Short items and
+  changed rates are flagged with the new margin and a one-tap price fix; the bill is
+  added to what the shop owes.
+* **Ginti (stock count):** count a shelf; stock is corrected, and the shortfall is booked
+  as loss or as sales nobody wrote down, so even a shop without billing gets its numbers.
+* **Close the day:** count the galla again and see the whole day in register lines, then
+  tomorrow's bills, booker visits and the customers to remind.
+* **Business report for a loan:** six months of sales, profit after running costs, khata,
+  supplier bills and record keeping, ready to print for a bank or microfinance officer.
+
+Also: **Today's 3 jobs** (the most urgent stock, price and khata problems), margin-squeeze
+alerts, a Safe Mark score for every customer, a 7-day cash outlook, and a **copilot in
+Roman Urdu and English** that answers only from the shop's own records and works offline.
+
+**No messages are sent.** Receipts, reminders and orders are drafts shown on screen, to
+show the customer, read out, or copy. There is no WhatsApp or SMS integration, so no
+customer number ever leaves the shop.
 
 Every number is computed by deterministic code. The LLM only explains results; it can
 never invent a number (answers that contain numbers without a tool call are discarded).
@@ -63,7 +83,9 @@ The demo is a **simulated** store, "Al-Madina General Store", with 120 real Paki
 grocery products, 15 khata customers and 8 distributors, generated from a fixed seed
 (42). It covers the 12 months up to today: weekday and salary-week patterns, Ramadan,
 Chaand Raat and both Eids (real 2025–2026 dates), distributor route days and lead times,
-customers with different payment habits, and the shop's own cash expenses. A few demo
+customers with different payment habits (cash and mobile wallets), itemised udhaar, the
+last 30 days of galla counts (a few nights short or over), and the shop's own cash
+expenses. A few demo
 moments are recorded as ordinary events: a stock count that leaves Dalda oil short,
 two supplier price rises not passed on, a slow-selling floor cleaner, and a customer who
 stopped paying. Customer names and phone numbers are fictional.
@@ -76,7 +98,9 @@ retail sales (see `docs/forecast_benchmark.md`).
 
 * `backend/app/analytics/`: inventory risk, margin squeeze, dead stock, khata aging,
   payables, cash book, cash outlook, KPIs and Today's actions. Each module states its rules.
-* `backend/app/reorder/budget_optimizer.py`: the budget planner (hero flow).
+* `backend/app/services/`: the workflows that write records: day open/close and kharcha,
+  khata entry and the credit check, orders and deliveries, ginti, the business report.
+* `backend/app/reorder/budget_optimizer.py`: the budget planner, also used per distributor.
 * `backend/app/forecasting/`: calendar-aware smoothing and two baselines, chosen by backtest.
 * `backend/app/copilot/`: allow-listed tools, Gemini/Groq function calling, offline engine.
 * `backend/app/simulator/`: the demo store generator.

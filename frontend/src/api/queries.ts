@@ -6,7 +6,7 @@
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, unwrap } from './client';
-import type { ChatLanguage, ImportType, KpiPeriod } from './types';
+import type { ChatLanguage, ExpenseCategory, ImportType, KpiPeriod, PaymentMethod } from './types';
 
 export const queryKeys = {
   store: ['store'] as const,
@@ -21,12 +21,24 @@ export const queryKeys = {
   customer: (id: number) => ['customer', id] as const,
   payables: ['payables'] as const,
   cashOutlook: ['cash-outlook'] as const,
+  day: ['day'] as const,
+  dayHistory: ['day-history'] as const,
+  customers: (search: string) => ['customers', search] as const,
+  creditCheck: (id: number, amount: number) => ['credit-check', id, amount] as const,
+  suppliers: ['suppliers'] as const,
+  orderSuggest: (supplierId: number, budget: number) => ['order-suggest', supplierId, budget] as const,
+  orders: (status: string) => ['orders', status] as const,
+  countSheet: (category: string) => ['count-sheet', category] as const,
+  countHistory: ['count-history'] as const,
+  report: ['report'] as const,
 };
 
 /** Data that depends on stock, prices, sales, khata or cash. */
 const STORE_DATA_KEYS = [
   ['actions'], ['dashboard'], ['products'], ['product'], ['forecast'], ['reorder'],
   ['insights'], ['credit'], ['customer'], ['payables'], ['cash-outlook'],
+  ['day'], ['day-history'], ['customers'], ['credit-check'], ['suppliers'], ['order-suggest'], ['orders'],
+  ['count-sheet'], ['count-history'], ['report'],
 ] as const;
 
 function useInvalidateStoreData() {
@@ -180,14 +192,177 @@ export function useAdjustStock() {
 export function useRecordPayment() {
   const invalidate = useInvalidateStoreData();
   return useMutation({
-    mutationFn: (v: { customerId: number; amount: number; notes?: string }) =>
+    mutationFn: (v: { customerId: number; amount: number; method: PaymentMethod; notes?: string }) =>
       unwrap(
         api.POST('/api/credit/payment', {
-          body: { customer_id: v.customerId, amount: v.amount, notes: v.notes ?? 'Counter wasooli' },
+          body: { customer_id: v.customerId, amount: v.amount, method: v.method, notes: v.notes ?? null },
         }),
       ),
     onSuccess: invalidate,
   });
+}
+
+// ---- daily workflows -------------------------------------------------------------------
+
+export function useDayToday() {
+  return useQuery({ queryKey: queryKeys.day, queryFn: () => unwrap(api.GET('/api/day/today')), refetchInterval: 60_000 });
+}
+
+export function useDayHistory(days = 14) {
+  return useQuery({
+    queryKey: queryKeys.dayHistory,
+    queryFn: () => unwrap(api.GET('/api/day/history', { params: { query: { days } } })),
+  });
+}
+
+export function useOpenDay() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { counted: number; note?: string }) =>
+      unwrap(api.POST('/api/day/open', { body: { counted_cash: v.counted, note: v.note ?? null } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCloseDay() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { counted: number; note?: string }) =>
+      unwrap(api.POST('/api/day/close', { body: { counted_cash: v.counted, note: v.note ?? null } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useAddExpense() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { category: ExpenseCategory; amount: number; note?: string }) =>
+      unwrap(api.POST('/api/expenses', { body: { category: v.category, amount: v.amount, note: v.note || null } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCustomers(search = '') {
+  return useQuery({
+    queryKey: queryKeys.customers(search),
+    queryFn: () => unwrap(api.GET('/api/credit/customers', { params: { query: { search: search || undefined } } })),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useCreateCustomer() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { name: string; phone?: string; creditLimit: number }) =>
+      unwrap(api.POST('/api/credit/customers', { body: { name: v.name, phone: v.phone || null, credit_limit: v.creditLimit } })),
+    onSuccess: invalidate,
+  });
+}
+
+/** "Udhaar dun?" Read-only, so it is safe to re-run as the amount changes. */
+export function useCreditCheck(customerId: number | null, amount: number) {
+  return useQuery({
+    queryKey: queryKeys.creditCheck(customerId ?? 0, amount),
+    queryFn: () => unwrap(api.POST('/api/credit/check', { body: { customer_id: customerId!, amount } })),
+    enabled: customerId !== null,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useGiveUdhaar() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { customerId: number; items: { product_id: number; qty: number }[]; extra: number; note?: string }) =>
+      unwrap(
+        api.POST('/api/credit/udhaar', {
+          body: { customer_id: v.customerId, items: v.items, extra_amount: v.extra, note: v.note || null },
+        }),
+      ),
+    onSuccess: invalidate,
+  });
+}
+
+export function useSuppliers() {
+  return useQuery({ queryKey: queryKeys.suppliers, queryFn: () => unwrap(api.GET('/api/orders/suppliers')) });
+}
+
+export function useOrderSuggestion(supplierId: number | null, budget: number) {
+  return useQuery({
+    queryKey: queryKeys.orderSuggest(supplierId ?? 0, budget),
+    queryFn: () => unwrap(api.POST('/api/orders/suggest', { body: { supplier_id: supplierId!, budget_pkr: budget } })),
+    enabled: supplierId !== null && budget > 0,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useCreateOrder() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { supplierId: number; lines: { product_id: number; packs: number }[] }) =>
+      unwrap(api.POST('/api/orders', { body: { supplier_id: v.supplierId, lines: v.lines } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useOrders(status: 'pending' | 'received' = 'pending') {
+  return useQuery({
+    queryKey: queryKeys.orders(status),
+    queryFn: () => unwrap(api.GET('/api/orders', { params: { query: { status } } })),
+  });
+}
+
+export function useReceiveOrder() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: {
+      purchaseId: number;
+      lines: { product_id: number; received_qty: number; unit_cost: number }[];
+      billNumber?: string;
+      payNow: number;
+      method: PaymentMethod;
+    }) =>
+      unwrap(
+        api.POST('/api/orders/{purchase_id}/receive', {
+          params: { path: { purchase_id: v.purchaseId } },
+          body: { lines: v.lines, bill_number: v.billNumber || null, pay_now_pkr: v.payNow, method: v.method },
+        }),
+      ),
+    onSuccess: invalidate,
+  });
+}
+
+export function usePaySupplier() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { supplierId: number; amount: number; method: PaymentMethod }) =>
+      unwrap(api.POST('/api/payables/pay', { body: { supplier_id: v.supplierId, amount: v.amount, method: v.method } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCountSheet(category: string) {
+  return useQuery({
+    queryKey: queryKeys.countSheet(category),
+    queryFn: () => unwrap(api.GET('/api/stock-count/sheet', { params: { query: { category: category || undefined } } })),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useCountHistory() {
+  return useQuery({ queryKey: queryKeys.countHistory, queryFn: () => unwrap(api.GET('/api/stock-count/history')) });
+}
+
+export function useSubmitCount() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { lines: { product_id: number; counted_qty: number }[]; treatShortAs: 'loss' | 'sales'; note?: string }) =>
+      unwrap(api.POST('/api/stock-count', { body: { lines: v.lines, treat_short_as: v.treatShortAs, note: v.note || null } })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useBusinessReport() {
+  return useQuery({ queryKey: queryKeys.report, queryFn: () => unwrap(api.GET('/api/reports/business')) });
 }
 
 export interface ChatTurn {

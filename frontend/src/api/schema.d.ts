@@ -44,6 +44,106 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/day/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Today
+         * @description Is the shop open? What should be in the galla now, and today's figures so far.
+         */
+        get: operations["get_today_api_day_today_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/day/open": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open Day
+         * @description Open the day with the counted galla. A difference from the records is booked.
+         */
+        post: operations["open_day_api_day_open_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/day/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close Day
+         * @description Close the day with the counted galla. Returns the day's summary and what tomorrow holds.
+         */
+        post: operations["close_day_api_day_close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/day/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get History
+         * @description Past days: opening and closing counts, galla differences, and each day's figures.
+         */
+        get: operations["get_history_api_day_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/expenses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Expense
+         * @description Kharcha paid from the galla: rent, bijli, salary, transport, or money taken home or banked.
+         */
+        post: operations["add_expense_api_expenses_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/dashboard": {
         parameters: {
             query?: never;
@@ -224,6 +324,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/credit/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Customers
+         * @description Every khata customer, most recently active first, for the picker at the counter.
+         */
+        get: operations["list_customers_api_credit_customers_get"];
+        put?: never;
+        /**
+         * Add Customer
+         * @description Open a new khata.
+         */
+        post: operations["add_customer_api_credit_customers_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/credit/customers/{customer_id}": {
         parameters: {
             query?: never;
@@ -233,11 +357,54 @@ export interface paths {
         };
         /**
          * Get Customer Ledger
-         * @description One customer's khata page with a running balance.
+         * @description One customer's khata page with a running balance and the items bought on each udhaar.
          */
         get: operations["get_customer_ledger_api_credit_customers__customer_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/credit/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check Credit
+         * @description 'Udhaar dun?' Yes, careful or no for this customer and amount, with the reasons.
+         */
+        post: operations["check_credit_api_credit_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/credit/udhaar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Give Udhaar
+         * @description Write udhaar in the khata: who, which items, at what price, and when it is due.
+         *
+         *     Items are sold from stock at the shelf price and linked to the khata line. Returns a
+         *     receipt draft to show the customer; nothing is sent anywhere.
+         */
+        post: operations["give_udhaar_api_credit_udhaar_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -255,7 +422,9 @@ export interface paths {
         put?: never;
         /**
          * Record Customer Payment
-         * @description Record a repayment (wasooli). It cannot be more than the customer owes.
+         * @description Record a repayment (wasooli) and how it was paid. It cannot be more than the customer owes.
+         *
+         *     Only cash goes into the galla; Easypaisa, JazzCash and bank payments do not.
          */
         post: operations["record_customer_payment_api_credit_payment_post"];
         delete?: never;
@@ -296,6 +465,184 @@ export interface paths {
          * @description Day-by-day cash for the next week from today's real cash in hand, with every assumption listed (CASH-01).
          */
         get: operations["get_cash_outlook_api_payables_cash_outlook_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/suppliers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Suppliers
+         * @description Distributors with their route days, what is owed, and how much the shop can safely order.
+         */
+        get: operations["get_suppliers_api_orders_suppliers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Suggest
+         * @description What to order from this distributor within the budget, in whole packs, with reasons.
+         */
+        post: operations["suggest_api_orders_suggest_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Orders */
+        get: operations["list_orders_api_orders_get"];
+        put?: never;
+        /**
+         * Create
+         * @description Save the order given to the booker. Returns the order text to show on screen; nothing is sent.
+         */
+        post: operations["create_api_orders_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{purchase_id}/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive
+         * @description Maal aaya: stock in at the bill price, a supplier bill created, price changes flagged.
+         */
+        post: operations["receive_api_orders__purchase_id__receive_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payables/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay
+         * @description Pay a distributor. Clears the oldest bills first. Cash payments come out of the galla.
+         */
+        post: operations["pay_api_payables_pay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stock-count/sheet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sheet
+         * @description The counting sheet for one shelf (category): what the records expect on it.
+         */
+        get: operations["sheet_api_stock_count_sheet_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stock-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit
+         * @description Save a count. Stock is set to what was counted; a shortfall is booked as loss or as unrecorded sales.
+         */
+        post: operations["submit_api_stock_count_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stock-count/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["history_api_stock_count_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/business": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Business
+         * @description Six months of sales, profit after costs, credit, supplier bills and record keeping, for a lender.
+         */
+        get: operations["business_api_reports_business_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -507,6 +854,13 @@ export interface components {
             /** Total Overdue Pkr */
             total_overdue_pkr: number;
         };
+        /** Bilingual */
+        Bilingual: {
+            /** En */
+            en: string;
+            /** Ur */
+            ur: string;
+        };
         /** Body_preview_csv_api_import_csv_post */
         Body_preview_csv_api_import_csv_post: {
             /**
@@ -525,6 +879,30 @@ export interface components {
              * @default 1
              */
             store_id?: number;
+        };
+        /** BusinessReportResponse */
+        BusinessReportResponse: {
+            /** Data Label */
+            data_label?: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            store: components["schemas"]["ReportStore"];
+            /** Months */
+            months: components["schemas"]["ReportMonth"][];
+            summary: components["schemas"]["ReportSummary"];
+            position: components["schemas"]["ReportPosition"];
+            credit: components["schemas"]["ReportCredit"];
+            suppliers: components["schemas"]["ReportSuppliers"];
+            record_keeping: components["schemas"]["ReportRecords"];
+            /** Strengths */
+            strengths: string[];
+            /** Cautions */
+            cautions: string[];
+            /** Method Notes */
+            method_notes: string[];
         };
         /** CSVCommitRequest */
         CSVCommitRequest: {
@@ -579,6 +957,13 @@ export interface components {
             event: string;
             /** Multiplier */
             multiplier: number;
+        };
+        /** CashCountRequest */
+        CashCountRequest: {
+            /** Counted Cash */
+            counted_cash: number;
+            /** Note */
+            note?: string | null;
         };
         /** CashDay */
         CashDay: {
@@ -686,8 +1071,17 @@ export interface components {
             supplier_payments_pkr: number;
             /** Expenses Pkr */
             expenses_pkr: number;
+            /** Galla Differences Pkr */
+            galla_differences_pkr: number;
             /** Cash In Hand Pkr */
             cash_in_hand_pkr: number;
+        };
+        /** CategoryCount */
+        CategoryCount: {
+            /** Category */
+            category: string;
+            /** Items */
+            items: number;
         };
         /** ChatMessage */
         ChatMessage: {
@@ -749,6 +1143,180 @@ export interface components {
             /** Offline Available */
             offline_available: boolean;
         };
+        /** CountHistoryItem */
+        CountHistoryItem: {
+            /** Count Id */
+            count_id: number;
+            /**
+             * Timestamp
+             * Format: date-time
+             */
+            timestamp: string;
+            /** Note */
+            note: string | null;
+            /** Items Counted */
+            items_counted: number;
+            /** Items Matched */
+            items_matched: number;
+            /** Short Value At Cost Pkr */
+            short_value_at_cost_pkr: number;
+            /** Extra Value At Cost Pkr */
+            extra_value_at_cost_pkr: number;
+        };
+        /** CountLineIn */
+        CountLineIn: {
+            /** Product Id */
+            product_id: number;
+            /** Counted Qty */
+            counted_qty: number;
+        };
+        /** CountRequest */
+        CountRequest: {
+            /** Lines */
+            lines: components["schemas"]["CountLineIn"][];
+            /**
+             * Treat Short As
+             * @description 'sales' books a shortfall as cash sales not written down.
+             * @default loss
+             * @enum {string}
+             */
+            treat_short_as?: "loss" | "sales";
+            /** Note */
+            note?: string | null;
+        };
+        /** CountResponse */
+        CountResponse: {
+            /** Count Id */
+            count_id: number;
+            /**
+             * Timestamp
+             * Format: date-time
+             */
+            timestamp: string;
+            /**
+             * Treat Short As
+             * @enum {string}
+             */
+            treat_short_as: "loss" | "sales";
+            /** Items Counted */
+            items_counted: number;
+            /** Items Matched */
+            items_matched: number;
+            /** Items Short */
+            items_short: number;
+            /** Items Extra */
+            items_extra: number;
+            /** Short Value At Cost Pkr */
+            short_value_at_cost_pkr: number;
+            /** Short Value At Price Pkr */
+            short_value_at_price_pkr: number;
+            /** Extra Value At Cost Pkr */
+            extra_value_at_cost_pkr: number;
+            /** Inferred Sale Id */
+            inferred_sale_id: number | null;
+            /** Inferred Sales Pkr */
+            inferred_sales_pkr: number;
+            /** Lines */
+            lines: components["schemas"]["CountResultLine"][];
+        };
+        /** CountResultLine */
+        CountResultLine: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Expected Qty */
+            expected_qty: number;
+            /** Counted Qty */
+            counted_qty: number;
+            /** Difference Qty */
+            difference_qty: number;
+            /** Difference Value Pkr */
+            difference_value_pkr: number;
+            /** Last Counted At */
+            last_counted_at: string | null;
+            /** Recorded Sales Since Last Count */
+            recorded_sales_since_last_count: number | null;
+            /**
+             * Sold Since Last Count
+             * @description From the counts: last count + received - this count.
+             */
+            sold_since_last_count: number | null;
+        };
+        /** CountSheetItem */
+        CountSheetItem: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Category */
+            category: string;
+            /** Unit */
+            unit: string;
+            /** Image Url */
+            image_url: string;
+            /** Expected Qty */
+            expected_qty: number;
+            /** Cost Price */
+            cost_price: number;
+            /** Selling Price */
+            selling_price: number;
+            /** Last Counted At */
+            last_counted_at: string | null;
+            /** Last Counted Qty */
+            last_counted_qty: number | null;
+        };
+        /** CountSheetResponse */
+        CountSheetResponse: {
+            /** Categories */
+            categories: components["schemas"]["CategoryCount"][];
+            /** Category */
+            category: string | null;
+            /** Items */
+            items: components["schemas"]["CountSheetItem"][];
+        };
+        /** CreditCheckRequest */
+        CreditCheckRequest: {
+            /** Customer Id */
+            customer_id: number;
+            /** Amount */
+            amount: number;
+        };
+        /** CreditCheckResponse */
+        CreditCheckResponse: {
+            /** Customer Id */
+            customer_id: number;
+            /** Name */
+            name: string;
+            /** Amount Pkr */
+            amount_pkr: number;
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "yes" | "careful" | "no";
+            /** Balance Pkr */
+            balance_pkr: number;
+            /** Balance After Pkr */
+            balance_after_pkr: number;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Days Overdue */
+            days_overdue: number;
+            /** Credit Limit Pkr */
+            credit_limit_pkr: number;
+            /** Safe Mark Score */
+            safe_mark_score: number;
+            /**
+             * Safe Amount Pkr
+             * @description How much more credit fits in the limit. 0 if a bill is over 30 days late.
+             */
+            safe_amount_pkr: number;
+            /** Reasons */
+            reasons: components["schemas"]["Bilingual"][];
+        };
         /** CreditSummaryResponse */
         CreditSummaryResponse: {
             /** Data Label */
@@ -782,6 +1350,42 @@ export interface components {
             overdue_31_60: number;
             /** Overdue 61 Plus */
             overdue_61_plus: number;
+        };
+        /** CustomerCreateRequest */
+        CustomerCreateRequest: {
+            /** Name */
+            name: string;
+            /** Phone */
+            phone?: string | null;
+            /**
+             * Credit Limit
+             * @default 5000
+             */
+            credit_limit?: number;
+        };
+        /** CustomerItem */
+        CustomerItem: {
+            /** Customer Id */
+            customer_id: number;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string | null;
+            /** Credit Limit Pkr */
+            credit_limit_pkr: number;
+            /** Balance Pkr */
+            balance_pkr: number;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Safe Mark Score */
+            safe_mark_score: number;
+            /**
+             * Risk Level
+             * @enum {string}
+             */
+            risk_level: "low" | "medium" | "high";
+            /** Last Activity */
+            last_activity: string | null;
         };
         /** CustomerKhataItem */
         CustomerKhataItem: {
@@ -839,6 +1443,17 @@ export interface components {
             /** Total Entries */
             total_entries: number;
         };
+        /** CustomerReminder */
+        CustomerReminder: {
+            /** Customer Id */
+            customer_id: number;
+            /** Name */
+            name: string;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Days Overdue */
+            days_overdue: number;
+        };
         /** DailyForecastPoint */
         DailyForecastPoint: {
             /**
@@ -863,6 +1478,172 @@ export interface components {
             date: string;
             /** Revenue Pkr */
             revenue_pkr: number;
+        };
+        /** DayCloseResponse */
+        DayCloseResponse: {
+            session: components["schemas"]["DaySessionOut"];
+            /** Difference Pkr */
+            difference_pkr: number;
+            figures: components["schemas"]["DayFigures"];
+            tomorrow: components["schemas"]["TomorrowPlan"];
+        };
+        /** DayFigures */
+        DayFigures: {
+            /**
+             * Bills
+             * @description Number of sales (cash and udhaar).
+             */
+            bills: number;
+            /** Sales Pkr */
+            sales_pkr: number;
+            /** Cash Sales Pkr */
+            cash_sales_pkr: number;
+            /** Udhaar Given Pkr */
+            udhaar_given_pkr: number;
+            /** Wasooli Cash Pkr */
+            wasooli_cash_pkr: number;
+            /**
+             * Wasooli Digital Pkr
+             * @description Easypaisa, JazzCash and bank. Not in the galla.
+             */
+            wasooli_digital_pkr: number;
+            /**
+             * Supplier Payments Pkr
+             * @description Paid to distributors in cash from the galla.
+             */
+            supplier_payments_pkr: number;
+            /**
+             * Expenses Pkr
+             * @description Running costs: rent, bijli, salaries, transport, general.
+             */
+            expenses_pkr: number;
+            /**
+             * Withdrawals Pkr
+             * @description Money taken home or deposited in the bank. Not a cost.
+             */
+            withdrawals_pkr: number;
+            /**
+             * Gross Profit Pkr
+             * @description Sales minus the cost of the items sold.
+             */
+            gross_profit_pkr: number;
+        };
+        /** DayHistoryItem */
+        DayHistoryItem: {
+            /** Session Id */
+            session_id: number;
+            /**
+             * Business Date
+             * Format: date
+             */
+            business_date: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Opening Expected Pkr */
+            opening_expected_pkr: number;
+            /** Opening Counted Pkr */
+            opening_counted_pkr: number;
+            /** Closed At */
+            closed_at: string | null;
+            /** Closing Expected Pkr */
+            closing_expected_pkr: number | null;
+            /** Closing Counted Pkr */
+            closing_counted_pkr: number | null;
+            /** Closing Difference Pkr */
+            closing_difference_pkr: number | null;
+            /** Note */
+            note: string | null;
+            figures: components["schemas"]["DayFigures"];
+        };
+        /** DayOpenResponse */
+        DayOpenResponse: {
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "not_opened" | "open" | "closed";
+            /**
+             * Business Date
+             * Format: date
+             */
+            business_date: string;
+            /**
+             * Now
+             * Format: date-time
+             */
+            now: string;
+            session: components["schemas"]["DaySessionOut"] | null;
+            /** Cash In Drawer Expected Pkr */
+            cash_in_drawer_expected_pkr: number;
+            today: components["schemas"]["DayFigures"];
+            /**
+             * Since Open Start
+             * Format: date-time
+             */
+            since_open_start: string;
+            yesterday: components["schemas"]["DaySessionOut"] | null;
+            /** Difference Pkr */
+            difference_pkr: number;
+        };
+        /** DaySessionOut */
+        DaySessionOut: {
+            /** Session Id */
+            session_id: number;
+            /**
+             * Business Date
+             * Format: date
+             */
+            business_date: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Opening Expected Pkr */
+            opening_expected_pkr: number;
+            /** Opening Counted Pkr */
+            opening_counted_pkr: number;
+            /** Closed At */
+            closed_at: string | null;
+            /** Closing Expected Pkr */
+            closing_expected_pkr: number | null;
+            /** Closing Counted Pkr */
+            closing_counted_pkr: number | null;
+            /** Closing Difference Pkr */
+            closing_difference_pkr: number | null;
+            /** Note */
+            note: string | null;
+        };
+        /** DayStatusResponse */
+        DayStatusResponse: {
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "not_opened" | "open" | "closed";
+            /**
+             * Business Date
+             * Format: date
+             */
+            business_date: string;
+            /**
+             * Now
+             * Format: date-time
+             */
+            now: string;
+            session: components["schemas"]["DaySessionOut"] | null;
+            /** Cash In Drawer Expected Pkr */
+            cash_in_drawer_expected_pkr: number;
+            today: components["schemas"]["DayFigures"];
+            /**
+             * Since Open Start
+             * Format: date-time
+             */
+            since_open_start: string;
+            yesterday: components["schemas"]["DaySessionOut"] | null;
         };
         /** DeadStockItem */
         DeadStockItem: {
@@ -927,6 +1708,39 @@ export interface components {
             purchases: number;
             /** Seconds */
             seconds: number;
+        };
+        /** ExpenseRequest */
+        ExpenseRequest: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "rent" | "electricity" | "salaries" | "transport" | "general" | "owner_drawings" | "bank_deposit";
+            /** Amount */
+            amount: number;
+            /** Note */
+            note?: string | null;
+        };
+        /** ExpenseResponse */
+        ExpenseResponse: {
+            /** Expense Id */
+            expense_id: number;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "rent" | "electricity" | "salaries" | "transport" | "general" | "owner_drawings" | "bank_deposit";
+            /** Amount Pkr */
+            amount_pkr: number;
+            /** Note */
+            note: string | null;
+            /** Cash In Drawer Pkr */
+            cash_in_drawer_pkr: number;
+            /**
+             * Method
+             * @constant
+             */
+            method: "cash";
         };
         /** ExpenseRule */
         ExpenseRule: {
@@ -1052,6 +1866,21 @@ export interface components {
             /** Margin Profit At Risk Pkr */
             margin_profit_at_risk_pkr: number;
         };
+        /** ItemLine */
+        ItemLine: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Qty */
+            qty: number;
+            /** Unit Price */
+            unit_price: number;
+            /** Line Total */
+            line_total: number;
+        };
         /** KPISummary */
         KPISummary: {
             /** Data Label */
@@ -1142,6 +1971,16 @@ export interface components {
             due_date: string | null;
             /** Description */
             description: string | null;
+            /**
+             * Method
+             * @description How a repayment was made. Empty for udhaar.
+             */
+            method?: ("cash" | "easypaisa" | "jazzcash" | "bank") | null;
+            /**
+             * Items
+             * @description What was bought on this udhaar, when known.
+             */
+            items?: components["schemas"]["ItemLine"][];
             /** Running Balance Pkr */
             running_balance_pkr: number;
         };
@@ -1193,6 +2032,16 @@ export interface components {
             /** Recommended Action */
             recommended_action: string;
         };
+        /**
+         * MessageDraft
+         * @description A message the shopkeeper can read out, show, or copy. HisaabAI never sends it.
+         */
+        MessageDraft: {
+            /** Roman Urdu */
+            roman_urdu: string;
+            /** English */
+            english: string;
+        };
         /** ModelScore */
         ModelScore: {
             /**
@@ -1238,6 +2087,161 @@ export interface components {
             /** Days Overdue */
             days_overdue: number;
         };
+        /** Order */
+        Order: {
+            /** Purchase Id */
+            purchase_id: number;
+            /** Supplier Id */
+            supplier_id: number;
+            /** Supplier Name */
+            supplier_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "received" | "cancelled";
+            /**
+             * Ordered At
+             * Format: date-time
+             */
+            ordered_at: string;
+            /** Expected Date */
+            expected_date: string | null;
+            /** Received Date */
+            received_date: string | null;
+            /** Bill Number */
+            bill_number: string | null;
+            /** Total Pkr */
+            total_pkr: number;
+            /** Lines */
+            lines: components["schemas"]["OrderLine"][];
+        };
+        /** OrderCreateRequest */
+        OrderCreateRequest: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Lines */
+            lines: components["schemas"]["OrderLineIn"][];
+        };
+        /** OrderCreated */
+        OrderCreated: {
+            /** Purchase Id */
+            purchase_id: number;
+            /** Supplier Id */
+            supplier_id: number;
+            /** Supplier Name */
+            supplier_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "received" | "cancelled";
+            /**
+             * Ordered At
+             * Format: date-time
+             */
+            ordered_at: string;
+            /** Expected Date */
+            expected_date: string | null;
+            /** Received Date */
+            received_date: string | null;
+            /** Bill Number */
+            bill_number: string | null;
+            /** Total Pkr */
+            total_pkr: number;
+            /** Lines */
+            lines: components["schemas"]["OrderLine"][];
+            draft: components["schemas"]["MessageDraft"];
+        };
+        /** OrderLine */
+        OrderLine: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Pack Unit */
+            pack_unit: string;
+            /** Units Per Pack */
+            units_per_pack: number;
+            /** Packs */
+            packs: number;
+            /** Qty */
+            qty: number;
+            /** Received Qty */
+            received_qty: number;
+            /** Unit Cost */
+            unit_cost: number;
+            /** Line Total */
+            line_total: number;
+        };
+        /** OrderLineIn */
+        OrderLineIn: {
+            /** Product Id */
+            product_id: number;
+            /** Packs */
+            packs: number;
+        };
+        /** OrderSuggestRequest */
+        OrderSuggestRequest: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Budget Pkr */
+            budget_pkr: number;
+        };
+        /** OrderSuggestResponse */
+        OrderSuggestResponse: {
+            /** Data Label */
+            data_label?: string;
+            /** Plan Id */
+            plan_id: number | null;
+            /** Store Id */
+            store_id: number;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            /** Budget Entered Pkr */
+            budget_entered_pkr: number;
+            /** Target Cover Days */
+            target_cover_days: number;
+            /** Total Allocated Spend Pkr */
+            total_allocated_spend_pkr: number;
+            /** Remaining Unallocated Pkr */
+            remaining_unallocated_pkr: number;
+            /** Budget Used Pct */
+            budget_used_pct: number;
+            /** Budget Respected */
+            budget_respected: boolean;
+            /** Total Skus Recommended */
+            total_skus_recommended: number;
+            /** Items Needing Reorder */
+            items_needing_reorder: number;
+            /** Items Fully Covered */
+            items_fully_covered: number;
+            /** Budget To Cover Everything Pkr */
+            budget_to_cover_everything_pkr: number;
+            /** Products With Unknown Demand */
+            products_with_unknown_demand: number;
+            /** Projected Revenue Pkr */
+            projected_revenue_pkr: number;
+            /** Projected Gross Profit Pkr */
+            projected_gross_profit_pkr: number;
+            /** Ranking Rule */
+            ranking_rule: string;
+            /** Recommendations */
+            recommendations: components["schemas"]["PurchasePlanLine"][];
+            /** Skipped */
+            skipped: components["schemas"]["SkippedItem"][];
+            /** Skipped Count */
+            skipped_count: number;
+            /** Supplier Id */
+            supplier_id: number;
+            /** Supplier Name */
+            supplier_name: string;
+        };
         /** PayablesSummaryResponse */
         PayablesSummaryResponse: {
             /** Data Label */
@@ -1269,10 +2273,13 @@ export interface components {
             /** Amount */
             amount: number;
             /**
-             * Notes
-             * @default Counter wasooli
+             * Method
+             * @default cash
+             * @enum {string}
              */
-            notes?: string;
+            method?: "cash" | "easypaisa" | "jazzcash" | "bank";
+            /** Notes */
+            notes?: string | null;
         };
         /** PaymentRecordResponse */
         PaymentRecordResponse: {
@@ -1282,12 +2289,18 @@ export interface components {
             name: string;
             /** Amount Received */
             amount_received: number;
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "cash" | "easypaisa" | "jazzcash" | "bank";
             /** Previous Balance */
             previous_balance: number;
             /** New Balance */
             new_balance: number;
             /** Message */
             message: string;
+            receipt: components["schemas"]["MessageDraft"];
         };
         /** PlannedExpense */
         PlannedExpense: {
@@ -1310,22 +2323,6 @@ export interface components {
             amount_pkr: number;
             /** Was Overdue */
             was_overdue: boolean;
-        };
-        /** PriceChange */
-        PriceChange: {
-            /**
-             * Effective Date
-             * Format: date-time
-             */
-            effective_date: string;
-            /** Cost Price */
-            cost_price: number;
-            /** Selling Price */
-            selling_price: number;
-            /** Margin Pct */
-            margin_pct: number;
-            /** Reason */
-            reason: string | null;
         };
         /** PriceUpdateRequest */
         PriceUpdateRequest: {
@@ -1423,7 +2420,7 @@ export interface components {
             is_dead_stock: boolean;
             pack_info: components["schemas"]["ProductPackInfo"] | null;
             /** Price History */
-            price_history: components["schemas"]["PriceChange"][];
+            price_history: components["schemas"]["app__schemas__inventory__PriceChange"][];
             /** Recent Movements */
             recent_movements: components["schemas"]["StockMovementItem"][];
             /** Units Sold 30D */
@@ -1540,6 +2537,8 @@ export interface components {
             category: string;
             /** Image Url */
             image_url: string;
+            /** Supplier Id */
+            supplier_id: number | null;
             /** Supplier Name */
             supplier_name: string;
             /** Pack Unit */
@@ -1595,6 +2594,55 @@ export interface components {
             reasons: string[];
             /** Reasons Ur */
             reasons_ur: string[];
+        };
+        /** ReceiveLineIn */
+        ReceiveLineIn: {
+            /** Product Id */
+            product_id: number;
+            /** Received Qty */
+            received_qty: number;
+            /**
+             * Unit Cost
+             * @description Price per unit on the distributor's bill.
+             */
+            unit_cost: number;
+        };
+        /** ReceiveRequest */
+        ReceiveRequest: {
+            /** Lines */
+            lines?: components["schemas"]["ReceiveLineIn"][];
+            /** Bill Number */
+            bill_number?: string | null;
+            /**
+             * Pay Now Pkr
+             * @default 0
+             */
+            pay_now_pkr?: number;
+            /**
+             * Method
+             * @default cash
+             * @enum {string}
+             */
+            method?: "cash" | "easypaisa" | "jazzcash" | "bank";
+        };
+        /** ReceiveResponse */
+        ReceiveResponse: {
+            order: components["schemas"]["Order"];
+            /** Bill Total Pkr */
+            bill_total_pkr: number;
+            /** Paid Now Pkr */
+            paid_now_pkr: number;
+            /** Left To Pay Pkr */
+            left_to_pay_pkr: number;
+            /**
+             * Due Date
+             * Format: date-time
+             */
+            due_date: string;
+            /** Price Changes */
+            price_changes: components["schemas"]["app__schemas__workflow__PriceChange"][];
+            /** Short Items */
+            short_items: components["schemas"]["ShortItem"][];
         };
         /** ReorderPlanResponse */
         ReorderPlanResponse: {
@@ -1668,6 +2716,116 @@ export interface components {
              */
             save_draft?: boolean;
         };
+        /** ReportCredit */
+        ReportCredit: {
+            /** Outstanding Pkr */
+            outstanding_pkr: number;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Overdue Pct */
+            overdue_pct: number;
+            /** Customers With Balance */
+            customers_with_balance: number;
+            /** Given 90D Pkr */
+            given_90d_pkr: number;
+            /** Collected 90D Pkr */
+            collected_90d_pkr: number;
+            /** Collection Ratio Pct */
+            collection_ratio_pct: number | null;
+        };
+        /** ReportMonth */
+        ReportMonth: {
+            /** Month */
+            month: string;
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /** Is Partial */
+            is_partial: boolean;
+            /** Days Trading */
+            days_trading: number;
+            /** Revenue Pkr */
+            revenue_pkr: number;
+            /** Gross Profit Pkr */
+            gross_profit_pkr: number;
+            /** Gross Margin Pct */
+            gross_margin_pct: number;
+            /** Operating Expenses Pkr */
+            operating_expenses_pkr: number;
+            /** Net Profit Pkr */
+            net_profit_pkr: number;
+            /** Cash Sales Pct */
+            cash_sales_pct: number;
+            /** Average Daily Sales Pkr */
+            average_daily_sales_pkr: number;
+            /** Bills */
+            bills: number;
+        };
+        /** ReportPosition */
+        ReportPosition: {
+            /** Cash In Hand Pkr */
+            cash_in_hand_pkr: number;
+            /** Stock Value At Cost Pkr */
+            stock_value_at_cost_pkr: number;
+            /** Customer Credit Outstanding Pkr */
+            customer_credit_outstanding_pkr: number;
+            /** Supplier Bills Outstanding Pkr */
+            supplier_bills_outstanding_pkr: number;
+            /** Working Capital Pkr */
+            working_capital_pkr: number;
+        };
+        /** ReportRecords */
+        ReportRecords: {
+            /** Days Closed Last 30 */
+            days_closed_last_30: number;
+            /** Days Galla Matched */
+            days_galla_matched: number;
+            /** Galla Difference 30D Pkr */
+            galla_difference_30d_pkr: number;
+        };
+        /** ReportStore */
+        ReportStore: {
+            /** Name */
+            name: string;
+            /** Location */
+            location: string | null;
+            /** Owner Name */
+            owner_name: string | null;
+            /** Records Since */
+            records_since: string | null;
+            /** Days Of Records */
+            days_of_records: number;
+        };
+        /** ReportSummary */
+        ReportSummary: {
+            /** Average Monthly Sales Pkr */
+            average_monthly_sales_pkr: number;
+            /** Average Monthly Net Profit Pkr */
+            average_monthly_net_profit_pkr: number;
+            /** Average Gross Margin Pct */
+            average_gross_margin_pct: number;
+            /** Sales Trend 3M Pct */
+            sales_trend_3m_pct: number | null;
+            /** Profitable Months */
+            profitable_months: number;
+            /** Full Months */
+            full_months: number;
+        };
+        /** ReportSuppliers */
+        ReportSuppliers: {
+            /** Outstanding Pkr */
+            outstanding_pkr: number;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Billed 90D Pkr */
+            billed_90d_pkr: number;
+            /** Paid 90D Pkr */
+            paid_90d_pkr: number;
+            /** Average Monthly Purchases Pkr */
+            average_monthly_purchases_pkr: number;
+        };
         /** RowError */
         RowError: {
             /** Row Number */
@@ -1679,12 +2837,56 @@ export interface components {
             /** Error */
             error: string;
         };
+        /** SafeBudget */
+        SafeBudget: {
+            /** Safe To Order Pkr */
+            safe_to_order_pkr: number;
+            /** Cash In Hand Pkr */
+            cash_in_hand_pkr: number;
+            /**
+             * Bill Due Date
+             * Format: date
+             * @description When a new order's bill would be due: delivery + credit days.
+             */
+            bill_due_date: string;
+            /**
+             * Lowest Cash Pkr
+             * @description Lowest expected cash in the week after the bill is due.
+             */
+            lowest_cash_pkr: number;
+            /**
+             * Lowest Cash Date
+             * Format: date
+             */
+            lowest_cash_date: string;
+            /** Safety Cash Pkr */
+            safety_cash_pkr: number;
+            /** Orders On The Way Pkr */
+            orders_on_the_way_pkr: number;
+            /** Explanation */
+            explanation: string[];
+            /** Explanation Ur */
+            explanation_ur: string[];
+        };
         /** ScoreFactor */
         ScoreFactor: {
             /** Reason */
             reason: string;
             /** Points */
             points: number;
+        };
+        /** ShortItem */
+        ShortItem: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Ordered Qty */
+            ordered_qty: number;
+            /** Received Qty */
+            received_qty: number;
+            /** Unit */
+            unit: string;
         };
         /** SkippedItem */
         SkippedItem: {
@@ -1778,6 +2980,63 @@ export interface components {
             supplier_count: number;
             copilot: components["schemas"]["CopilotStatus"];
         };
+        /** SupplierAmount */
+        SupplierAmount: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Supplier Name */
+            supplier_name: string;
+            /** Amount Pkr */
+            amount_pkr: number;
+        };
+        /** SupplierOverview */
+        SupplierOverview: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Name */
+            name: string;
+            /** Contact */
+            contact: string | null;
+            /** Payment Terms Days */
+            payment_terms_days: number;
+            /**
+             * Visit Days
+             * @description 0 = Monday ... 6 = Sunday
+             */
+            visit_days: number[];
+            /** Visit Days Label */
+            visit_days_label: string;
+            /** Visit Days Label Ur */
+            visit_days_label_ur: string;
+            /** Visits Today */
+            visits_today: boolean;
+            /** Next Visit In Days */
+            next_visit_in_days: number | null;
+            /** Products */
+            products: number;
+            /** Total Payable Pkr */
+            total_payable_pkr: number;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Due Within 7 Days Pkr */
+            due_within_7_days_pkr: number;
+            /** Pending Orders Count */
+            pending_orders_count: number;
+            /** Pending Orders Value Pkr */
+            pending_orders_value_pkr: number;
+            /** @description The most the galla can bear for an order from this distributor. */
+            budget: components["schemas"]["SafeBudget"];
+            /**
+             * Usual Order Pkr
+             * @description Average bill per order from them in the last 90 days.
+             */
+            usual_order_pkr: number;
+            /**
+             * Suggested Budget Pkr
+             * @description The galla limit, capped at 1.5x the usual order.
+             */
+            suggested_budget_pkr: number;
+        };
         /** SupplierPayableItem */
         SupplierPayableItem: {
             /** Supplier Id */
@@ -1805,6 +3064,61 @@ export interface components {
             /** Next Delivery Date */
             next_delivery_date: string | null;
         };
+        /** SupplierPaymentRequest */
+        SupplierPaymentRequest: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Amount */
+            amount: number;
+            /**
+             * Method
+             * @default cash
+             * @enum {string}
+             */
+            method?: "cash" | "easypaisa" | "jazzcash" | "bank";
+            /** Note */
+            note?: string | null;
+        };
+        /** SupplierPaymentResponse */
+        SupplierPaymentResponse: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Supplier Name */
+            supplier_name: string;
+            /** Amount Paid Pkr */
+            amount_paid_pkr: number;
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "cash" | "easypaisa" | "jazzcash" | "bank";
+            /** Previous Payable Pkr */
+            previous_payable_pkr: number;
+            /** Remaining Payable Pkr */
+            remaining_payable_pkr: number;
+            /** Cash In Drawer Pkr */
+            cash_in_drawer_pkr: number;
+        };
+        /** SupplierRef */
+        SupplierRef: {
+            /** Supplier Id */
+            supplier_id: number;
+            /** Supplier Name */
+            supplier_name: string;
+        };
+        /** SuppliersResponse */
+        SuppliersResponse: {
+            /** Data Label */
+            data_label?: string;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            budget: components["schemas"]["SafeBudget"];
+            /** Suppliers */
+            suppliers: components["schemas"]["SupplierOverview"][];
+        };
         /** TodayActionsResponse */
         TodayActionsResponse: {
             /** Data Label */
@@ -1823,6 +3137,26 @@ export interface components {
             /** Actions */
             actions: components["schemas"]["ActionItem"][];
         };
+        /** TomorrowPlan */
+        TomorrowPlan: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Weekday */
+            weekday: string;
+            /** Bills Due */
+            bills_due: components["schemas"]["SupplierAmount"][];
+            /** Bills Due Total Pkr */
+            bills_due_total_pkr: number;
+            /** Distributor Visits */
+            distributor_visits: components["schemas"]["SupplierRef"][];
+            /** Customers To Remind */
+            customers_to_remind: components["schemas"]["CustomerReminder"][];
+            /** Items Running Low */
+            items_running_low: number;
+        };
         /** ToolCallExecution */
         ToolCallExecution: {
             /** Tool Name */
@@ -1837,6 +3171,58 @@ export interface components {
             result_summary: {
                 [key: string]: unknown;
             };
+        };
+        /** UdhaarItemIn */
+        UdhaarItemIn: {
+            /** Product Id */
+            product_id: number;
+            /** Qty */
+            qty: number;
+        };
+        /** UdhaarRequest */
+        UdhaarRequest: {
+            /** Customer Id */
+            customer_id: number;
+            /** Items */
+            items?: components["schemas"]["UdhaarItemIn"][];
+            /**
+             * Extra Amount
+             * @description Money or items not in the catalogue.
+             * @default 0
+             */
+            extra_amount?: number;
+            /** Note */
+            note?: string | null;
+        };
+        /** UdhaarResponse */
+        UdhaarResponse: {
+            /** Entry Id */
+            entry_id: number;
+            /** Customer Id */
+            customer_id: number;
+            /** Name */
+            name: string;
+            /**
+             * Timestamp
+             * Format: date-time
+             */
+            timestamp: string;
+            /** Items */
+            items: components["schemas"]["ItemLine"][];
+            /** Extra Amount Pkr */
+            extra_amount_pkr: number;
+            /** Note */
+            note: string | null;
+            /** Total Pkr */
+            total_pkr: number;
+            /**
+             * Due Date
+             * Format: date-time
+             */
+            due_date: string;
+            /** Balance Pkr */
+            balance_pkr: number;
+            receipt: components["schemas"]["MessageDraft"];
         };
         /** UpcomingEvent */
         UpcomingEvent: {
@@ -1853,6 +3239,45 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** PriceChange */
+        app__schemas__inventory__PriceChange: {
+            /**
+             * Effective Date
+             * Format: date-time
+             */
+            effective_date: string;
+            /** Cost Price */
+            cost_price: number;
+            /** Selling Price */
+            selling_price: number;
+            /** Margin Pct */
+            margin_pct: number;
+            /** Reason */
+            reason: string | null;
+        };
+        /** PriceChange */
+        app__schemas__workflow__PriceChange: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /** Old Cost */
+            old_cost: number;
+            /** New Cost */
+            new_cost: number;
+            /** Change Pct */
+            change_pct: number;
+            /** Selling Price */
+            selling_price: number;
+            /** Old Margin Pct */
+            old_margin_pct: number;
+            /** New Margin Pct */
+            new_margin_pct: number;
+            /** Price To Keep Margin */
+            price_to_keep_margin: number;
         };
     };
     responses: never;
@@ -1912,6 +3337,174 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TodayActionsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_today_api_day_today_get: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_day_api_day_open_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CashCountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayOpenResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    close_day_api_day_close_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CashCountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayCloseResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_history_api_day_history_get: {
+        parameters: {
+            query?: {
+                days?: number;
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayHistoryItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_expense_api_expenses_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpenseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpenseResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2223,6 +3816,73 @@ export interface operations {
             };
         };
     };
+    list_customers_api_credit_customers_get: {
+        parameters: {
+            query?: {
+                search?: string | null;
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_customer_api_credit_customers_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomerCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_customer_ledger_api_credit_customers__customer_id__get: {
         parameters: {
             query?: {
@@ -2256,9 +3916,81 @@ export interface operations {
             };
         };
     };
+    check_credit_api_credit_check_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreditCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreditCheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    give_udhaar_api_credit_udhaar_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UdhaarRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UdhaarResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     record_customer_payment_api_credit_payment_post: {
         parameters: {
-            query?: never;
+            query?: {
+                store_id?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2340,6 +4072,343 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CashOutlookResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_suppliers_api_orders_suppliers_get: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuppliersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suggest_api_orders_suggest_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderSuggestRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderSuggestResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_orders_api_orders_get: {
+        parameters: {
+            query?: {
+                status?: ("pending" | "received" | "cancelled") | null;
+                supplier_id?: number | null;
+                limit?: number;
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Order"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_api_orders_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receive_api_orders__purchase_id__receive_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path: {
+                purchase_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceiveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiveResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pay_api_payables_pay_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupplierPaymentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupplierPaymentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sheet_api_stock_count_sheet_get: {
+        parameters: {
+            query?: {
+                category?: string | null;
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountSheetResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_api_stock_count_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CountRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    history_api_stock_count_history_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountHistoryItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    business_api_reports_business_get: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessReportResponse"];
                 };
             };
             /** @description Validation Error */

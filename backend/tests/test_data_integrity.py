@@ -42,7 +42,12 @@ def test_prices_are_sane(db_session):
 
 def test_data_ends_today_and_has_pending_orders(db_session):
     last_sale = db_session.query(func.max(Sale.timestamp)).scalar()
-    assert last_sale.date() == store_today()
+    # Before opening time the newest sale is from last night; after it, from today.
+    from datetime import timedelta
+    from app.core.clock import store_now
+    from app.simulator.demand_profiles import HOUR_WEIGHTS
+    expected = store_today() if store_now().hour > min(HOUR_WEIGHTS) else store_today() - timedelta(days=1)
+    assert last_sale.date() == expected
     assert db_session.query(Purchase).filter(Purchase.status == "pending").count() > 0
 
 

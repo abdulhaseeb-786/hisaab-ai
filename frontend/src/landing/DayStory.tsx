@@ -10,26 +10,26 @@ import { cn, formatPKR } from '@/lib/format';
 const STEPS: { time: [string, string]; title: [string, string]; body: [string, string] }[] = [
   {
     time: ['8:00 am', 'Subah 8 baje'],
-    title: ['The register opens with today’s jobs', 'Register khulta hai, aaj ke kaam ke saath'],
+    title: ['The galla is counted, the day opens', 'Galla gina, din shuru'],
     body: [
-      'Before the first customer, the owner sees the cash in the drawer, who is late, what is running low, and the three things to do first.',
-      'Pehle customer se pehle maalik dekh leta hai: galle ka cash, kaun late hai, aur sab se pehle kya karna hai.',
+      'Before the first customer, the owner counts the drawer. HisaabAI checks it against the records and shows who is late, what is running low, and the three things to do first.',
+      'Pehle customer se pehle maalik galla ginta hai. HisaabAI records se milata hai aur batata hai kaun late hai, kya kam hai, aur sab se pehle kya karna hai.',
     ],
   },
   {
     time: ['11:00 am', 'Din 11 baje'],
-    title: ['The order goes to the distributor', 'Order distributor ko chala jata hai'],
+    title: ['The order booker comes', 'Order booker aata hai'],
     body: [
-      'He types his budget. HisaabAI fills it with whole cartons, most urgent first, and the list goes out on WhatsApp.',
-      'Budget likha, HisaabAI ne poore carton se list bana di, zaroori maal pehle, aur list WhatsApp par chali gayi.',
+      'HisaabAI knows how much the galla can safely spend before this bill is due, and fills it with whole cartons, most urgent first. The order is on screen to read out.',
+      'HisaabAI jaanta hai is bill se pehle galla kitna kharch bardasht kar sakta hai, aur poore carton se list banata hai, zaroori maal pehle. Order screen par, parh kar suna dein.',
     ],
   },
   {
     time: ['6:00 pm', 'Shaam 6 baje'],
     title: ['Khata gets collected, politely', 'Khata ki wasooli, narmi se'],
     body: [
-      'The customer who is most late gets a ready-made reminder. When he pays, the khata is stamped and every screen updates.',
-      'Sab se late customer ko tayyar yaad dihani jati hai. Payment aate hi khata par mohar lagti hai aur har screen update.',
+      'Every udhaar is written with the items and the due date. The most late customer gets a polite reminder on screen; when he pays, the khata is stamped and every screen updates.',
+      'Har udhaar items aur wapsi ki tareekh ke saath likha jata hai. Sab se late customer ke liye screen par narm yaad dihani; payment aate hi khata par mohar aur har screen update.',
     ],
   },
   {

@@ -51,3 +51,6 @@ build/
 
 # Raw public datasets (downloaded by hand, large)
 backend/datasets/raw/
+
+# Browser workflow screenshots
+frontend/e2e-shots/

@@ -27,6 +27,7 @@ from app.analytics.dead_stock import detect_dead_stock
 from app.analytics.inventory_rules import compute_inventory_health
 from app.analytics.margin_detector import detect_margin_squeezes
 from app.core.clock import store_now
+from app.core.wording import days
 
 URGENCY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 AREA_ORDER = {"restock": 0, "fix_price": 1, "collect_khata": 2, "clear_dead_stock": 3, "cash_warning": 4}
@@ -60,7 +61,7 @@ def _restock_action(inventory: list[dict[str, Any]]) -> dict[str, Any] | None:
         "title": f"Reorder {item['name']}",
         "summary": (
             f"Only {item['stock_qty']:.0f} {item['unit']} left, about {cover:.1f} days of sales. "
-            f"A new order takes {item['lead_time_days']} days to arrive."
+            f"A new order takes {days(item['lead_time_days'])} to arrive."
         ),
         "next_step": f"Order {int(packs)} {pack['pack_unit']} from {item['supplier_name'] or 'the supplier'} today.",
         "title_ur": f"{item['name']} fauran mangwayein",

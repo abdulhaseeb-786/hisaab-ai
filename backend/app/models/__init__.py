@@ -3,6 +3,7 @@ from .product import Product, ProductPack, PriceHistory
 from .sales import Sale, SaleLine, StockMovement
 from .purchases import Supplier, SupplierProduct, Purchase, PurchaseLine
 from .credit import Customer, LedgerEntry, SupplierLedgerEntry
+from .operations import DaySession, CashAdjustment, StockCount, StockCountLine
 from .analytics import Expense, Insight, Forecast, PurchasePlan, PurchasePlanLine
 
 __all__ = [
@@ -25,5 +26,9 @@ __all__ = [
     "Insight",
     "Forecast",
     "PurchasePlan",
-    "PurchasePlanLine"
+    "PurchasePlanLine",
+    "DaySession",
+    "CashAdjustment",
+    "StockCount",
+    "StockCountLine",
 ]

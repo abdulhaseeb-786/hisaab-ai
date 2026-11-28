@@ -1,11 +1,11 @@
-import confetti from 'canvas-confetti';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronDown, Copy, Send, SlidersHorizontal } from 'lucide-react';
+import { Check, ChevronDown, ClipboardList, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useReorderPlan, useStore } from '@/api/queries';
 import type { ReorderLine, ReorderPlan, StoreProfile } from '@/api/types';
 import { useUi } from '@/app/UiContext';
-import { Button, ButtonLink } from '@/components/ui/Button';
+import { MessageDraft, type Draft } from '@/components/MessageDraft';
+import { Button } from '@/components/ui/Button';
 import { Money } from '@/components/ui/Money';
 import { ProductImage } from '@/components/ui/ProductImage';
 import { EmptyState, ErrorBox, Skeleton } from '@/components/ui/QueryState';
@@ -15,23 +15,26 @@ import { StockStatus } from '@/components/ui/Status';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { cn, formatNumber, formatPKR } from '@/lib/format';
 import { useDebounced } from '@/lib/useDebounced';
-import { copyText, whatsappShareUrl } from '@/lib/whatsapp';
 
 const PRESETS = [25_000, 50_000, 75_000, 100_000];
 const MIN = 1_000;
 const MAX = 10_000_000;
 
-function orderText(lines: ReorderLine[], store: StoreProfile | undefined, supplier?: string): string {
+function orderText(lines: ReorderLine[], store: StoreProfile | undefined): Draft {
   const groups = new Map<string, ReorderLine[]>();
   for (const l of lines) groups.set(l.supplier_name, [...(groups.get(l.supplier_name) ?? []), l]);
   const date = new Date().toLocaleDateString('en-PK');
-  const blocks = [...groups.entries()].map(([name, items]) => {
-    const total = items.reduce((s, l) => s + l.line_total_cost_pkr, 0);
-    return [`*${name}*`, ...items.map((l) => `- ${l.product_name}: ${l.recommended_packs} ${l.pack_unit}`), `Andazan: ${formatPKR(total)}`].join('\n');
-  });
-  return [`*Order: ${store?.name ?? ''}*`, `${store?.location ?? ''}, ${date}`, '', ...blocks.flatMap((b) => [b, '']), supplier ? '' : `*Kul: ${formatPKR(lines.reduce((s, l) => s + l.line_total_cost_pkr, 0))}*`]
-    .join('\n')
-    .trim();
+  const total = lines.reduce((s, l) => s + l.line_total_cost_pkr, 0);
+  const make = (est: string, sum: string) => {
+    const blocks = [...groups.entries()].map(([name, items]) => {
+      const t = items.reduce((s, l) => s + l.line_total_cost_pkr, 0);
+      return [`*${name}*`, ...items.map((l) => `- ${l.product_name}: ${l.recommended_packs} ${l.pack_unit}`), `${est}: ${formatPKR(t)}`].join('\n');
+    });
+    const head = [`*Order: ${store?.name ?? ''}*`, `${store?.location ?? ''}, ${date}`, ''];
+    const tail = groups.size > 1 ? [`*${sum}: ${formatPKR(total)}*`] : [];
+    return [...head, ...blocks.flatMap((b) => [b, '']), ...tail].join('\n').trim();
+  };
+  return { roman_urdu: make('Andaaza', 'Kul'), english: make('Estimate', 'Total') };
 }
 
 function Line({ line }: { line: ReorderLine }) {
@@ -91,27 +94,16 @@ function Line({ line }: { line: ReorderLine }) {
   );
 }
 
-function SendButtons({ text, compact }: { text: string; compact?: boolean }) {
+function OrderDraft({ lines, title, store }: { lines: ReorderLine[]; title: string; store: StoreProfile | undefined }) {
   const { pick } = useLanguage();
-  const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(false);
+  const draft = useMemo(() => orderText(lines, store), [lines, store]);
   return (
-    <div className="flex gap-2">
-      <Button
-        variant="secondary"
-        size={compact ? 'sm' : 'md'}
-        icon={copied ? <Check className="w-5 h-5 text-sabz" /> : <Copy className="w-5 h-5" />}
-        onClick={async () => {
-          if (await copyText(text)) {
-            setCopied(true);
-            window.setTimeout(() => setCopied(false), 2000);
-          }
-        }}
-      >
-        {copied ? pick('Copied', 'Copy ho gaya') : pick('Copy', 'Copy')}
+    <div className="space-y-3">
+      <Button variant={open ? 'secondary' : 'primary'} size="sm" icon={<ClipboardList className="w-5 h-5" />} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+        {open ? pick('Hide order text', 'Order chhupayein') : pick('Show order text', 'Order dikhayein')}
       </Button>
-      <ButtonLink href={whatsappShareUrl(text)} target="_blank" rel="noreferrer" size={compact ? 'sm' : 'md'} icon={<Send className="w-5 h-5" />} onClick={() => confetti({ particleCount: 60, spread: 70, origin: { y: 0.8 } })}>
-        WhatsApp
-      </ButtonLink>
+      {open && <MessageDraft draft={draft} title={title} editable />}
     </div>
   );
 }
@@ -126,7 +118,6 @@ function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
     for (const l of lines) m.set(l.supplier_name, [...(m.get(l.supplier_name) ?? []), l]);
     return [...m.entries()];
   }, [lines]);
-  const fullText = useMemo(() => orderText(lines, store.data), [lines, store.data]);
 
   if (!lines.length) {
     return (
@@ -204,7 +195,9 @@ function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
                       {items.length} {pick('items', 'items')}, {formatPKR(items.reduce((s, l) => s + l.line_total_cost_pkr, 0))}
                     </p>
                   </div>
-                  <SendButtons text={orderText(items, store.data, name)} compact />
+                </div>
+                <div className="mb-3">
+                  <OrderDraft lines={items} store={store.data} title={pick(`Order for ${name}`, `${name} ka order`)} />
                 </div>
                 <ol className="divide-y divide-line">
                   {items.map((l) => (
@@ -241,21 +234,12 @@ function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
         <p className="mt-1">{plan.ranking_rule}</p>
       </details>
 
-      {/* Phone: keep the total and the send button in thumb reach. */}
-      <div className="lg:hidden fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 bg-card border-t border-line px-4 py-3 flex items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-xs text-ink-muted">{pick('Total order', 'Kul order')}</p>
-          <p className="text-lg font-extrabold tabular">{formatPKR(plan.total_allocated_spend_pkr)}</p>
-        </div>
-        <ButtonLink href={whatsappShareUrl(fullText)} target="_blank" rel="noreferrer" icon={<Send className="w-5 h-5" />}>
-          {pick('Send order', 'Order bhejein')}
-        </ButtonLink>
-      </div>
-      <div className="hidden lg:flex items-center justify-between gap-4 bg-card rounded-2xl border border-line p-5">
+      <div className="bg-card rounded-2xl border border-line p-5 space-y-3">
         <p className="text-lg font-extrabold">
           {pick('Whole order', 'Poora order')}: <span className="tabular">{formatPKR(plan.total_allocated_spend_pkr)}</span>
         </p>
-        <SendButtons text={fullText} />
+        <MessageDraft draft={orderText(lines, store.data)} title={pick('Order list to read out or copy', 'Parhne ya copy karne ke liye order list')} editable />
+        <p className="text-sm text-ink-muted">{pick('To save an order and track its delivery, use the Order screen for one distributor at a time.', 'Order save karne aur maal ka hisaab rakhne ke liye Order screen par ek distributor ka order banayein.')}</p>
       </div>
     </div>
   );

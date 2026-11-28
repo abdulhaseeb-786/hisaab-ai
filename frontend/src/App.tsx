@@ -8,9 +8,12 @@ import { OnboardingProvider, useOnboarding } from '@/onboarding/OnboardingContex
 import { Tour } from '@/onboarding/Tour';
 import { Welcome } from '@/onboarding/Welcome';
 import BuyPage from '@/pages/BuyPage';
-import CashPage from '@/pages/CashPage';
+import CountPage from '@/pages/CountPage';
+import HisaabPage from '@/pages/HisaabPage';
 import LandingPage from '@/pages/LandingPage';
 import KhataPage from '@/pages/KhataPage';
+import OrderPage from '@/pages/OrderPage';
+import ReportPage from '@/pages/ReportPage';
 import StockPage from '@/pages/StockPage';
 import StoreMapPage from '@/pages/StoreMapPage';
 import TodayPage from '@/pages/TodayPage';
@@ -54,9 +57,13 @@ export default function App() {
                 <Route path="app" element={<AppWithOnboarding />}>
                   <Route index element={<TodayPage />} />
                   <Route path="buy" element={<BuyPage />} />
+                  <Route path="order" element={<OrderPage />} />
                   <Route path="stock" element={<StockPage />} />
+                  <Route path="stock/count" element={<CountPage />} />
                   <Route path="khata" element={<KhataPage />} />
-                  <Route path="cash" element={<CashPage />} />
+                  <Route path="hisaab" element={<HisaabPage />} />
+                  <Route path="report" element={<ReportPage />} />
+                  <Route path="cash" element={<Navigate to="/app/hisaab" replace />} />
                   <Route path="store-map" element={<StoreMapPage />} />
                   <Route path="*" element={<Navigate to="/app" replace />} />
                 </Route>

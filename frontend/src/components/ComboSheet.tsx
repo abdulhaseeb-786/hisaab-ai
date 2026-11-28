@@ -1,10 +1,9 @@
-import { AlertTriangle, Copy, Send } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useInsights, useProducts, useStore } from '@/api/queries';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { cn, formatPKR } from '@/lib/format';
-import { copyText, whatsappShareUrl } from '@/lib/whatsapp';
-import { Button, ButtonLink } from './ui/Button';
+import { MessageDraft } from './MessageDraft';
 import { ProductImage } from './ui/ProductImage';
 import { ErrorBox, Skeleton } from './ui/QueryState';
 import { Sheet } from './ui/Sheet';
@@ -16,7 +15,6 @@ export function ComboSheet({ productId, onClose }: { productId: number | null; o
   const products = useProducts({});
   const store = useStore();
   const [discount, setDiscount] = useState(10);
-  const [copied, setCopied] = useState(false);
 
   const dead = insights.data?.dead_stock.find((d) => d.product_id === productId);
   const partner = useMemo(() => {
@@ -33,11 +31,11 @@ export function ComboSheet({ productId, onClose }: { productId: number | null; o
   const price = Math.round((regular * (100 - discount)) / 100 / 5) * 5;
   const profit = price - cost;
   const offer = ready
-    ? pick(
-        `Special offer at ${store.data?.name ?? 'our shop'}:\n${dead.name} + ${partner.name}\nOnly ${formatPKR(price)} (usually ${formatPKR(regular)}). While stock lasts.`,
-        `${store.data?.name ?? 'Hamari dukaan'} par khaas offer:\n${dead.name} + ${partner.name}\nSirf ${formatPKR(price)} (asal ${formatPKR(regular)}). Stock khatam hone tak.`,
-      )
-    : '';
+    ? {
+        english: `*Special offer at ${store.data?.name ?? 'our shop'}*\n${dead.name} + ${partner.name}\nOnly ${formatPKR(price)} (usually ${formatPKR(regular)}). While stock lasts.`,
+        roman_urdu: `*${store.data?.name ?? 'Hamari dukaan'} par khaas offer*\n${dead.name} + ${partner.name}\nSirf ${formatPKR(price)} (asal ${formatPKR(regular)}). Stock khatam hone tak.`,
+      }
+    : null;
   const error = insights.error ?? products.error;
 
   return (
@@ -46,27 +44,6 @@ export function ComboSheet({ productId, onClose }: { productId: number | null; o
       onClose={onClose}
       title={pick('Bundle offer for slow stock', 'Phase maal ka bundle offer')}
       description={pick('Sell a slow item together with a fast one.', 'Aahista bikne wala maal tez bikne wale ke saath bechein.')}
-      footer={
-        ready ? (
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              icon={<Copy className="w-5 h-5" />}
-              onClick={async () => {
-                if (await copyText(offer)) {
-                  setCopied(true);
-                  window.setTimeout(() => setCopied(false), 2000);
-                }
-              }}
-            >
-              {copied ? pick('Copied', 'Copy ho gaya') : pick('Copy', 'Copy')}
-            </Button>
-            <ButtonLink href={whatsappShareUrl(offer)} target="_blank" rel="noreferrer" icon={<Send className="w-5 h-5" />} className="flex-1">
-              {pick('Share offer on WhatsApp', 'WhatsApp par offer bhejein')}
-            </ButtonLink>
-          </div>
-        ) : undefined
-      }
     >
       {error && <ErrorBox error={error} />}
       {!ready && !error && (insights.isLoading || products.isLoading) && <Skeleton className="h-64" />}
@@ -117,6 +94,7 @@ export function ComboSheet({ productId, onClose }: { productId: number | null; o
               <AlertTriangle className="w-5 h-5" /> {pick('At this discount you sell below cost.', 'Is discount par khareed se kam mein bikay ga.')}
             </p>
           )}
+          {offer && <MessageDraft draft={offer} title={pick('Offer to show or put up at the counter', 'Counter par dikhane ya lagane ke liye offer')} editable />}
         </div>
       )}
     </Sheet>

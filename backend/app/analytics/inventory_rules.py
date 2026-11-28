@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.clock import store_now
 from app.models import Product, Purchase, PurchaseLine, Sale, SaleLine
+from app.core.wording import days
 
 DEFAULT_LOOKBACK_DAYS = 28
 DEFAULT_TARGET_COVER_DAYS = 14
@@ -73,9 +74,9 @@ def _risk_reason(risk: str, cover: float | None, effective: float | None, lead: 
         return "Not enough recent sales to estimate demand."
     on_way = f" ({pending:.0f} units on the way)" if pending > 0 else ""
     if risk == "critical":
-        return f"Stock lasts {effective:.1f} days{on_way}, but a new order takes {lead} days to arrive."
+        return f"Stock lasts {effective:.1f} days{on_way}, but a new order takes {days(lead)} to arrive."
     if risk == "high":
-        return f"Stock lasts {effective:.1f} days{on_way}; lead time {lead} days plus {safety} safety days."
+        return f"Stock lasts {effective:.1f} days{on_way}; lead time {days(lead)} plus {days(safety)} of safety stock."
     if risk == "medium":
         return f"Stock lasts {effective:.1f} days{on_way}; reorder soon."
     return f"Stock lasts {cover:.1f} days{on_way}."

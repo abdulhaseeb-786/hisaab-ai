@@ -1,12 +1,15 @@
-import { Banknote, BookOpenText, Boxes, Map, ShoppingCart, Sun } from 'lucide-react';
+import { BookOpenText, Boxes, Calculator, ClipboardList, Map, ShoppingCart, Sun } from 'lucide-react';
 
 /** The five daily jobs, in the order a shopkeeper's day goes. */
 export const PRIMARY_NAV = [
   { to: '/app', end: true, icon: Sun, en: 'Today', ur: 'Aaj', tour: 'nav-today' },
-  { to: '/app/buy', icon: ShoppingCart, en: 'Buy', ur: 'Khareedari', tour: 'nav-buy' },
-  { to: '/app/stock', icon: Boxes, en: 'Stock', ur: 'Stock', tour: 'nav-stock' },
   { to: '/app/khata', icon: BookOpenText, en: 'Khata', ur: 'Khata', tour: 'nav-khata' },
-  { to: '/app/cash', icon: Banknote, en: 'Cash', ur: 'Cash', tour: 'nav-cash' },
+  { to: '/app/order', icon: ClipboardList, en: 'Order', ur: 'Order', tour: 'nav-order' },
+  { to: '/app/stock', icon: Boxes, en: 'Stock', ur: 'Stock', tour: 'nav-stock' },
+  { to: '/app/hisaab', icon: Calculator, en: 'Hisaab', ur: 'Hisaab', tour: 'nav-hisaab' },
 ] as const;
 
-export const SECONDARY_NAV = [{ to: '/app/store-map', icon: Map, en: 'Store map', ur: 'Dukaan ka naqsha' }] as const;
+export const SECONDARY_NAV = [
+  { to: '/app/buy', icon: ShoppingCart, en: 'Budget plan', ur: 'Budget plan' },
+  { to: '/app/store-map', icon: Map, en: 'Store map', ur: 'Dukaan ka naqsha' },
+] as const;

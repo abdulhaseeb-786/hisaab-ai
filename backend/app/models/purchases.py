@@ -11,6 +11,7 @@ class Supplier(Base):
     name = Column(String(120), nullable=False, index=True)
     contact = Column(String(60), nullable=True)
     payment_terms_days = Column(Integer, default=7)  # standard Pakistani weekly distributor cycle
+    visit_days = Column(String(20), default="")  # order booker's route days, "0,3" = Mon, Thu
 
     store = relationship("Store", back_populates="suppliers")
     products = relationship("Product", back_populates="supplier")
@@ -42,6 +43,7 @@ class Purchase(Base):
     status = Column(String(30), default="received")  # pending, received, cancelled
     expected_date = Column(DateTime, nullable=True)  # when a pending order should arrive
     received_date = Column(DateTime, nullable=True)
+    bill_number = Column(String(40), nullable=True)  # the distributor's bill number, when received
     total = Column(Float, nullable=False, default=0.0)
 
     store = relationship("Store", back_populates="purchases")

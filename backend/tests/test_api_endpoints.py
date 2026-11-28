@@ -2,6 +2,14 @@
 
 import pytest
 
+from app.core.clock import store_now
+from app.simulator.demand_profiles import HOUR_WEIGHTS
+
+
+def shop_has_opened_today() -> bool:
+    """The simulated shop sells from its first opening hour; earlier, today has no sales."""
+    return store_now().hour > min(HOUR_WEIGHTS)
+
 
 def test_health(client):
     assert client.get("/health").json() == {"status": "healthy"}
@@ -31,7 +39,10 @@ def test_today_actions_have_evidence_and_both_languages(client):
 def test_dashboard_periods(client, period):
     data = client.get(f"/api/dashboard?period={period}").json()
     assert data["period"] == period
-    assert data["revenue_pkr"] > 0
+    if period == "today" and not shop_has_opened_today():
+        assert data["revenue_pkr"] == 0  # before opening time there are honestly no sales yet
+    else:
+        assert data["revenue_pkr"] > 0
     assert data["gross_profit_pkr"] == pytest.approx(data["revenue_pkr"] - data["cogs_pkr"], abs=1)
     assert len(data["daily_revenue"]) >= 1
 

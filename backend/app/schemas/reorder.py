@@ -21,6 +21,7 @@ class PurchasePlanLine(BaseModel):
     product_name: str
     category: str
     image_url: str
+    supplier_id: Optional[int]
     supplier_name: str
     pack_unit: str
     units_per_pack: int

@@ -13,29 +13,34 @@ interface Step {
 
 const STEPS: Step[] = [
   {
+    targets: ['day-bar'],
+    en: ['Open and close the day', 'Count the galla in the morning and at night. HisaabAI checks it against the records, so every number stays honest.'],
+    ur: ['Din kholein aur band karein', 'Subah aur raat ko galla ginein. HisaabAI records se milata hai, taake har number sahi rahe.'],
+  },
+  {
+    targets: ['quick-actions'],
+    en: ['Your everyday buttons', 'Udhaar with the items, wasooli, the order booker, a delivery, or kharcha. One tap each, right at the counter.'],
+    ur: ['Roz ke button', 'Items ke saath udhaar, wasooli, order booker, maal aana, ya kharcha. Har ek ek tap par, counter par hi.'],
+  },
+  {
     targets: ['first-job'],
     en: ["Today's jobs", 'The most important job is always at the top. Each one says why, with the numbers.'],
     ur: ['Aaj ke kaam', 'Sab se zaroori kaam hamesha sab se upar. Har kaam ke saath wajah aur numbers.'],
   },
   {
-    targets: ['first-action'],
-    en: ['One tap to act', 'Each job has one button that does the work: plan the order, fix the price or send a reminder.'],
-    ur: ['Ek tap, kaam shuru', 'Har kaam ka ek button: order ka plan, qeemat theek karna ya yaad dihani bhejna.'],
-  },
-  {
-    targets: ['numbers'],
-    en: ['Your shop in 4 numbers', "Today's sale, cash in the drawer, late khata and items running low. Tap any of them for details."],
-    ur: ['4 numbers mein dukaan', 'Aaj ki sale, galle ka cash, late udhaar aur kam maal. Tafseel ke liye kisi par bhi tap karein.'],
-  },
-  {
-    targets: ['nav-buy', 'side-nav-buy'],
-    en: ['Buying with a budget', 'Here you type your budget and get the order list for your distributors.'],
-    ur: ['Budget se khareedari', 'Yahan budget likhein aur distributors ke liye order ki list lein.'],
+    targets: ['nav-order', 'side-nav-order'],
+    en: ['When the order booker comes', 'Pick the distributor. You get what to order in whole cartons, and how much the galla can safely spend.'],
+    ur: ['Jab order booker aaye', 'Distributor chunein. Poore carton mein order milta hai, aur yeh bhi ke galla kitna kharch bardasht kar sakta hai.'],
   },
   {
     targets: ['nav-khata', 'side-nav-khata'],
-    en: ['Khata', 'Who owes you, who is late, and a ready reminder message for each customer.'],
-    ur: ['Khata', 'Kis ka udhaar hai, kaun late hai, aur har customer ke liye tayyar yaad dihani.'],
+    en: ['Khata', 'Who took what and when, who is late, and "Udhaar dun?" before you give more.'],
+    ur: ['Khata', 'Kis ne kya aur kab liya, kaun late hai, aur mazeed dene se pehle "Udhaar dun?".'],
+  },
+  {
+    targets: ['nav-hisaab', 'side-nav-hisaab'],
+    en: ['Hisaab', 'The galla, the week ahead, distributor bills, and a business report you can print for a loan.'],
+    ur: ['Hisaab', 'Galla, aane wala hafta, distributors ke bill, aur loan ke liye print hone wali report.'],
   },
   {
     targets: ['ask', 'ask-side'],

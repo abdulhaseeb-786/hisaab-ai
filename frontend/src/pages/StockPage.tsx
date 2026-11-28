@@ -1,5 +1,5 @@
-import { ChevronRight, PackageSearch, Search } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { ChevronRight, ClipboardCheck, PackageSearch, Search } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useProducts, type ProductFilters } from '@/api/queries';
 import type { Product } from '@/api/types';
 import { useUi } from '@/app/UiContext';
@@ -52,6 +52,17 @@ export default function StockPage() {
         title={pick('Stock', 'Stock')}
         subtitle={pick('Items that will run out soonest are at the top.', 'Jo maal jaldi khatam hoga woh sab se upar hai.')}
       />
+
+      <Link to="/app/stock/count" data-tour="ginti" className="group flex items-center gap-4 p-4 rounded-2xl bg-card border-2 border-line hover:border-ink-muted">
+        <span className="w-12 h-12 rounded-full bg-neela-tint text-neela flex items-center justify-center shrink-0">
+          <ClipboardCheck className="w-6 h-6" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-extrabold">{pick('Ginti: count a shelf', 'Ginti: shelf ginein')}</span>
+          <span className="block text-sm text-ink-muted">{pick('Fix the stock to what is really there, and see what went missing.', 'Stock ko asal ke mutabiq karein, aur dekhein kya kam hua.')}</span>
+        </span>
+        <ChevronRight className="w-6 h-6 text-ink-faint group-hover:text-ink" />
+      </Link>
 
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" aria-hidden />

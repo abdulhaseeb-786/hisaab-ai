@@ -1,4 +1,5 @@
-import { CheckCircle2, ChevronRight, Search } from 'lucide-react';
+import { CheckCircle2, ChevronRight, HandCoins, NotebookPen, Search } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { useCreditSummary } from '@/api/queries';
 import type { CreditSummary, KhataCustomer } from '@/api/types';
@@ -91,6 +92,7 @@ function CustomerRow({ c }: { c: KhataCustomer }) {
 
 export default function KhataPage() {
   const { pick } = useLanguage();
+  const ui = useUi();
   const credit = useCreditSummary();
   const [search, setSearch] = useState('');
   const d = credit.data;
@@ -101,6 +103,18 @@ export default function KhataPage() {
   return (
     <div className="space-y-6">
       <PageTitle title={pick('Khata', 'Khata')} subtitle={pick('Who owes you, and who to collect from first.', 'Kis ka kitna udhaar hai, aur pehle kis se wasooli karni hai.')} />
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button size="lg" icon={<NotebookPen className="w-6 h-6" />} onClick={() => ui.openUdhaar()} data-tour="khata-udhaar">
+          {pick('+ Udhaar', '+ Udhaar')}
+        </Button>
+        <Button size="lg" variant="secondary" icon={<HandCoins className="w-6 h-6" />} onClick={() => ui.openWasooli()}>
+          {pick('+ Wasooli', '+ Wasooli')}
+        </Button>
+      </div>
+      <p className="text-sm text-ink-muted -mt-2">
+        {pick('Every udhaar is written with the items, prices and due date. Before you save, HisaabAI answers "Udhaar dun?" for that customer.', 'Har udhaar items, qeemat aur wapsi ki tareekh ke saath likha jata hai. Save se pehle HisaabAI us customer ke liye "Udhaar dun?" ka jawab deta hai.')}
+      </p>
 
       {credit.isError && <ErrorBox error={credit.error} onRetry={() => credit.refetch()} />}
       {!d && !credit.isError && <Skeleton className="h-56" />}

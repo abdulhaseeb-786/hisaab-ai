@@ -30,6 +30,10 @@ class LedgerEntry(Base):
     due_date = Column(DateTime, nullable=True, index=True)
     reference = Column(String(80), nullable=True)
     description = Column(String(200), nullable=True)
+    # Udhaar purchases point to the sale, so the khata can list exactly what was bought.
+    sale_id = Column(Integer, ForeignKey("sales.sale_id"), nullable=True, index=True)
+    # How a repayment came in: cash (goes in the galla), easypaisa, jazzcash or bank.
+    method = Column(String(20), nullable=True)
 
     customer = relationship("Customer", back_populates="ledger_entries")
 
@@ -46,5 +50,6 @@ class SupplierLedgerEntry(Base):
     due_date = Column(DateTime, nullable=True, index=True)
     reference = Column(String(80), nullable=True)
     description = Column(String(200), nullable=True)
+    method = Column(String(20), nullable=True)  # how a payment was made: cash or bank/mobile
 
     supplier = relationship("Supplier", back_populates="ledger_entries")

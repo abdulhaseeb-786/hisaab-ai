@@ -94,6 +94,272 @@
         }
       }
     },
+    "/api/day/today": {
+      "get": {
+        "tags": [
+          "Day: open, close, kharcha"
+        ],
+        "summary": "Get Today",
+        "description": "Is the shop open? What should be in the galla now, and today's figures so far.",
+        "operationId": "get_today_api_day_today_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/day/open": {
+      "post": {
+        "tags": [
+          "Day: open, close, kharcha"
+        ],
+        "summary": "Open Day",
+        "description": "Open the day with the counted galla. A difference from the records is booked.",
+        "operationId": "open_day_api_day_open_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashCountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayOpenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/day/close": {
+      "post": {
+        "tags": [
+          "Day: open, close, kharcha"
+        ],
+        "summary": "Close Day",
+        "description": "Close the day with the counted galla. Returns the day's summary and what tomorrow holds.",
+        "operationId": "close_day_api_day_close_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashCountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayCloseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/day/history": {
+      "get": {
+        "tags": [
+          "Day: open, close, kharcha"
+        ],
+        "summary": "Get History",
+        "description": "Past days: opening and closing counts, galla differences, and each day's figures.",
+        "operationId": "get_history_api_day_history_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 90,
+              "minimum": 1,
+              "default": 14,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayHistoryItem"
+                  },
+                  "title": "Response Get History Api Day History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/expenses": {
+      "post": {
+        "tags": [
+          "Day: open, close, kharcha"
+        ],
+        "summary": "Add Expense",
+        "description": "Kharcha paid from the galla: rent, bijli, salary, transport, or money taken home or banked.",
+        "operationId": "add_expense_api_expenses_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpenseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/dashboard": {
       "get": {
         "tags": [
@@ -599,13 +865,130 @@
         }
       }
     },
+    "/api/credit/customers": {
+      "get": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "List Customers",
+        "description": "Every khata customer, most recently active first, for the picker at the counter.",
+        "operationId": "list_customers_api_credit_customers_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 60
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomerItem"
+                  },
+                  "title": "Response List Customers Api Credit Customers Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "Add Customer",
+        "description": "Open a new khata.",
+        "operationId": "add_customer_api_credit_customers_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/credit/customers/{customer_id}": {
       "get": {
         "tags": [
           "Customer Khata"
         ],
         "summary": "Get Customer Ledger",
-        "description": "One customer's khata page with a running balance.",
+        "description": "One customer's khata page with a running balance and the items bought on each udhaar.",
         "operationId": "get_customer_ledger_api_credit_customers__customer_id__get",
         "parameters": [
           {
@@ -652,23 +1035,143 @@
         }
       }
     },
+    "/api/credit/check": {
+      "post": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "Check Credit",
+        "description": "'Udhaar dun?' Yes, careful or no for this customer and amount, with the reasons.",
+        "operationId": "check_credit_api_credit_check_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/credit/udhaar": {
+      "post": {
+        "tags": [
+          "Customer Khata"
+        ],
+        "summary": "Give Udhaar",
+        "description": "Write udhaar in the khata: who, which items, at what price, and when it is due.\n\nItems are sold from stock at the shelf price and linked to the khata line. Returns a\nreceipt draft to show the customer; nothing is sent anywhere.",
+        "operationId": "give_udhaar_api_credit_udhaar_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UdhaarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UdhaarResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/credit/payment": {
       "post": {
         "tags": [
           "Customer Khata"
         ],
         "summary": "Record Customer Payment",
-        "description": "Record a repayment (wasooli). It cannot be more than the customer owes.",
+        "description": "Record a repayment (wasooli) and how it was paid. It cannot be more than the customer owes.\n\nOnly cash goes into the galla; Easypaisa, JazzCash and bank payments do not.",
         "operationId": "record_customer_payment_api_credit_payment_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PaymentRecordRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -789,6 +1292,588 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CashOutlookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/suppliers": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get Suppliers",
+        "description": "Distributors with their route days, what is owed, and how much the shop can safely order.",
+        "operationId": "get_suppliers_api_orders_suppliers_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuppliersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/suggest": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Suggest",
+        "description": "What to order from this distributor within the budget, in whole packs, with reasons.",
+        "operationId": "suggest_api_orders_suggest_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderSuggestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderSuggestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Create",
+        "description": "Save the order given to the booker. Returns the order text to show on screen; nothing is sent.",
+        "operationId": "create_api_orders_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCreated"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "List Orders",
+        "operationId": "list_orders_api_orders_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "received",
+                    "cancelled"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "pending",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "supplier_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Supplier Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 30,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  },
+                  "title": "Response List Orders Api Orders Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{purchase_id}/receive": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Receive",
+        "description": "Maal aaya: stock in at the bill price, a supplier bill created, price changes flagged.",
+        "operationId": "receive_api_orders__purchase_id__receive_post",
+        "parameters": [
+          {
+            "name": "purchase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Purchase Id"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payables/pay": {
+      "post": {
+        "tags": [
+          "Supplier Payables & Cash"
+        ],
+        "summary": "Pay",
+        "description": "Pay a distributor. Clears the oldest bills first. Cash payments come out of the galla.",
+        "operationId": "pay_api_payables_pay_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierPaymentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierPaymentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stock-count/sheet": {
+      "get": {
+        "tags": [
+          "Stock count"
+        ],
+        "summary": "Sheet",
+        "description": "The counting sheet for one shelf (category): what the records expect on it.",
+        "operationId": "sheet_api_stock_count_sheet_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountSheetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stock-count": {
+      "post": {
+        "tags": [
+          "Stock count"
+        ],
+        "summary": "Submit",
+        "description": "Save a count. Stock is set to what was counted; a shortfall is booked as loss or as unrecorded sales.",
+        "operationId": "submit_api_stock_count_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stock-count/history": {
+      "get": {
+        "tags": [
+          "Stock count"
+        ],
+        "summary": "History",
+        "operationId": "history_api_stock_count_history_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountHistoryItem"
+                  },
+                  "title": "Response History Api Stock Count History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/business": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Business",
+        "description": "Six months of sales, profit after costs, credit, supplier bills and record keeping, for a lender.",
+        "operationId": "business_api_reports_business_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReportResponse"
                 }
               }
             }
@@ -1242,6 +2327,24 @@
         ],
         "title": "AgingBuckets"
       },
+      "Bilingual": {
+        "properties": {
+          "en": {
+            "type": "string",
+            "title": "En"
+          },
+          "ur": {
+            "type": "string",
+            "title": "Ur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "en",
+          "ur"
+        ],
+        "title": "Bilingual"
+      },
       "Body_preview_csv_api_import_csv_post": {
         "properties": {
           "file": {
@@ -1269,6 +2372,80 @@
           "file"
         ],
         "title": "Body_preview_csv_api_import_csv_post"
+      },
+      "BusinessReportResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "store": {
+            "$ref": "#/components/schemas/ReportStore"
+          },
+          "months": {
+            "items": {
+              "$ref": "#/components/schemas/ReportMonth"
+            },
+            "type": "array",
+            "title": "Months"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ReportSummary"
+          },
+          "position": {
+            "$ref": "#/components/schemas/ReportPosition"
+          },
+          "credit": {
+            "$ref": "#/components/schemas/ReportCredit"
+          },
+          "suppliers": {
+            "$ref": "#/components/schemas/ReportSuppliers"
+          },
+          "record_keeping": {
+            "$ref": "#/components/schemas/ReportRecords"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths"
+          },
+          "cautions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cautions"
+          },
+          "method_notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Method Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "store",
+          "months",
+          "summary",
+          "position",
+          "credit",
+          "suppliers",
+          "record_keeping",
+          "strengths",
+          "cautions",
+          "method_notes"
+        ],
+        "title": "BusinessReportResponse"
       },
       "CSVCommitRequest": {
         "properties": {
@@ -1397,6 +2574,33 @@
           "multiplier"
         ],
         "title": "CalendarEffect"
+      },
+      "CashCountRequest": {
+        "properties": {
+          "counted_cash": {
+            "type": "number",
+            "maximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Counted Cash"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "counted_cash"
+        ],
+        "title": "CashCountRequest"
       },
       "CashDay": {
         "properties": {
@@ -1649,6 +2853,10 @@
             "type": "number",
             "title": "Expenses Pkr"
           },
+          "galla_differences_pkr": {
+            "type": "number",
+            "title": "Galla Differences Pkr"
+          },
           "cash_in_hand_pkr": {
             "type": "number",
             "title": "Cash In Hand Pkr"
@@ -1663,9 +2871,28 @@
           "wasooli_pkr",
           "supplier_payments_pkr",
           "expenses_pkr",
+          "galla_differences_pkr",
           "cash_in_hand_pkr"
         ],
         "title": "CashPosition"
+      },
+      "CategoryCount": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "items": {
+            "type": "integer",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "items"
+        ],
+        "title": "CategoryCount"
       },
       "ChatMessage": {
         "properties": {
@@ -1809,6 +3036,492 @@
         ],
         "title": "CopilotStatus"
       },
+      "CountHistoryItem": {
+        "properties": {
+          "count_id": {
+            "type": "integer",
+            "title": "Count Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "items_counted": {
+            "type": "integer",
+            "title": "Items Counted"
+          },
+          "items_matched": {
+            "type": "integer",
+            "title": "Items Matched"
+          },
+          "short_value_at_cost_pkr": {
+            "type": "number",
+            "title": "Short Value At Cost Pkr"
+          },
+          "extra_value_at_cost_pkr": {
+            "type": "number",
+            "title": "Extra Value At Cost Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count_id",
+          "timestamp",
+          "note",
+          "items_counted",
+          "items_matched",
+          "short_value_at_cost_pkr",
+          "extra_value_at_cost_pkr"
+        ],
+        "title": "CountHistoryItem"
+      },
+      "CountLineIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "counted_qty": {
+            "type": "number",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Counted Qty"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "counted_qty"
+        ],
+        "title": "CountLineIn"
+      },
+      "CountRequest": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CountLineIn"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Lines"
+          },
+          "treat_short_as": {
+            "type": "string",
+            "enum": [
+              "loss",
+              "sales"
+            ],
+            "title": "Treat Short As",
+            "description": "'sales' books a shortfall as cash sales not written down.",
+            "default": "loss"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ],
+        "title": "CountRequest"
+      },
+      "CountResponse": {
+        "properties": {
+          "count_id": {
+            "type": "integer",
+            "title": "Count Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "treat_short_as": {
+            "type": "string",
+            "enum": [
+              "loss",
+              "sales"
+            ],
+            "title": "Treat Short As"
+          },
+          "items_counted": {
+            "type": "integer",
+            "title": "Items Counted"
+          },
+          "items_matched": {
+            "type": "integer",
+            "title": "Items Matched"
+          },
+          "items_short": {
+            "type": "integer",
+            "title": "Items Short"
+          },
+          "items_extra": {
+            "type": "integer",
+            "title": "Items Extra"
+          },
+          "short_value_at_cost_pkr": {
+            "type": "number",
+            "title": "Short Value At Cost Pkr"
+          },
+          "short_value_at_price_pkr": {
+            "type": "number",
+            "title": "Short Value At Price Pkr"
+          },
+          "extra_value_at_cost_pkr": {
+            "type": "number",
+            "title": "Extra Value At Cost Pkr"
+          },
+          "inferred_sale_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inferred Sale Id"
+          },
+          "inferred_sales_pkr": {
+            "type": "number",
+            "title": "Inferred Sales Pkr"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CountResultLine"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count_id",
+          "timestamp",
+          "treat_short_as",
+          "items_counted",
+          "items_matched",
+          "items_short",
+          "items_extra",
+          "short_value_at_cost_pkr",
+          "short_value_at_price_pkr",
+          "extra_value_at_cost_pkr",
+          "inferred_sale_id",
+          "inferred_sales_pkr",
+          "lines"
+        ],
+        "title": "CountResponse"
+      },
+      "CountResultLine": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "expected_qty": {
+            "type": "number",
+            "title": "Expected Qty"
+          },
+          "counted_qty": {
+            "type": "number",
+            "title": "Counted Qty"
+          },
+          "difference_qty": {
+            "type": "number",
+            "title": "Difference Qty"
+          },
+          "difference_value_pkr": {
+            "type": "number",
+            "title": "Difference Value Pkr"
+          },
+          "last_counted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Counted At"
+          },
+          "recorded_sales_since_last_count": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded Sales Since Last Count"
+          },
+          "sold_since_last_count": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sold Since Last Count",
+            "description": "From the counts: last count + received - this count."
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "unit",
+          "expected_qty",
+          "counted_qty",
+          "difference_qty",
+          "difference_value_pkr",
+          "last_counted_at",
+          "recorded_sales_since_last_count",
+          "sold_since_last_count"
+        ],
+        "title": "CountResultLine"
+      },
+      "CountSheetItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          },
+          "expected_qty": {
+            "type": "number",
+            "title": "Expected Qty"
+          },
+          "cost_price": {
+            "type": "number",
+            "title": "Cost Price"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "last_counted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Counted At"
+          },
+          "last_counted_qty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Counted Qty"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "category",
+          "unit",
+          "image_url",
+          "expected_qty",
+          "cost_price",
+          "selling_price",
+          "last_counted_at",
+          "last_counted_qty"
+        ],
+        "title": "CountSheetItem"
+      },
+      "CountSheetResponse": {
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryCount"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CountSheetItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "categories",
+          "category",
+          "items"
+        ],
+        "title": "CountSheetResponse"
+      },
+      "CreditCheckRequest": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "amount": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "amount"
+        ],
+        "title": "CreditCheckRequest"
+      },
+      "CreditCheckResponse": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "amount_pkr": {
+            "type": "number",
+            "title": "Amount Pkr"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "careful",
+              "no"
+            ],
+            "title": "Decision"
+          },
+          "balance_pkr": {
+            "type": "number",
+            "title": "Balance Pkr"
+          },
+          "balance_after_pkr": {
+            "type": "number",
+            "title": "Balance After Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "days_overdue": {
+            "type": "integer",
+            "title": "Days Overdue"
+          },
+          "credit_limit_pkr": {
+            "type": "number",
+            "title": "Credit Limit Pkr"
+          },
+          "safe_mark_score": {
+            "type": "number",
+            "title": "Safe Mark Score"
+          },
+          "safe_amount_pkr": {
+            "type": "number",
+            "title": "Safe Amount Pkr",
+            "description": "How much more credit fits in the limit. 0 if a bill is over 30 days late."
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/Bilingual"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "amount_pkr",
+          "decision",
+          "balance_pkr",
+          "balance_after_pkr",
+          "overdue_pkr",
+          "days_overdue",
+          "credit_limit_pkr",
+          "safe_mark_score",
+          "safe_amount_pkr",
+          "reasons"
+        ],
+        "title": "CreditCheckResponse"
+      },
       "CreditSummaryResponse": {
         "properties": {
           "data_label": {
@@ -1894,6 +3607,113 @@
           "overdue_61_plus"
         ],
         "title": "CustomerAging"
+      },
+      "CustomerCreateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "credit_limit": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Credit Limit",
+            "default": 5000
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CustomerCreateRequest"
+      },
+      "CustomerItem": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "credit_limit_pkr": {
+            "type": "number",
+            "title": "Credit Limit Pkr"
+          },
+          "balance_pkr": {
+            "type": "number",
+            "title": "Balance Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "safe_mark_score": {
+            "type": "number",
+            "title": "Safe Mark Score"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Risk Level"
+          },
+          "last_activity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "phone",
+          "credit_limit_pkr",
+          "balance_pkr",
+          "overdue_pkr",
+          "safe_mark_score",
+          "risk_level",
+          "last_activity"
+        ],
+        "title": "CustomerItem"
       },
       "CustomerKhataItem": {
         "properties": {
@@ -2079,6 +3899,34 @@
         ],
         "title": "CustomerLedgerResponse"
       },
+      "CustomerReminder": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "days_overdue": {
+            "type": "integer",
+            "title": "Days Overdue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "overdue_pkr",
+          "days_overdue"
+        ],
+        "title": "CustomerReminder"
+      },
       "DailyForecastPoint": {
         "properties": {
           "date": {
@@ -2142,6 +3990,430 @@
           "revenue_pkr"
         ],
         "title": "DailyRevenuePoint"
+      },
+      "DayCloseResponse": {
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/DaySessionOut"
+          },
+          "difference_pkr": {
+            "type": "number",
+            "title": "Difference Pkr"
+          },
+          "figures": {
+            "$ref": "#/components/schemas/DayFigures"
+          },
+          "tomorrow": {
+            "$ref": "#/components/schemas/TomorrowPlan"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session",
+          "difference_pkr",
+          "figures",
+          "tomorrow"
+        ],
+        "title": "DayCloseResponse"
+      },
+      "DayFigures": {
+        "properties": {
+          "bills": {
+            "type": "integer",
+            "title": "Bills",
+            "description": "Number of sales (cash and udhaar)."
+          },
+          "sales_pkr": {
+            "type": "number",
+            "title": "Sales Pkr"
+          },
+          "cash_sales_pkr": {
+            "type": "number",
+            "title": "Cash Sales Pkr"
+          },
+          "udhaar_given_pkr": {
+            "type": "number",
+            "title": "Udhaar Given Pkr"
+          },
+          "wasooli_cash_pkr": {
+            "type": "number",
+            "title": "Wasooli Cash Pkr"
+          },
+          "wasooli_digital_pkr": {
+            "type": "number",
+            "title": "Wasooli Digital Pkr",
+            "description": "Easypaisa, JazzCash and bank. Not in the galla."
+          },
+          "supplier_payments_pkr": {
+            "type": "number",
+            "title": "Supplier Payments Pkr",
+            "description": "Paid to distributors in cash from the galla."
+          },
+          "expenses_pkr": {
+            "type": "number",
+            "title": "Expenses Pkr",
+            "description": "Running costs: rent, bijli, salaries, transport, general."
+          },
+          "withdrawals_pkr": {
+            "type": "number",
+            "title": "Withdrawals Pkr",
+            "description": "Money taken home or deposited in the bank. Not a cost."
+          },
+          "gross_profit_pkr": {
+            "type": "number",
+            "title": "Gross Profit Pkr",
+            "description": "Sales minus the cost of the items sold."
+          }
+        },
+        "type": "object",
+        "required": [
+          "bills",
+          "sales_pkr",
+          "cash_sales_pkr",
+          "udhaar_given_pkr",
+          "wasooli_cash_pkr",
+          "wasooli_digital_pkr",
+          "supplier_payments_pkr",
+          "expenses_pkr",
+          "withdrawals_pkr",
+          "gross_profit_pkr"
+        ],
+        "title": "DayFigures"
+      },
+      "DayHistoryItem": {
+        "properties": {
+          "session_id": {
+            "type": "integer",
+            "title": "Session Id"
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Business Date"
+          },
+          "opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opened At"
+          },
+          "opening_expected_pkr": {
+            "type": "number",
+            "title": "Opening Expected Pkr"
+          },
+          "opening_counted_pkr": {
+            "type": "number",
+            "title": "Opening Counted Pkr"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "closing_expected_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Expected Pkr"
+          },
+          "closing_counted_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Counted Pkr"
+          },
+          "closing_difference_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Difference Pkr"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "figures": {
+            "$ref": "#/components/schemas/DayFigures"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "business_date",
+          "opened_at",
+          "opening_expected_pkr",
+          "opening_counted_pkr",
+          "closed_at",
+          "closing_expected_pkr",
+          "closing_counted_pkr",
+          "closing_difference_pkr",
+          "note",
+          "figures"
+        ],
+        "title": "DayHistoryItem"
+      },
+      "DayOpenResponse": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "not_opened",
+              "open",
+              "closed"
+            ],
+            "title": "State"
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Business Date"
+          },
+          "now": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Now"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DaySessionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cash_in_drawer_expected_pkr": {
+            "type": "number",
+            "title": "Cash In Drawer Expected Pkr"
+          },
+          "today": {
+            "$ref": "#/components/schemas/DayFigures"
+          },
+          "since_open_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Since Open Start"
+          },
+          "yesterday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DaySessionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difference_pkr": {
+            "type": "number",
+            "title": "Difference Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state",
+          "business_date",
+          "now",
+          "session",
+          "cash_in_drawer_expected_pkr",
+          "today",
+          "since_open_start",
+          "yesterday",
+          "difference_pkr"
+        ],
+        "title": "DayOpenResponse"
+      },
+      "DaySessionOut": {
+        "properties": {
+          "session_id": {
+            "type": "integer",
+            "title": "Session Id"
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Business Date"
+          },
+          "opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opened At"
+          },
+          "opening_expected_pkr": {
+            "type": "number",
+            "title": "Opening Expected Pkr"
+          },
+          "opening_counted_pkr": {
+            "type": "number",
+            "title": "Opening Counted Pkr"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "closing_expected_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Expected Pkr"
+          },
+          "closing_counted_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Counted Pkr"
+          },
+          "closing_difference_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Difference Pkr"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "business_date",
+          "opened_at",
+          "opening_expected_pkr",
+          "opening_counted_pkr",
+          "closed_at",
+          "closing_expected_pkr",
+          "closing_counted_pkr",
+          "closing_difference_pkr",
+          "note"
+        ],
+        "title": "DaySessionOut"
+      },
+      "DayStatusResponse": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "not_opened",
+              "open",
+              "closed"
+            ],
+            "title": "State"
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Business Date"
+          },
+          "now": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Now"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DaySessionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cash_in_drawer_expected_pkr": {
+            "type": "number",
+            "title": "Cash In Drawer Expected Pkr"
+          },
+          "today": {
+            "$ref": "#/components/schemas/DayFigures"
+          },
+          "since_open_start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Since Open Start"
+          },
+          "yesterday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DaySessionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "state",
+          "business_date",
+          "now",
+          "session",
+          "cash_in_drawer_expected_pkr",
+          "today",
+          "since_open_start",
+          "yesterday"
+        ],
+        "title": "DayStatusResponse"
       },
       "DeadStockItem": {
         "properties": {
@@ -2304,6 +4576,102 @@
           "seconds"
         ],
         "title": "DemoResetResponse"
+      },
+      "ExpenseRequest": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "rent",
+              "electricity",
+              "salaries",
+              "transport",
+              "general",
+              "owner_drawings",
+              "bank_deposit"
+            ],
+            "title": "Category"
+          },
+          "amount": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Amount"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "amount"
+        ],
+        "title": "ExpenseRequest"
+      },
+      "ExpenseResponse": {
+        "properties": {
+          "expense_id": {
+            "type": "integer",
+            "title": "Expense Id"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "rent",
+              "electricity",
+              "salaries",
+              "transport",
+              "general",
+              "owner_drawings",
+              "bank_deposit"
+            ],
+            "title": "Category"
+          },
+          "amount_pkr": {
+            "type": "number",
+            "title": "Amount Pkr"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "cash_in_drawer_pkr": {
+            "type": "number",
+            "title": "Cash In Drawer Pkr"
+          },
+          "method": {
+            "type": "string",
+            "const": "cash",
+            "title": "Method"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expense_id",
+          "category",
+          "amount_pkr",
+          "note",
+          "cash_in_drawer_pkr",
+          "method"
+        ],
+        "title": "ExpenseResponse"
       },
       "ExpenseRule": {
         "properties": {
@@ -2656,6 +5024,44 @@
         ],
         "title": "InsightsResponse"
       },
+      "ItemLine": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "qty": {
+            "type": "number",
+            "title": "Qty"
+          },
+          "unit_price": {
+            "type": "number",
+            "title": "Unit Price"
+          },
+          "line_total": {
+            "type": "number",
+            "title": "Line Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "unit",
+          "qty",
+          "unit_price",
+          "line_total"
+        ],
+        "title": "ItemLine"
+      },
       "KPISummary": {
         "properties": {
           "data_label": {
@@ -2879,6 +5285,32 @@
             ],
             "title": "Description"
           },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cash",
+                  "easypaisa",
+                  "jazzcash",
+                  "bank"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method",
+            "description": "How a repayment was made. Empty for udhaar."
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemLine"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "What was bought on this udhaar, when known."
+          },
           "running_balance_pkr": {
             "type": "number",
             "title": "Running Balance Pkr"
@@ -3024,6 +5456,25 @@
         ],
         "title": "MarginSqueezeItem"
       },
+      "MessageDraft": {
+        "properties": {
+          "roman_urdu": {
+            "type": "string",
+            "title": "Roman Urdu"
+          },
+          "english": {
+            "type": "string",
+            "title": "English"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roman_urdu",
+          "english"
+        ],
+        "title": "MessageDraft",
+        "description": "A message the shopkeeper can read out, show, or copy. HisaabAI never sends it."
+      },
       "ModelScore": {
         "properties": {
           "model": {
@@ -3116,6 +5567,447 @@
         ],
         "title": "OpenInvoice"
       },
+      "Order": {
+        "properties": {
+          "purchase_id": {
+            "type": "integer",
+            "title": "Purchase Id"
+          },
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "ordered_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ordered At"
+          },
+          "expected_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Date"
+          },
+          "received_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received Date"
+          },
+          "bill_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bill Number"
+          },
+          "total_pkr": {
+            "type": "number",
+            "title": "Total Pkr"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/OrderLine"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "purchase_id",
+          "supplier_id",
+          "supplier_name",
+          "status",
+          "ordered_at",
+          "expected_date",
+          "received_date",
+          "bill_number",
+          "total_pkr",
+          "lines"
+        ],
+        "title": "Order"
+      },
+      "OrderCreateRequest": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/OrderLineIn"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "lines"
+        ],
+        "title": "OrderCreateRequest"
+      },
+      "OrderCreated": {
+        "properties": {
+          "purchase_id": {
+            "type": "integer",
+            "title": "Purchase Id"
+          },
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "received",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "ordered_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ordered At"
+          },
+          "expected_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Date"
+          },
+          "received_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received Date"
+          },
+          "bill_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bill Number"
+          },
+          "total_pkr": {
+            "type": "number",
+            "title": "Total Pkr"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/OrderLine"
+            },
+            "type": "array",
+            "title": "Lines"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/MessageDraft"
+          }
+        },
+        "type": "object",
+        "required": [
+          "purchase_id",
+          "supplier_id",
+          "supplier_name",
+          "status",
+          "ordered_at",
+          "expected_date",
+          "received_date",
+          "bill_number",
+          "total_pkr",
+          "lines",
+          "draft"
+        ],
+        "title": "OrderCreated"
+      },
+      "OrderLine": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "pack_unit": {
+            "type": "string",
+            "title": "Pack Unit"
+          },
+          "units_per_pack": {
+            "type": "integer",
+            "title": "Units Per Pack"
+          },
+          "packs": {
+            "type": "number",
+            "title": "Packs"
+          },
+          "qty": {
+            "type": "number",
+            "title": "Qty"
+          },
+          "received_qty": {
+            "type": "number",
+            "title": "Received Qty"
+          },
+          "unit_cost": {
+            "type": "number",
+            "title": "Unit Cost"
+          },
+          "line_total": {
+            "type": "number",
+            "title": "Line Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "unit",
+          "pack_unit",
+          "units_per_pack",
+          "packs",
+          "qty",
+          "received_qty",
+          "unit_cost",
+          "line_total"
+        ],
+        "title": "OrderLine"
+      },
+      "OrderLineIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "packs": {
+            "type": "number",
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Packs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "packs"
+        ],
+        "title": "OrderLineIn"
+      },
+      "OrderSuggestRequest": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "budget_pkr": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Budget Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "budget_pkr"
+        ],
+        "title": "OrderSuggestRequest"
+      },
+      "OrderSuggestResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "budget_entered_pkr": {
+            "type": "number",
+            "title": "Budget Entered Pkr"
+          },
+          "target_cover_days": {
+            "type": "integer",
+            "title": "Target Cover Days"
+          },
+          "total_allocated_spend_pkr": {
+            "type": "number",
+            "title": "Total Allocated Spend Pkr"
+          },
+          "remaining_unallocated_pkr": {
+            "type": "number",
+            "title": "Remaining Unallocated Pkr"
+          },
+          "budget_used_pct": {
+            "type": "number",
+            "title": "Budget Used Pct"
+          },
+          "budget_respected": {
+            "type": "boolean",
+            "title": "Budget Respected"
+          },
+          "total_skus_recommended": {
+            "type": "integer",
+            "title": "Total Skus Recommended"
+          },
+          "items_needing_reorder": {
+            "type": "integer",
+            "title": "Items Needing Reorder"
+          },
+          "items_fully_covered": {
+            "type": "integer",
+            "title": "Items Fully Covered"
+          },
+          "budget_to_cover_everything_pkr": {
+            "type": "number",
+            "title": "Budget To Cover Everything Pkr"
+          },
+          "products_with_unknown_demand": {
+            "type": "integer",
+            "title": "Products With Unknown Demand"
+          },
+          "projected_revenue_pkr": {
+            "type": "number",
+            "title": "Projected Revenue Pkr"
+          },
+          "projected_gross_profit_pkr": {
+            "type": "number",
+            "title": "Projected Gross Profit Pkr"
+          },
+          "ranking_rule": {
+            "type": "string",
+            "title": "Ranking Rule"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/PurchasePlanLine"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/SkippedItem"
+            },
+            "type": "array",
+            "title": "Skipped"
+          },
+          "skipped_count": {
+            "type": "integer",
+            "title": "Skipped Count"
+          },
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan_id",
+          "store_id",
+          "as_of",
+          "budget_entered_pkr",
+          "target_cover_days",
+          "total_allocated_spend_pkr",
+          "remaining_unallocated_pkr",
+          "budget_used_pct",
+          "budget_respected",
+          "total_skus_recommended",
+          "items_needing_reorder",
+          "items_fully_covered",
+          "budget_to_cover_everything_pkr",
+          "products_with_unknown_demand",
+          "projected_revenue_pkr",
+          "projected_gross_profit_pkr",
+          "ranking_rule",
+          "recommendations",
+          "skipped",
+          "skipped_count",
+          "supplier_id",
+          "supplier_name"
+        ],
+        "title": "OrderSuggestResponse"
+      },
       "PayablesSummaryResponse": {
         "properties": {
           "data_label": {
@@ -3184,11 +6076,28 @@
             "exclusiveMinimum": 0.0,
             "title": "Amount"
           },
-          "notes": {
+          "method": {
             "type": "string",
-            "maxLength": 200,
-            "title": "Notes",
-            "default": "Counter wasooli"
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method",
+            "default": "cash"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
           }
         },
         "type": "object",
@@ -3212,6 +6121,16 @@
             "type": "number",
             "title": "Amount Received"
           },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method"
+          },
           "previous_balance": {
             "type": "number",
             "title": "Previous Balance"
@@ -3223,6 +6142,9 @@
           "message": {
             "type": "string",
             "title": "Message"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/MessageDraft"
           }
         },
         "type": "object",
@@ -3230,9 +6152,11 @@
           "customer_id",
           "name",
           "amount_received",
+          "method",
           "previous_balance",
           "new_balance",
-          "message"
+          "message",
+          "receipt"
         ],
         "title": "PaymentRecordResponse"
       },
@@ -3298,47 +6222,6 @@
           "was_overdue"
         ],
         "title": "PlannedSupplierPayment"
-      },
-      "PriceChange": {
-        "properties": {
-          "effective_date": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Effective Date"
-          },
-          "cost_price": {
-            "type": "number",
-            "title": "Cost Price"
-          },
-          "selling_price": {
-            "type": "number",
-            "title": "Selling Price"
-          },
-          "margin_pct": {
-            "type": "number",
-            "title": "Margin Pct"
-          },
-          "reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason"
-          }
-        },
-        "type": "object",
-        "required": [
-          "effective_date",
-          "cost_price",
-          "selling_price",
-          "margin_pct",
-          "reason"
-        ],
-        "title": "PriceChange"
       },
       "PriceUpdateRequest": {
         "properties": {
@@ -3604,7 +6487,7 @@
           },
           "price_history": {
             "items": {
-              "$ref": "#/components/schemas/PriceChange"
+              "$ref": "#/components/schemas/app__schemas__inventory__PriceChange"
             },
             "type": "array",
             "title": "Price History"
@@ -4002,6 +6885,17 @@
             "type": "string",
             "title": "Image Url"
           },
+          "supplier_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Id"
+          },
           "supplier_name": {
             "type": "string",
             "title": "Supplier Name"
@@ -4127,6 +7021,7 @@
           "product_name",
           "category",
           "image_url",
+          "supplier_id",
           "supplier_name",
           "pack_unit",
           "units_per_pack",
@@ -4155,6 +7050,127 @@
           "reasons_ur"
         ],
         "title": "PurchasePlanLine"
+      },
+      "ReceiveLineIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "received_qty": {
+            "type": "number",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Received Qty"
+          },
+          "unit_cost": {
+            "type": "number",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Unit Cost",
+            "description": "Price per unit on the distributor's bill."
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "received_qty",
+          "unit_cost"
+        ],
+        "title": "ReceiveLineIn"
+      },
+      "ReceiveRequest": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/ReceiveLineIn"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Lines"
+          },
+          "bill_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bill Number"
+          },
+          "pay_now_pkr": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Pay Now Pkr",
+            "default": 0
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method",
+            "default": "cash"
+          }
+        },
+        "type": "object",
+        "title": "ReceiveRequest"
+      },
+      "ReceiveResponse": {
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "bill_total_pkr": {
+            "type": "number",
+            "title": "Bill Total Pkr"
+          },
+          "paid_now_pkr": {
+            "type": "number",
+            "title": "Paid Now Pkr"
+          },
+          "left_to_pay_pkr": {
+            "type": "number",
+            "title": "Left To Pay Pkr"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due Date"
+          },
+          "price_changes": {
+            "items": {
+              "$ref": "#/components/schemas/app__schemas__workflow__PriceChange"
+            },
+            "type": "array",
+            "title": "Price Changes"
+          },
+          "short_items": {
+            "items": {
+              "$ref": "#/components/schemas/ShortItem"
+            },
+            "type": "array",
+            "title": "Short Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order",
+          "bill_total_pkr",
+          "paid_now_pkr",
+          "left_to_pay_pkr",
+          "due_date",
+          "price_changes",
+          "short_items"
+        ],
+        "title": "ReceiveResponse"
       },
       "ReorderPlanResponse": {
         "properties": {
@@ -4316,6 +7332,314 @@
         ],
         "title": "ReorderRequest"
       },
+      "ReportCredit": {
+        "properties": {
+          "outstanding_pkr": {
+            "type": "number",
+            "title": "Outstanding Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "overdue_pct": {
+            "type": "number",
+            "title": "Overdue Pct"
+          },
+          "customers_with_balance": {
+            "type": "integer",
+            "title": "Customers With Balance"
+          },
+          "given_90d_pkr": {
+            "type": "number",
+            "title": "Given 90D Pkr"
+          },
+          "collected_90d_pkr": {
+            "type": "number",
+            "title": "Collected 90D Pkr"
+          },
+          "collection_ratio_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collection Ratio Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "outstanding_pkr",
+          "overdue_pkr",
+          "overdue_pct",
+          "customers_with_balance",
+          "given_90d_pkr",
+          "collected_90d_pkr",
+          "collection_ratio_pct"
+        ],
+        "title": "ReportCredit"
+      },
+      "ReportMonth": {
+        "properties": {
+          "month": {
+            "type": "string",
+            "title": "Month"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "is_partial": {
+            "type": "boolean",
+            "title": "Is Partial"
+          },
+          "days_trading": {
+            "type": "integer",
+            "title": "Days Trading"
+          },
+          "revenue_pkr": {
+            "type": "number",
+            "title": "Revenue Pkr"
+          },
+          "gross_profit_pkr": {
+            "type": "number",
+            "title": "Gross Profit Pkr"
+          },
+          "gross_margin_pct": {
+            "type": "number",
+            "title": "Gross Margin Pct"
+          },
+          "operating_expenses_pkr": {
+            "type": "number",
+            "title": "Operating Expenses Pkr"
+          },
+          "net_profit_pkr": {
+            "type": "number",
+            "title": "Net Profit Pkr"
+          },
+          "cash_sales_pct": {
+            "type": "number",
+            "title": "Cash Sales Pct"
+          },
+          "average_daily_sales_pkr": {
+            "type": "number",
+            "title": "Average Daily Sales Pkr"
+          },
+          "bills": {
+            "type": "integer",
+            "title": "Bills"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "start",
+          "is_partial",
+          "days_trading",
+          "revenue_pkr",
+          "gross_profit_pkr",
+          "gross_margin_pct",
+          "operating_expenses_pkr",
+          "net_profit_pkr",
+          "cash_sales_pct",
+          "average_daily_sales_pkr",
+          "bills"
+        ],
+        "title": "ReportMonth"
+      },
+      "ReportPosition": {
+        "properties": {
+          "cash_in_hand_pkr": {
+            "type": "number",
+            "title": "Cash In Hand Pkr"
+          },
+          "stock_value_at_cost_pkr": {
+            "type": "number",
+            "title": "Stock Value At Cost Pkr"
+          },
+          "customer_credit_outstanding_pkr": {
+            "type": "number",
+            "title": "Customer Credit Outstanding Pkr"
+          },
+          "supplier_bills_outstanding_pkr": {
+            "type": "number",
+            "title": "Supplier Bills Outstanding Pkr"
+          },
+          "working_capital_pkr": {
+            "type": "number",
+            "title": "Working Capital Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cash_in_hand_pkr",
+          "stock_value_at_cost_pkr",
+          "customer_credit_outstanding_pkr",
+          "supplier_bills_outstanding_pkr",
+          "working_capital_pkr"
+        ],
+        "title": "ReportPosition"
+      },
+      "ReportRecords": {
+        "properties": {
+          "days_closed_last_30": {
+            "type": "integer",
+            "title": "Days Closed Last 30"
+          },
+          "days_galla_matched": {
+            "type": "integer",
+            "title": "Days Galla Matched"
+          },
+          "galla_difference_30d_pkr": {
+            "type": "number",
+            "title": "Galla Difference 30D Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days_closed_last_30",
+          "days_galla_matched",
+          "galla_difference_30d_pkr"
+        ],
+        "title": "ReportRecords"
+      },
+      "ReportStore": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "owner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Name"
+          },
+          "records_since": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records Since"
+          },
+          "days_of_records": {
+            "type": "integer",
+            "title": "Days Of Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "location",
+          "owner_name",
+          "records_since",
+          "days_of_records"
+        ],
+        "title": "ReportStore"
+      },
+      "ReportSummary": {
+        "properties": {
+          "average_monthly_sales_pkr": {
+            "type": "number",
+            "title": "Average Monthly Sales Pkr"
+          },
+          "average_monthly_net_profit_pkr": {
+            "type": "number",
+            "title": "Average Monthly Net Profit Pkr"
+          },
+          "average_gross_margin_pct": {
+            "type": "number",
+            "title": "Average Gross Margin Pct"
+          },
+          "sales_trend_3m_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Trend 3M Pct"
+          },
+          "profitable_months": {
+            "type": "integer",
+            "title": "Profitable Months"
+          },
+          "full_months": {
+            "type": "integer",
+            "title": "Full Months"
+          }
+        },
+        "type": "object",
+        "required": [
+          "average_monthly_sales_pkr",
+          "average_monthly_net_profit_pkr",
+          "average_gross_margin_pct",
+          "sales_trend_3m_pct",
+          "profitable_months",
+          "full_months"
+        ],
+        "title": "ReportSummary"
+      },
+      "ReportSuppliers": {
+        "properties": {
+          "outstanding_pkr": {
+            "type": "number",
+            "title": "Outstanding Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "billed_90d_pkr": {
+            "type": "number",
+            "title": "Billed 90D Pkr"
+          },
+          "paid_90d_pkr": {
+            "type": "number",
+            "title": "Paid 90D Pkr"
+          },
+          "average_monthly_purchases_pkr": {
+            "type": "number",
+            "title": "Average Monthly Purchases Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "outstanding_pkr",
+          "overdue_pkr",
+          "billed_90d_pkr",
+          "paid_90d_pkr",
+          "average_monthly_purchases_pkr"
+        ],
+        "title": "ReportSuppliers"
+      },
       "RowError": {
         "properties": {
           "row_number": {
@@ -4343,6 +7667,69 @@
         ],
         "title": "RowError"
       },
+      "SafeBudget": {
+        "properties": {
+          "safe_to_order_pkr": {
+            "type": "number",
+            "title": "Safe To Order Pkr"
+          },
+          "cash_in_hand_pkr": {
+            "type": "number",
+            "title": "Cash In Hand Pkr"
+          },
+          "bill_due_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Bill Due Date",
+            "description": "When a new order's bill would be due: delivery + credit days."
+          },
+          "lowest_cash_pkr": {
+            "type": "number",
+            "title": "Lowest Cash Pkr",
+            "description": "Lowest expected cash in the week after the bill is due."
+          },
+          "lowest_cash_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Lowest Cash Date"
+          },
+          "safety_cash_pkr": {
+            "type": "number",
+            "title": "Safety Cash Pkr"
+          },
+          "orders_on_the_way_pkr": {
+            "type": "number",
+            "title": "Orders On The Way Pkr"
+          },
+          "explanation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Explanation"
+          },
+          "explanation_ur": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Explanation Ur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "safe_to_order_pkr",
+          "cash_in_hand_pkr",
+          "bill_due_date",
+          "lowest_cash_pkr",
+          "lowest_cash_date",
+          "safety_cash_pkr",
+          "orders_on_the_way_pkr",
+          "explanation",
+          "explanation_ur"
+        ],
+        "title": "SafeBudget"
+      },
       "ScoreFactor": {
         "properties": {
           "reason": {
@@ -4360,6 +7747,39 @@
           "points"
         ],
         "title": "ScoreFactor"
+      },
+      "ShortItem": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "ordered_qty": {
+            "type": "number",
+            "title": "Ordered Qty"
+          },
+          "received_qty": {
+            "type": "number",
+            "title": "Received Qty"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "ordered_qty",
+          "received_qty",
+          "unit"
+        ],
+        "title": "ShortItem"
       },
       "SkippedItem": {
         "properties": {
@@ -4612,6 +8032,147 @@
         ],
         "title": "StoreProfile"
       },
+      "SupplierAmount": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "amount_pkr": {
+            "type": "number",
+            "title": "Amount Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "supplier_name",
+          "amount_pkr"
+        ],
+        "title": "SupplierAmount"
+      },
+      "SupplierOverview": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "contact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact"
+          },
+          "payment_terms_days": {
+            "type": "integer",
+            "title": "Payment Terms Days"
+          },
+          "visit_days": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Visit Days",
+            "description": "0 = Monday ... 6 = Sunday"
+          },
+          "visit_days_label": {
+            "type": "string",
+            "title": "Visit Days Label"
+          },
+          "visit_days_label_ur": {
+            "type": "string",
+            "title": "Visit Days Label Ur"
+          },
+          "visits_today": {
+            "type": "boolean",
+            "title": "Visits Today"
+          },
+          "next_visit_in_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Visit In Days"
+          },
+          "products": {
+            "type": "integer",
+            "title": "Products"
+          },
+          "total_payable_pkr": {
+            "type": "number",
+            "title": "Total Payable Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "due_within_7_days_pkr": {
+            "type": "number",
+            "title": "Due Within 7 Days Pkr"
+          },
+          "pending_orders_count": {
+            "type": "integer",
+            "title": "Pending Orders Count"
+          },
+          "pending_orders_value_pkr": {
+            "type": "number",
+            "title": "Pending Orders Value Pkr"
+          },
+          "budget": {
+            "$ref": "#/components/schemas/SafeBudget",
+            "description": "The most the galla can bear for an order from this distributor."
+          },
+          "usual_order_pkr": {
+            "type": "number",
+            "title": "Usual Order Pkr",
+            "description": "Average bill per order from them in the last 90 days."
+          },
+          "suggested_budget_pkr": {
+            "type": "number",
+            "title": "Suggested Budget Pkr",
+            "description": "The galla limit, capped at 1.5x the usual order."
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "name",
+          "contact",
+          "payment_terms_days",
+          "visit_days",
+          "visit_days_label",
+          "visit_days_label_ur",
+          "visits_today",
+          "next_visit_in_days",
+          "products",
+          "total_payable_pkr",
+          "overdue_pkr",
+          "due_within_7_days_pkr",
+          "pending_orders_count",
+          "pending_orders_value_pkr",
+          "budget",
+          "usual_order_pkr",
+          "suggested_budget_pkr"
+        ],
+        "title": "SupplierOverview"
+      },
       "SupplierPayableItem": {
         "properties": {
           "supplier_id": {
@@ -4706,6 +8267,146 @@
         ],
         "title": "SupplierPayableItem"
       },
+      "SupplierPaymentRequest": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "amount": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Amount"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method",
+            "default": "cash"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "amount"
+        ],
+        "title": "SupplierPaymentRequest"
+      },
+      "SupplierPaymentResponse": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          },
+          "amount_paid_pkr": {
+            "type": "number",
+            "title": "Amount Paid Pkr"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method"
+          },
+          "previous_payable_pkr": {
+            "type": "number",
+            "title": "Previous Payable Pkr"
+          },
+          "remaining_payable_pkr": {
+            "type": "number",
+            "title": "Remaining Payable Pkr"
+          },
+          "cash_in_drawer_pkr": {
+            "type": "number",
+            "title": "Cash In Drawer Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "supplier_name",
+          "amount_paid_pkr",
+          "method",
+          "previous_payable_pkr",
+          "remaining_payable_pkr",
+          "cash_in_drawer_pkr"
+        ],
+        "title": "SupplierPaymentResponse"
+      },
+      "SupplierRef": {
+        "properties": {
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "supplier_name": {
+            "type": "string",
+            "title": "Supplier Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supplier_id",
+          "supplier_name"
+        ],
+        "title": "SupplierRef"
+      },
+      "SuppliersResponse": {
+        "properties": {
+          "data_label": {
+            "type": "string",
+            "title": "Data Label"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "budget": {
+            "$ref": "#/components/schemas/SafeBudget"
+          },
+          "suppliers": {
+            "items": {
+              "$ref": "#/components/schemas/SupplierOverview"
+            },
+            "type": "array",
+            "title": "Suppliers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "as_of",
+          "budget",
+          "suppliers"
+        ],
+        "title": "SuppliersResponse"
+      },
       "TodayActionsResponse": {
         "properties": {
           "data_label": {
@@ -4747,6 +8448,59 @@
         ],
         "title": "TodayActionsResponse"
       },
+      "TomorrowPlan": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "weekday": {
+            "type": "string",
+            "title": "Weekday"
+          },
+          "bills_due": {
+            "items": {
+              "$ref": "#/components/schemas/SupplierAmount"
+            },
+            "type": "array",
+            "title": "Bills Due"
+          },
+          "bills_due_total_pkr": {
+            "type": "number",
+            "title": "Bills Due Total Pkr"
+          },
+          "distributor_visits": {
+            "items": {
+              "$ref": "#/components/schemas/SupplierRef"
+            },
+            "type": "array",
+            "title": "Distributor Visits"
+          },
+          "customers_to_remind": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerReminder"
+            },
+            "type": "array",
+            "title": "Customers To Remind"
+          },
+          "items_running_low": {
+            "type": "integer",
+            "title": "Items Running Low"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "weekday",
+          "bills_due",
+          "bills_due_total_pkr",
+          "distributor_visits",
+          "customers_to_remind",
+          "items_running_low"
+        ],
+        "title": "TomorrowPlan"
+      },
       "ToolCallExecution": {
         "properties": {
           "tool_name": {
@@ -4776,6 +8530,141 @@
           "result_summary"
         ],
         "title": "ToolCallExecution"
+      },
+      "UdhaarItemIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "qty": {
+            "type": "number",
+            "maximum": 10000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Qty"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "qty"
+        ],
+        "title": "UdhaarItemIn"
+      },
+      "UdhaarRequest": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UdhaarItemIn"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Items"
+          },
+          "extra_amount": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Extra Amount",
+            "description": "Money or items not in the catalogue.",
+            "default": 0
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id"
+        ],
+        "title": "UdhaarRequest"
+      },
+      "UdhaarResponse": {
+        "properties": {
+          "entry_id": {
+            "type": "integer",
+            "title": "Entry Id"
+          },
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemLine"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "extra_amount_pkr": {
+            "type": "number",
+            "title": "Extra Amount Pkr"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "total_pkr": {
+            "type": "number",
+            "title": "Total Pkr"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Due Date"
+          },
+          "balance_pkr": {
+            "type": "number",
+            "title": "Balance Pkr"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/MessageDraft"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entry_id",
+          "customer_id",
+          "name",
+          "timestamp",
+          "items",
+          "extra_amount_pkr",
+          "note",
+          "total_pkr",
+          "due_date",
+          "balance_pkr",
+          "receipt"
+        ],
+        "title": "UdhaarResponse"
       },
       "UpcomingEvent": {
         "properties": {
@@ -4827,6 +8716,105 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "app__schemas__inventory__PriceChange": {
+        "properties": {
+          "effective_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Effective Date"
+          },
+          "cost_price": {
+            "type": "number",
+            "title": "Cost Price"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "margin_pct": {
+            "type": "number",
+            "title": "Margin Pct"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effective_date",
+          "cost_price",
+          "selling_price",
+          "margin_pct",
+          "reason"
+        ],
+        "title": "PriceChange"
+      },
+      "app__schemas__workflow__PriceChange": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "old_cost": {
+            "type": "number",
+            "title": "Old Cost"
+          },
+          "new_cost": {
+            "type": "number",
+            "title": "New Cost"
+          },
+          "change_pct": {
+            "type": "number",
+            "title": "Change Pct"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price"
+          },
+          "old_margin_pct": {
+            "type": "number",
+            "title": "Old Margin Pct"
+          },
+          "new_margin_pct": {
+            "type": "number",
+            "title": "New Margin Pct"
+          },
+          "price_to_keep_margin": {
+            "type": "number",
+            "title": "Price To Keep Margin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "unit",
+          "old_cost",
+          "new_cost",
+          "change_pct",
+          "selling_price",
+          "old_margin_pct",
+          "new_margin_pct",
+          "price_to_keep_margin"
+        ],
+        "title": "PriceChange"
       }
     }
   }

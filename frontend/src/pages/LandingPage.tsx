@@ -435,7 +435,7 @@ function Counter() {
   const items: [typeof Languages, string, string, string, string][] = [
     [Languages, 'Roman Urdu first', 'Pehle Roman Urdu', 'Written the way shopkeepers talk, with English one tap away.', 'Waise likha jaise dukaandar baat karte hain, English ek tap par.'],
     [BookOpenText, 'Big text, one button per job', 'Bara likha, har kaam ka ek button', 'A typeface made for weak eyesight, and no screen with more than one main action.', 'Kamzor nazar ke liye bana font, aur har screen par ek hi bara kaam.'],
-    [Send, 'WhatsApp, not new habits', 'WhatsApp, nayi aadat nahi', 'Orders go to distributors and reminders go to customers on WhatsApp.', 'Order distributors ko aur yaad dihani customers ko WhatsApp par.'],
+    [Send, 'Nothing is sent behind your back', 'Aap ke bina kuch nahi jata', 'Receipts, reminders and orders stay on your screen to show, read out or copy. No customer number leaves the shop.', 'Raseed, yaad dihani aur order screen par rehte hain: dikhayein, parh kar sunayein ya copy karein. Koi customer number dukaan se bahar nahi jata.'],
     [MessageCircleQuestion, 'Ask in your own words', 'Apni zabaan mein poochein', '“Dalda kitna bacha hai?” gets a straight answer from the shop’s own records.', '“Dalda kitna bacha hai?” ka seedha jawab, dukaan ke apne records se.'],
   ];
   return (

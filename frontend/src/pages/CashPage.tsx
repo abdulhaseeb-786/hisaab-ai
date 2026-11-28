@@ -16,7 +16,7 @@ function weekday(date: string, english: boolean): string {
   return ['Itwar', 'Peer', 'Mangal', 'Budh', 'Jumeraat', 'Juma', 'Hafta'][d.getDay()] ?? '';
 }
 
-function Verdict({ o }: { o: CashOutlook }) {
+export function Verdict({ o }: { o: CashOutlook }) {
   const { pick } = useLanguage();
   const ok = !o.shortfall_warning;
   return (
@@ -104,7 +104,7 @@ function WeekChart({ o }: { o: CashOutlook }) {
   );
 }
 
-function Days({ o }: { o: CashOutlook }) {
+export function Days({ o }: { o: CashOutlook }) {
   const { pick, language } = useLanguage();
   const [open, setOpen] = useState<string | null>(null);
   return (

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const KEY = 'hisaab_onboarding_v1';
+const KEY = 'hisaab_onboarding_v2';
 
 type Phase = 'welcome' | 'tour' | 'done';
 

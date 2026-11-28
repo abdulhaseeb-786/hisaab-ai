@@ -31,6 +31,7 @@ from sqlalchemy.orm import Session
 from app.analytics.inventory_rules import compute_inventory_health
 from app.core.clock import store_now
 from app.models import PurchasePlan, PurchasePlanLine, SupplierProduct
+from app.core.wording import days
 
 URGENCY_WEIGHT = 0.65
 PROFIT_WEIGHT = 0.35
@@ -61,7 +62,9 @@ def generate_budget_reorder_plan(
     target_cover_days: int = 14,
     save_draft: bool = False,
     now: datetime | None = None,
+    supplier_id: int | None = None,
 ) -> dict[str, Any]:
+    """`supplier_id` limits the plan to one distributor: what to order from the booker at the counter."""
     if budget_pkr <= 0:
         raise ValueError("Budget must be greater than zero.")
     now = now or store_now()
@@ -69,6 +72,8 @@ def generate_budget_reorder_plan(
     inventory = compute_inventory_health(db, store_id=store_id, target_cover_days=target_cover_days, now=now)
     moq_by_product = {sp.product_id: sp.moq or 1 for sp in db.query(SupplierProduct)}
 
+    if supplier_id is not None:
+        inventory = [i for i in inventory if i["supplier_id"] == supplier_id]
     needing = [i for i in inventory if i["average_daily_demand"] and i["recommended_order_qty"] > 0]
     unknown_demand = sum(1 for i in inventory if i["average_daily_demand"] is None and not i["is_dead_stock"])
     best_daily_profit = max(
@@ -157,7 +162,7 @@ def generate_budget_reorder_plan(
         cover_after = (item["stock_qty"] + item["pending_receipts"] + units) / demand
         unit_profit = item["selling_price"] - item["cost_price"]
         why = [
-            f"{cover_before:.1f} days of stock left; supplier needs {item['lead_time_days']} days to deliver.",
+            f"{cover_before:.1f} days of stock left; supplier needs {days(item['lead_time_days'])} to deliver.",
             f"Sells about {demand:.1f} {item['unit']} a day (last {item['lookback_days']} days).",
         ]
         why_ur = [
@@ -187,6 +192,7 @@ def generate_budget_reorder_plan(
             "product_name": item["name"],
             "category": item["category"],
             "image_url": item["image_url"],
+            "supplier_id": item["supplier_id"],
             "supplier_name": item["supplier_name"] or "Local wholesaler",
             "pack_unit": c["pack"]["pack_unit"],
             "units_per_pack": c["per_pack"],

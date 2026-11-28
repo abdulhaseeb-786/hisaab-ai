@@ -48,7 +48,7 @@ from app.simulator.demand_profiles import (
     line_quantity_options,
 )
 
-SCHEMA_VERSION = "3"
+SCHEMA_VERSION = "5"
 STORE_ID = 1
 OPENING_CASH = 150_000.0
 
@@ -180,6 +180,7 @@ def _poisson(rng: random.Random, lam: float) -> int:
 def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = None) -> dict:
     """Generate the whole store history into an empty schema. Returns a short summary."""
     rng = random.Random(seed)
+    method_rng = random.Random(seed + 1)  # separate stream so payment methods do not shift the rest
     now = now or store_now()
     today = now.date()
     start_day = today - timedelta(days=settings.DEMO_HISTORY_DAYS)
@@ -203,6 +204,7 @@ def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = 
         rows[Supplier].append({
             "supplier_id": s["supplier_id"], "store_id": STORE_ID, "name": s["name"],
             "contact": s["contact"], "payment_terms_days": s["payment_terms_days"],
+            "visit_days": ",".join(str(d) for d in SUPPLIER_VISIT_DAYS.get(s["supplier_id"], [])),
         })
 
     customer_ids: list[int] = []
@@ -296,6 +298,7 @@ def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = 
                 "supplier_id": prow["supplier_id"], "timestamp": arrival, "debit": 0.0,
                 "credit": prow["total"], "due_date": due, "reference": ref,
                 "description": f"Invoice for delivery PO-{purchase_id}",
+                "method": None,
             })
             open_supplier_invoices[prow["supplier_id"]].append([due.date(), prow["total"], ref])
 
@@ -392,6 +395,7 @@ def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = 
                     "timestamp": ts, "debit": total, "credit": 0.0,
                     "due_date": ts + timedelta(days=settings.DEFAULT_CREDIT_TERM_DAYS),
                     "reference": f"SALE-{sale_id}", "description": "Groceries on khata",
+                    "sale_id": sale_id, "method": None,
                 })
             else:
                 cash_sales_today += total
@@ -427,11 +431,15 @@ def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = 
             if amount <= 0:
                 continue
             customer_balance[cid] -= amount
-            drawer += amount
+            # Most pay cash at the counter; some send it by Easypaisa or JazzCash.
+            method = method_rng.choices(["cash", "easypaisa", "jazzcash"], [0.75, 0.15, 0.10])[0]
+            if method == "cash":
+                drawer += amount
             rows[LedgerEntry].append({
                 "entry_id": ids.next("ledger"), "store_id": STORE_ID, "customer_id": cid,
                 "timestamp": pay_ts, "debit": 0.0, "credit": amount, "due_date": None,
-                "reference": "WASOOLI", "description": "Cash repayment (wasooli)",
+                "reference": "WASOOLI", "sale_id": None, "method": method,
+                "description": "Repayment (wasooli)" if method == "cash" else f"Repayment by {method.title()}",
             })
 
         # 7. Distributor visits: order up to target cover; delivery after the lead time.
@@ -500,7 +508,7 @@ def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = 
                             "entry_id": ids.next("supplier_ledger"), "store_id": STORE_ID,
                             "supplier_id": supplier_id, "timestamp": pay_ts, "debit": amount,
                             "credit": 0.0, "due_date": None, "reference": f"PAY-{ref}",
-                            "description": f"Cash payment for {ref}",
+                            "description": f"Cash payment for {ref}", "method": "cash",
                         })
                     else:
                         still_open.append([due_day, amount, ref])
@@ -566,6 +574,9 @@ def seed_store_digital_twin(db: Session, seed: int = 42, now: datetime | None = 
         if batch:
             db.execute(insert(model), batch)
     db.commit()
+
+    from app.simulator.day_history import seed_day_sessions
+    seed_day_sessions(db, now, seed)
 
     return {
         "store_id": STORE_ID,

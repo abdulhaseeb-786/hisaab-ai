@@ -166,6 +166,9 @@ def customer_ledger(db: Session, customer_id: int, store_id: int = 1, now: datet
         .order_by(LedgerEntry.timestamp, LedgerEntry.entry_id)
         .all()
     )
+    from app.services.khata import entry_items  # local import: khata imports this module
+
+    items = entry_items(db, [e.sale_id for e in entries[-60:] if e.sale_id])
     running = 0.0
     lines = []
     for e in entries:
@@ -177,6 +180,8 @@ def customer_ledger(db: Session, customer_id: int, store_id: int = 1, now: datet
             "amount_pkr": round(e.debit or e.credit, 2),
             "due_date": e.due_date,
             "description": e.description,
+            "method": e.method if e.credit > 0 else None,
+            "items": items.get(e.sale_id, []) if e.sale_id else [],
             "running_balance_pkr": round(running, 2),
         })
     return {

@@ -1,8 +1,11 @@
 """Cash book: the cash in the drawer, derived from records (never typed in by hand).
 
 cash now = opening cash on the opening date
-         + cash sales + khata repayments (wasooli)
-         - supplier payments - expenses (incl. owner household money and bank deposits)
+         + cash sales + khata repayments paid in cash
+         - supplier payments paid in cash - expenses (incl. owner household money, bank deposits)
+         + galla differences found when the drawer was counted (extra +, short −)
+
+Repayments and supplier payments made by Easypaisa, JazzCash or bank never touch the drawer.
 """
 
 from __future__ import annotations
@@ -15,9 +18,17 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.clock import store_now
-from app.models import Expense, LedgerEntry, Sale, Store, SupplierLedgerEntry
+from sqlalchemy import or_
+
+from app.models import CashAdjustment, Expense, LedgerEntry, Sale, Store, SupplierLedgerEntry
 
 NON_OPERATING_EXPENSES = {"owner_drawings", "bank_deposit"}
+CASH = "cash"
+
+
+def paid_in_cash(column):
+    """Rows recorded before payment methods existed count as cash."""
+    return or_(column.is_(None), column == CASH)
 
 
 def _sum(query) -> float:
@@ -34,10 +45,13 @@ def cash_position(db: Session, store_id: int = 1, now: datetime | None = None) -
         Sale.store_id == store_id, Sale.payment_type == "cash", Sale.status == "completed",
         Sale.timestamp >= since, Sale.timestamp <= now))
     wasooli = _sum(db.query(func.sum(LedgerEntry.credit)).filter(
-        LedgerEntry.store_id == store_id, LedgerEntry.timestamp >= since, LedgerEntry.timestamp <= now))
+        LedgerEntry.store_id == store_id, LedgerEntry.timestamp >= since, LedgerEntry.timestamp <= now,
+        paid_in_cash(LedgerEntry.method)))
     supplier_paid = _sum(db.query(func.sum(SupplierLedgerEntry.debit)).filter(
         SupplierLedgerEntry.store_id == store_id, SupplierLedgerEntry.timestamp >= since,
-        SupplierLedgerEntry.timestamp <= now))
+        SupplierLedgerEntry.timestamp <= now, paid_in_cash(SupplierLedgerEntry.method)))
+    adjustments = _sum(db.query(func.sum(CashAdjustment.amount)).filter(
+        CashAdjustment.store_id == store_id, CashAdjustment.timestamp >= since, CashAdjustment.timestamp <= now))
     expenses = _sum(db.query(func.sum(Expense.amount)).filter(
         Expense.store_id == store_id, Expense.date >= since, Expense.date <= now))
 
@@ -49,7 +63,8 @@ def cash_position(db: Session, store_id: int = 1, now: datetime | None = None) -
         "wasooli_pkr": round(wasooli, 2),
         "supplier_payments_pkr": round(supplier_paid, 2),
         "expenses_pkr": round(expenses, 2),
-        "cash_in_hand_pkr": round(opening + cash_sales + wasooli - supplier_paid - expenses, 2),
+        "galla_differences_pkr": round(adjustments, 2),
+        "cash_in_hand_pkr": round(opening + cash_sales + wasooli - supplier_paid - expenses + adjustments, 2),
     }
 
 
@@ -62,7 +77,7 @@ def daily_cash_flows(db: Session, store_id: int, start: date, end: date) -> dict
             Sale.timestamp >= lo, Sale.timestamp < hi):
         out[ts.date()]["cash_sales"] += total
     for ts, credit in db.query(LedgerEntry.timestamp, LedgerEntry.credit).filter(
-            LedgerEntry.store_id == store_id, LedgerEntry.credit > 0,
+            LedgerEntry.store_id == store_id, LedgerEntry.credit > 0, paid_in_cash(LedgerEntry.method),
             LedgerEntry.timestamp >= lo, LedgerEntry.timestamp < hi):
         out[ts.date()]["wasooli"] += credit
     return out

@@ -1,8 +1,9 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronRight, ClipboardList, DoorClosed, DoorOpen, HandCoins, NotebookPen, PackageCheck, Receipt } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDashboard, useStore, useTodayActions } from '@/api/queries';
+import { useDashboard, useDayToday, useOrders, useStore, useTodayActions } from '@/api/queries';
 import type { ActionType, KpiSummary, TodayAction } from '@/api/types';
 import storeImg from '@/assets/store-isometric.jpg';
 import { RegisterBook } from '@/components/RegisterBook';
@@ -13,12 +14,12 @@ import { ErrorBox, Skeleton } from '@/components/ui/QueryState';
 import { Section } from '@/components/ui/Section';
 import { Pill } from '@/components/ui/Status';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { cn, formatChange, formatDate, formatNumber, formatPct, formatPKR } from '@/lib/format';
+import { cn, formatChange, formatDate, formatDateTime, formatNumber, formatPct, formatPKR } from '@/lib/format';
 
 const CTA: Record<ActionType, [string, string]> = {
   restock: ['Make the order list', 'Order list banayein'],
   fix_price: ['Change the price', 'Qeemat badlein'],
-  collect_khata: ['Send a reminder', 'Yaad dihani bhejein'],
+  collect_khata: ['See the reminder', 'Yaad dihani dekhein'],
   clear_dead_stock: ['Make a bundle offer', 'Bundle offer banayein'],
   cash_warning: ['See the cash plan', 'Cash ka plan dekhein'],
 };
@@ -46,8 +47,8 @@ function Job({ action, first }: { action: TodayAction; first: boolean }) {
   const id = action.target.id;
 
   const run = () => {
-    if (action.action_type === 'restock') navigate('/app/buy');
-    else if (action.action_type === 'cash_warning') navigate('/app/cash');
+    if (action.action_type === 'restock') navigate('/app/order');
+    else if (action.action_type === 'cash_warning') navigate('/app/hisaab');
     else if (id === null) return;
     else if (action.action_type === 'fix_price') ui.openProduct(id);
     else if (action.action_type === 'collect_khata') ui.openReminder(id);
@@ -188,7 +189,7 @@ function TodayRegister() {
                   label: pick('Cash in drawer', 'Galle mein cash'),
                   value: formatPKR(k.cash_in_hand_pkr),
                   note: pick(`${formatPKR(k.payables_due_7d_pkr)} due to suppliers this week`, `is hafte suppliers ko ${formatPKR(k.payables_due_7d_pkr)}`),
-                  to: '/app/cash',
+                  to: '/app/hisaab',
                 },
                 {
                   label: pick('Late khata', 'Late udhaar'),
@@ -211,6 +212,101 @@ function TodayRegister() {
         }
       />
     </div>
+  );
+}
+
+/** Open or close the day: the galla count that keeps every number honest. */
+function DayBar() {
+  const { pick } = useLanguage();
+  const ui = useUi();
+  const day = useDayToday();
+  const d = day.data;
+  if (!d) return <Skeleton className="h-[72px]" />;
+  const evening = new Date().getHours() >= 20;
+
+  if (d.state === 'not_opened') {
+    return (
+      <button data-tour="day-bar" onClick={() => ui.openDay('open')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-haldi-tint border-2 border-haldi/60 text-left hover:brightness-[0.98]">
+        <span className="w-12 h-12 rounded-full bg-haldi text-ink flex items-center justify-center shrink-0 animate-pulse-ring">
+          <DoorOpen className="w-6 h-6" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-extrabold">{pick('Open the shop', 'Dukaan kholein')}</span>
+          <span className="block text-sm text-ink-soft">{pick('Count the galla first, so tonight the cash adds up.', 'Pehle galla gin lein, taake raat ko hisaab barabar ho.')}</span>
+        </span>
+        <ChevronRight className="w-6 h-6 text-ink-faint" />
+      </button>
+    );
+  }
+  if (d.state === 'closed') {
+    const diff = d.session?.closing_difference_pkr ?? 0;
+    return (
+      <div data-tour="day-bar" className="flex flex-wrap items-center gap-3 p-4 rounded-2xl bg-card border border-line">
+        <DoorClosed className="w-6 h-6 text-ink-muted" />
+        <p className="flex-1 font-bold">
+          {pick(`Day closed at ${formatDateTime(d.session?.closed_at)}.`, `Din ${formatDateTime(d.session?.closed_at)} par band hua.`)}{' '}
+          <span className={cn('font-normal', Math.abs(diff) < 0.5 ? 'text-sabz-dark' : 'text-lal-dark')}>
+            {Math.abs(diff) < 0.5 ? pick('Galla matched.', 'Galla barabar tha.') : diff < 0 ? pick(`${formatPKR(-diff)} short.`, `${formatPKR(-diff)} kam.`) : pick(`${formatPKR(diff)} extra.`, `${formatPKR(diff)} zyada.`)}
+          </span>
+        </p>
+        <Button variant="ghost" size="sm" onClick={() => ui.openDay('close')}>{pick('See the day', 'Din dekhein')}</Button>
+      </div>
+    );
+  }
+  return (
+    <div data-tour="day-bar" className={cn('flex flex-wrap items-center gap-3 p-4 rounded-2xl border-2', evening ? 'bg-neela-tint border-neela/40' : 'bg-card border-line')}>
+      <span className="relative flex w-3 h-3 shrink-0" aria-hidden>
+        <span className="absolute inline-flex h-full w-full rounded-full bg-sabz opacity-60 motion-safe:animate-ping" />
+        <span className="relative inline-flex w-3 h-3 rounded-full bg-sabz" />
+      </span>
+      <p className="flex-1 min-w-0 basis-48">
+        <span className="font-extrabold">{pick('Shop is open', 'Dukaan khuli hai')}</span>{' '}
+        <span className="text-ink-soft">
+          {pick(`since ${formatDateTime(d.session?.opened_at)}. Galla should have `, `${formatDateTime(d.session?.opened_at)} se. Galle mein hone chahiye `)}
+          <strong className="text-ink tabular">{formatPKR(d.cash_in_drawer_expected_pkr)}</strong>
+        </span>
+      </p>
+      <Button size="sm" variant={evening ? 'primary' : 'secondary'} onClick={() => ui.openDay('close')} icon={<DoorClosed className="w-5 h-5" />}>
+        {pick('Close the day', 'Din band karein')}
+      </Button>
+    </div>
+  );
+}
+
+function QuickAction({ icon, label, hint, onClick, primary, tour, wide }: { icon: ReactNode; label: string; hint?: string; onClick: () => void; primary?: boolean; tour?: string; wide?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      data-tour={tour}
+      className={cn(
+        'flex gap-2 p-3.5 sm:p-4 rounded-2xl border-2 text-left transition-colors',
+        wide ? 'col-span-2 sm:col-span-1 flex-row items-center sm:flex-col sm:items-start min-h-[64px] sm:min-h-[112px]' : 'flex-col items-start min-h-[100px] sm:min-h-[112px]',
+        primary ? 'bg-sabz text-white border-sabz hover:bg-sabz-dark' : 'bg-card border-line hover:border-ink-muted',
+      )}
+    >
+      <span className={cn('w-11 h-11 rounded-full flex items-center justify-center shrink-0', primary ? 'bg-white/15' : 'bg-sabz-tint text-sabz')}>{icon}</span>
+      <span className={cn('min-w-0', wide && 'flex-1 flex items-baseline gap-2 sm:block')}>
+        <span className="block text-lg font-extrabold leading-tight">{label}</span>
+        {hint && <span className={cn('block text-sm leading-snug', primary ? 'text-white/80' : 'text-ink-muted')}>{hint}</span>}
+      </span>
+    </button>
+  );
+}
+
+function QuickActions() {
+  const { pick } = useLanguage();
+  const ui = useUi();
+  const navigate = useNavigate();
+  const pending = useOrders('pending');
+  const onTheWay = pending.data?.length ?? 0;
+  return (
+    <section aria-label={pick('Quick actions', 'Fori kaam')} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" data-tour="quick-actions">
+      <QuickAction primary icon={<NotebookPen className="w-6 h-6" />} label="+ Udhaar" hint={pick('Who took what', 'Kis ne kya liya')} onClick={() => ui.openUdhaar()} tour="quick-udhaar" />
+      <QuickAction icon={<HandCoins className="w-6 h-6" />} label="+ Wasooli" hint={pick('Money received', 'Raqam aayi')} onClick={() => ui.openWasooli()} />
+      <QuickAction icon={<ClipboardList className="w-6 h-6" />} label={pick('Order booker', 'Order booker aaya')} hint={pick('What to order', 'Kya mangwayein')} onClick={() => navigate('/app/order')} />
+      <QuickAction icon={<PackageCheck className="w-6 h-6" />} label={pick('Delivery came', 'Maal aaya')} hint={onTheWay ? pick(`${onTheWay} on the way`, `${onTheWay} raste mein`) : pick('Check the bill', 'Bill milayein')} onClick={() => ui.openReceive()} />
+      <QuickAction wide icon={<Receipt className="w-6 h-6" />} label="Kharcha" hint={pick('Paid from the galla', 'Galle se diya')} onClick={ui.openExpense} />
+    </section>
   );
 }
 
@@ -252,6 +348,11 @@ export default function TodayPage() {
 
   return (
     <div className="space-y-8">
+      <div className="space-y-4">
+        <DayBar />
+        <QuickActions />
+      </div>
+
       <TodayRegister />
 
       <Parchi />

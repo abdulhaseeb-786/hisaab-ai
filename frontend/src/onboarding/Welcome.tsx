@@ -37,10 +37,10 @@ function useSlides() {
     },
     {
       icon: ShoppingCart,
-      title: pick('Tell it your budget, get a list', 'Budget batayein, list lein'),
+      title: pick('Order booker here? Get the order', 'Order booker aaya? Order tayyar'),
       body: pick(
-        'Type how much you can spend. You get a list in whole cartons, most urgent first, never over budget. Send it to your distributor on WhatsApp.',
-        'Likhein kitna kharch kar sakte hain. Poore carton ki list milti hai, zaroori maal pehle, budget se zyada kabhi nahi. WhatsApp par distributor ko bhej dein.',
+        'Pick the distributor. HisaabAI says how much the galla can safely spend and suggests the order in whole cartons, most urgent first. When the delivery comes, check it against the bill.',
+        'Distributor chunein. HisaabAI batata hai galla kitna kharch bardasht kar sakta hai aur poore carton mein order banata hai, zaroori maal pehle. Maal aaye to bill se milayein.',
       ),
       preview: (
         <Preview>
@@ -57,8 +57,8 @@ function useSlides() {
       icon: BookOpenText,
       title: pick('Khata and cash, clearly', 'Khata aur cash, saaf saaf'),
       body: pick(
-        'See who is late with payment, send a polite reminder, and check that you will have enough cash for the week.',
-        'Dekhein kis ka udhaar late hai, narmi se yaad dihani bhejein, aur dekhein hafte bhar ka cash kaafi hai ya nahi.',
+        'Write every udhaar with the items, check "Udhaar dun?" before you give, count the galla at night, and see if the cash will last the week.',
+        'Har udhaar items ke saath likhein, dene se pehle "Udhaar dun?" dekhein, raat ko galla ginein, aur dekhein hafte bhar ka cash kaafi hai ya nahi.',
       ),
       preview: (
         <Preview>
