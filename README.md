@@ -12,7 +12,6 @@ and every morning tells him the three jobs that save him money.
 [![Track 5: Urdu & Regional Tech](https://img.shields.io/badge/CYE%202026-Track%205%3A%20Urdu%20%26%20Regional%20Tech-E8A317)](#)
 [![Backend tests](https://img.shields.io/badge/backend%20tests-205%20passing-0E6B3F)](#tested-not-mocked)
 [![Languages](https://img.shields.io/badge/speaks-Urdu%20%C2%B7%20Roman%20Urdu%20%C2%B7%20English-E8A317)](#speak-it-check-it-its-in-the-books)
-[![Works offline](https://img.shields.io/badge/works-offline%20too-2A5BA8)](#why-you-can-trust-the-numbers)
 
 **[Live demo](#)** &nbsp;·&nbsp; **[2-minute video](#)** &nbsp;·&nbsp; **[Pitch deck](pitch/HisaabAI_Pitch.pdf)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
 
