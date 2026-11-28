@@ -534,6 +534,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/orders/from-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Plan
+         * @description Save a whole-shop budget plan as one pending order per distributor (all or nothing, within budget).
+         */
+        post: operations["create_from_plan_api_orders_from_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders/{purchase_id}/receive": {
         parameters: {
             query?: never;
@@ -665,6 +685,148 @@ export interface paths {
          * @description Answer a question in English or Roman Urdu using only allow-listed, read-only tools (COP-01..04).
          */
         post: operations["copilot_chat_api_copilot_chat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/voice/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Voice Status
+         * @description Is voice ready: has the owner allowed online AI, and is one configured? (Never the keys.)
+         */
+        get: operations["voice_status_api_voice_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/voice/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Voice Settings
+         * @description The owner's yes or no to sending recordings to an online AI to be understood.
+         */
+        patch: operations["voice_settings_api_voice_settings_patch"];
+        trace?: never;
+    };
+    "/api/voice/understand": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Understand
+         * @description What was said, and what HisaabAI thinks should be written. Nothing is saved to the books yet.
+         *
+         *     A question ("Imran ka kitna baqi hai?") is answered straight away by the copilot instead.
+         */
+        post: operations["understand_api_voice_understand_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/voice/captures/{capture_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm
+         * @description The shopkeeper checked it: write the udhaar, wasooli or kharcha, linked to the recording.
+         */
+        post: operations["confirm_api_voice_captures__capture_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/voice/captures/{capture_id}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Discard
+         * @description "Rehne dein": nothing is written. The capture is kept as set aside.
+         */
+        post: operations["discard_api_voice_captures__capture_id__discard_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/voice/captures/{capture_id}/audio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Audio
+         * @description Play back what the shopkeeper said for this entry.
+         */
+        get: operations["audio_api_voice_captures__capture_id__audio_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/voice/log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Voice Log
+         * @description Recent voice entries and how often they were saved without a correction (real use, not simulated).
+         */
+        get: operations["voice_log_api_voice_log_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -880,6 +1042,28 @@ export interface components {
              */
             store_id?: number;
         };
+        /** Body_understand_api_voice_understand_post */
+        Body_understand_api_voice_understand_post: {
+            /**
+             * Audio
+             * @description The recording (WAV preferred), up to 30 seconds.
+             */
+            audio?: string | null;
+            /**
+             * Text
+             * @description Or the same thing typed.
+             */
+            text?: string | null;
+            /** Seconds */
+            seconds?: number | null;
+            /**
+             * Answer Language
+             * @description For questions: the answer's language ('urdu' = Urdu script, for read-aloud).
+             * @default roman_urdu
+             * @enum {string}
+             */
+            answer_language?: "roman_urdu" | "english" | "urdu";
+        };
         /** BusinessReportResponse */
         BusinessReportResponse: {
             /** Data Label */
@@ -1071,6 +1255,12 @@ export interface components {
             supplier_payments_pkr: number;
             /** Expenses Pkr */
             expenses_pkr: number;
+            /**
+             * Cash Loans Pkr
+             * @description Naqad udhaar: cash handed to customers from the galla.
+             * @default 0
+             */
+            cash_loans_pkr?: number;
             /** Galla Differences Pkr */
             galla_differences_pkr: number;
             /** Cash In Hand Pkr */
@@ -1351,6 +1541,35 @@ export interface components {
             /** Overdue 61 Plus */
             overdue_61_plus: number;
         };
+        /** CustomerCandidate */
+        CustomerCandidate: {
+            /** Customer Id */
+            customer_id: number;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string | null;
+            /** Credit Limit Pkr */
+            credit_limit_pkr: number;
+            /** Balance Pkr */
+            balance_pkr: number;
+            /** Overdue Pkr */
+            overdue_pkr: number;
+            /** Safe Mark Score */
+            safe_mark_score: number;
+            /**
+             * Risk Level
+             * @enum {string}
+             */
+            risk_level: "low" | "medium" | "high";
+            /** Last Activity */
+            last_activity: string | null;
+            /**
+             * Score
+             * @description How close the spoken name is, 0 to 1.
+             */
+            score: number;
+        };
         /** CustomerCreateRequest */
         CustomerCreateRequest: {
             /** Name */
@@ -1523,6 +1742,12 @@ export interface components {
              */
             withdrawals_pkr: number;
             /**
+             * Cash Loans Pkr
+             * @description Naqad udhaar: cash lent from the galla. Part of udhaar given.
+             * @default 0
+             */
+            cash_loans_pkr?: number;
+            /**
              * Gross Profit Pkr
              * @description Sales minus the cost of the items sold.
              */
@@ -1585,6 +1810,8 @@ export interface components {
              */
             since_open_start: string;
             yesterday: components["schemas"]["DaySessionOut"] | null;
+            /** @description After the day is closed: what tomorrow holds. */
+            tomorrow?: components["schemas"]["TomorrowPlan"] | null;
             /** Difference Pkr */
             difference_pkr: number;
         };
@@ -1644,6 +1871,8 @@ export interface components {
              */
             since_open_start: string;
             yesterday: components["schemas"]["DaySessionOut"] | null;
+            /** @description After the day is closed: what tomorrow holds. */
+            tomorrow?: components["schemas"]["TomorrowPlan"] | null;
         };
         /** DeadStockItem */
         DeadStockItem: {
@@ -1866,6 +2095,33 @@ export interface components {
             /** Margin Profit At Risk Pkr */
             margin_profit_at_risk_pkr: number;
         };
+        /** ItemHeard */
+        ItemHeard: {
+            /**
+             * Words
+             * @description The words for this item, e.g. 'do kilo cheeni'.
+             */
+            words: string;
+            /** Words Urdu */
+            words_urdu: string | null;
+            /**
+             * Qty Heard
+             * @description False when no quantity was said and 1 was filled in.
+             */
+            qty_heard: boolean;
+            /**
+             * Qty Said
+             * @description The words the quantity came from, e.g. 'do kilo'.
+             */
+            qty_said: string | null;
+            /** @description Preselected only when one product clearly fits. */
+            match: components["schemas"]["ProductOption"] | null;
+            /**
+             * Options
+             * @description Products that fit, best first; ties go to what sells most.
+             */
+            options: components["schemas"]["ProductOption"][];
+        };
         /** ItemLine */
         ItemLine: {
             /** Product Id */
@@ -1981,6 +2237,23 @@ export interface components {
              * @description What was bought on this udhaar, when known.
              */
             items?: components["schemas"]["ItemLine"][];
+            /**
+             * Cash Loan
+             * @description Cash handed over from the galla (naqad udhaar).
+             * @default false
+             */
+            cash_loan?: boolean;
+            /**
+             * Voice Capture Id
+             * @description Written by voice; see /api/voice/captures/{id}.
+             */
+            voice_capture_id?: number | null;
+            /**
+             * Has Recording
+             * @description The voice recording is kept and can be played back.
+             * @default false
+             */
+            has_recording?: boolean;
             /** Running Balance Pkr */
             running_balance_pkr: number;
         };
@@ -2283,6 +2556,8 @@ export interface components {
         };
         /** PaymentRecordResponse */
         PaymentRecordResponse: {
+            /** Entry Id */
+            entry_id?: number | null;
             /** Customer Id */
             customer_id: number;
             /** Name */
@@ -2301,6 +2576,54 @@ export interface components {
             /** Message */
             message: string;
             receipt: components["schemas"]["MessageDraft"];
+        };
+        /** PersonGuess */
+        PersonGuess: {
+            /**
+             * Spoken Name
+             * @description The name as heard, in Roman letters.
+             */
+            spoken_name: string | null;
+            /** Spoken Name Urdu */
+            spoken_name_urdu: string | null;
+            /** @description The khata picked for the shopkeeper, only when the match is clear. */
+            match: components["schemas"]["CustomerCandidate"] | null;
+            /**
+             * Candidates
+             * @description Close khatas to choose from, best first.
+             */
+            candidates: components["schemas"]["CustomerCandidate"][];
+        };
+        /** PlanLineIn */
+        PlanLineIn: {
+            /** Product Id */
+            product_id: number;
+            /** Supplier Id */
+            supplier_id: number;
+            /** Packs */
+            packs: number;
+        };
+        /** PlanOrdersCreated */
+        PlanOrdersCreated: {
+            /**
+             * Orders
+             * @description One pending order per distributor; each arrives through Maal aaya.
+             */
+            orders: components["schemas"]["OrderCreated"][];
+            /** Total Pkr */
+            total_pkr: number;
+            /** Budget Pkr */
+            budget_pkr: number;
+        };
+        /** PlanOrdersRequest */
+        PlanOrdersRequest: {
+            /**
+             * Budget Pkr
+             * @description The plan's budget; the orders together never cost more.
+             */
+            budget_pkr: number;
+            /** Lines */
+            lines: components["schemas"]["PlanLineIn"][];
         };
         /** PlannedExpense */
         PlannedExpense: {
@@ -2444,6 +2767,34 @@ export interface components {
             categories: string[];
             /** Products */
             products: components["schemas"]["ProductResponse"][];
+        };
+        /** ProductOption */
+        ProductOption: {
+            /** Product Id */
+            product_id: number;
+            /** Name */
+            name: string;
+            /** Unit */
+            unit: string;
+            /**
+             * Selling Price
+             * @description Shelf price; prices never come from speech.
+             */
+            selling_price: number;
+            /** Stock Qty */
+            stock_qty: number;
+            /** Image Url */
+            image_url: string | null;
+            /**
+             * Score
+             * @description How well it fits the words said, 0 to about 1.
+             */
+            score: number;
+            /**
+             * Qty
+             * @description The quantity said, in this product's own unit (e.g. '5 kilo atta' = 1 bag of 5 kg).
+             */
+            qty: number;
         };
         /** ProductPackInfo */
         ProductPackInfo: {
@@ -3193,6 +3544,12 @@ export interface components {
             extra_amount?: number;
             /** Note */
             note?: string | null;
+            /**
+             * Cash From Galla
+             * @description The extra amount was cash handed over from the galla (naqad udhaar).
+             * @default false
+             */
+            cash_from_galla?: boolean;
         };
         /** UdhaarResponse */
         UdhaarResponse: {
@@ -3222,6 +3579,11 @@ export interface components {
             due_date: string;
             /** Balance Pkr */
             balance_pkr: number;
+            /**
+             * Cash From Galla
+             * @default false
+             */
+            cash_from_galla?: boolean;
             receipt: components["schemas"]["MessageDraft"];
         };
         /** UpcomingEvent */
@@ -3239,6 +3601,264 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VoiceCaptureItem */
+        VoiceCaptureItem: {
+            /** Capture Id */
+            capture_id: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "audio" | "text";
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "gemini" | "groq" | "offline";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "saved" | "discarded" | "answered";
+            /** Intent */
+            intent: ("udhaar" | "wasooli" | "kharcha" | "question") | null;
+            /** Edited */
+            edited: boolean | null;
+            /** Transcript Urdu */
+            transcript_urdu: string | null;
+            /** Transcript Roman */
+            transcript_roman: string | null;
+            /** Has Recording */
+            has_recording: boolean;
+        };
+        /** VoiceConfirmRequest */
+        VoiceConfirmRequest: {
+            /**
+             * Intent
+             * @enum {string}
+             */
+            intent: "udhaar" | "wasooli" | "kharcha";
+            /**
+             * Amount
+             * @description Udhaar: the amount besides the items (may be 0 with items).
+             * @default 0
+             */
+            amount?: number;
+            /**
+             * Items
+             * @description Udhaar of goods, sold at shelf price.
+             */
+            items?: components["schemas"]["UdhaarItemIn"][];
+            /** Customer Id */
+            customer_id?: number | null;
+            /**
+             * New Customer Name
+             * @description Open a new khata with this name.
+             */
+            new_customer_name?: string | null;
+            /**
+             * Cash From Galla
+             * @default true
+             */
+            cash_from_galla?: boolean;
+            /**
+             * Method
+             * @default cash
+             * @enum {string}
+             */
+            method?: "cash" | "easypaisa" | "jazzcash" | "bank";
+            /** Expense Category */
+            expense_category?: ("rent" | "electricity" | "salaries" | "transport" | "general" | "owner_drawings" | "bank_deposit") | null;
+            /** Reason */
+            reason?: string | null;
+            /**
+             * Days Ago
+             * @default 0
+             */
+            days_ago?: number;
+            /** Due Date */
+            due_date?: string | null;
+        };
+        /**
+         * VoiceLog
+         * @description Real usage, not simulated: how often voice entries were saved without a correction.
+         */
+        VoiceLog: {
+            /** Saved */
+            saved: number;
+            /**
+             * Answered
+             * @description Questions asked by voice and answered.
+             * @default 0
+             */
+            answered?: number;
+            /** Saved Without Changes */
+            saved_without_changes: number;
+            /** Discarded */
+            discarded: number;
+            /** Captures */
+            captures: components["schemas"]["VoiceCaptureItem"][];
+        };
+        /**
+         * VoiceProposal
+         * @description What HisaabAI understood. Nothing is saved until the shopkeeper confirms.
+         */
+        VoiceProposal: {
+            /** Capture Id */
+            capture_id: number;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "audio" | "text";
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "gemini" | "groq" | "offline";
+            /** Has Recording */
+            has_recording: boolean;
+            /** Transcript Urdu */
+            transcript_urdu: string | null;
+            /** Transcript Roman */
+            transcript_roman: string | null;
+            /**
+             * Intent
+             * @description Empty when it was not clear. 'question': answered, nothing written.
+             */
+            intent: ("udhaar" | "wasooli" | "kharcha" | "question") | null;
+            /**
+             * Question
+             * @description Intent 'question': what was asked, as sent to the copilot.
+             */
+            question?: string | null;
+            /** @description Intent 'question': the copilot's answer (numbers only from its tools). */
+            answer?: components["schemas"]["ChatResponse"] | null;
+            /**
+             * Amount Pkr
+             * @description Only an amount that was really said; empty otherwise.
+             */
+            amount_pkr: number | null;
+            /**
+             * Amount Heard
+             * @description The words the amount came from, e.g. 'paanch hazaar'.
+             */
+            amount_heard: string | null;
+            /**
+             * Extra Amount Pkr
+             * @description Udhaar: amount besides the items (cash said with them). Without items, the amount.
+             */
+            extra_amount_pkr?: number | null;
+            /**
+             * Items
+             * @description Udhaar of goods: the items heard.
+             */
+            items?: components["schemas"]["ItemHeard"][];
+            /**
+             * Items Total Pkr
+             * @description Matched items at shelf prices.
+             * @default 0
+             */
+            items_total_pkr?: number;
+            person: components["schemas"]["PersonGuess"];
+            /**
+             * Cash From Galla
+             * @description Udhaar: cash handed over from the galla (naqad), not goods.
+             */
+            cash_from_galla: boolean;
+            /**
+             * Cash From Galla Heard
+             * @description True if 'cash' or 'saamaan' was actually said.
+             */
+            cash_from_galla_heard: boolean;
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "cash" | "easypaisa" | "jazzcash" | "bank";
+            /** Expense Category */
+            expense_category: ("rent" | "electricity" | "salaries" | "transport" | "general" | "owner_drawings" | "bank_deposit") | null;
+            /** Reason */
+            reason: string | null;
+            /** Reason Urdu */
+            reason_urdu: string | null;
+            /** Days Ago */
+            days_ago: number;
+            /**
+             * Occurred On
+             * Format: date
+             */
+            occurred_on: string;
+            /**
+             * Due Date
+             * @description Return date, only if one was said.
+             */
+            due_date: string | null;
+            /**
+             * Usual Due Date
+             * Format: date
+             * @description The return date from the shop's usual credit term.
+             */
+            usual_due_date: string;
+            /** Cash In Galla Pkr */
+            cash_in_galla_pkr: number;
+            /** Missing */
+            missing: ("intent" | "amount" | "person" | "category" | "item")[];
+            /**
+             * Notes
+             * @description Plain notes on how it was understood (e.g. offline, amount not heard).
+             */
+            notes: components["schemas"]["Bilingual"][];
+        };
+        /** VoiceSaved */
+        VoiceSaved: {
+            /** Capture Id */
+            capture_id: number;
+            /**
+             * Intent
+             * @enum {string}
+             */
+            intent: "udhaar" | "wasooli" | "kharcha";
+            /**
+             * Edited
+             * @description The shopkeeper changed something HisaabAI understood.
+             */
+            edited: boolean;
+            /** Customer Id */
+            customer_id: number | null;
+            /** New Customer */
+            new_customer: boolean;
+            udhaar?: components["schemas"]["UdhaarResponse"] | null;
+            payment?: components["schemas"]["PaymentRecordResponse"] | null;
+            expense?: components["schemas"]["ExpenseResponse"] | null;
+        };
+        /** VoiceSettingsRequest */
+        VoiceSettingsRequest: {
+            /** Cloud Allowed */
+            cloud_allowed: boolean;
+        };
+        /** VoiceStatus */
+        VoiceStatus: {
+            /**
+             * Cloud Allowed
+             * @description The owner agreed to send recordings to a cloud AI to be understood.
+             */
+            cloud_allowed: boolean;
+            /**
+             * Cloud Available
+             * @description A cloud AI is configured (keys are never returned).
+             */
+            cloud_available: boolean;
+            /** Providers */
+            providers: ("gemini" | "groq" | "offline")[];
+            /** Max Seconds */
+            max_seconds: number;
         };
         /** PriceChange */
         app__schemas__inventory__PriceChange: {
@@ -4220,6 +4840,41 @@ export interface operations {
             };
         };
     };
+    create_from_plan_api_orders_from_plan_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanOrdersRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOrdersCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     receive_api_orders__purchase_id__receive_post: {
         parameters: {
             query?: {
@@ -4442,6 +5097,242 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    voice_status_api_voice_status_get: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    voice_settings_api_voice_settings_patch: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoiceSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    understand_api_voice_understand_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_understand_api_voice_understand_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceProposal"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_api_voice_captures__capture_id__confirm_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoiceConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceSaved"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    discard_api_voice_captures__capture_id__discard_post: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    audio_api_voice_captures__capture_id__audio_get: {
+        parameters: {
+            query?: {
+                store_id?: number;
+            };
+            header?: never;
+            path: {
+                capture_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    voice_log_api_voice_log_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                store_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceLog"];
                 };
             };
             /** @description Validation Error */

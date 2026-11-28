@@ -1,4 +1,4 @@
-import { BookOpenText, Boxes, Calculator, ClipboardList, Map, ShoppingCart, Sun } from 'lucide-react';
+import { BookOpenText, Boxes, Calculator, ClipboardList, Map, Sun } from 'lucide-react';
 
 /** The five daily jobs, in the order a shopkeeper's day goes. */
 export const PRIMARY_NAV = [
@@ -10,6 +10,5 @@ export const PRIMARY_NAV = [
 ] as const;
 
 export const SECONDARY_NAV = [
-  { to: '/app/buy', icon: ShoppingCart, en: 'Budget plan', ur: 'Budget plan' },
   { to: '/app/store-map', icon: Map, en: 'Store map', ur: 'Dukaan ka naqsha' },
 ] as const;

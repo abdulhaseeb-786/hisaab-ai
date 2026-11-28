@@ -98,6 +98,9 @@ def run_deterministic_copilot(db: Session, message: str, language: str = "roman_
             d = _call(db, "get_product_details", {"product": product["name"]}, store_id, calls)
             if "error" not in d:
                 return _reply(_product_text(d, ur), language, calls)
+        # "Imran ka kitna baqi hai?": a customer's name and no product means the khata, not stock.
+        if not product and intent in ("stock", None) and _customer_in_message(db, msg, store_id):
+            intent = "credit"
 
     if intent == "reorder":
         budget = parse_budget(msg) or 50_000.0
@@ -250,7 +253,7 @@ def _cash_text(d: dict[str, Any], ur: bool) -> str:
     low_date = d["lowest_cash_date"]
     low_date = low_date.isoformat() if hasattr(low_date, "isoformat") else low_date
     if ur:
-        text = (f"**Galle mein abhi:** {_money(d['cash_in_hand_pkr'])}\n"
+        text = (f"**Cash box mein abhi:** {_money(d['cash_in_hand_pkr'])}\n"
                 f"Agle 7 din: aamad {_money(d['inflows']['total_inflows_pkr'])}, kharcha {_money(d['outflows']['total_outflows_pkr'])}. "
                 f"Hafte ke aakhir mein takreeban **{_money(d['closing_cash_in_7_days_pkr'])}**. "
                 f"Sab se kam {_money(d['lowest_cash_pkr'])} ({low_date}).")

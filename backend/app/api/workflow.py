@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.schemas.workflow import (
+    PlanOrdersCreated, PlanOrdersRequest,
     BusinessReportResponse, CountHistoryItem, CountRequest, CountResponse, CountSheetResponse, Order, OrderCreated,
     OrderCreateRequest, OrderSuggestRequest, OrderSuggestResponse, ReceiveRequest, ReceiveResponse,
     SupplierPaymentRequest, SupplierPaymentResponse, SuppliersResponse,
@@ -41,6 +42,13 @@ def suggest(payload: OrderSuggestRequest, store_id: int = 1, db: Session = Depen
 def create(payload: OrderCreateRequest, store_id: int = 1, db: Session = Depends(get_db)):
     """Save the order given to the booker. Returns the order text to show on screen; nothing is sent."""
     return _run(orders.create_order, db, payload.supplier_id, [l.model_dump() for l in payload.lines], store_id=store_id)
+
+
+@router.post("/orders/from-plan", response_model=PlanOrdersCreated, status_code=201, tags=["Orders"])
+def create_from_plan(payload: PlanOrdersRequest, store_id: int = 1, db: Session = Depends(get_db)):
+    """Save a whole-shop budget plan as one pending order per distributor (all or nothing, within budget)."""
+    return _run(orders.create_orders_from_plan, db, [l.model_dump() for l in payload.lines], payload.budget_pkr,
+                store_id=store_id)
 
 
 @router.get("/orders", response_model=list[Order], tags=["Orders"])

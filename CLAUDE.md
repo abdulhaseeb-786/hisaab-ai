@@ -117,5 +117,49 @@ cd frontend && node e2e/workflow.mjs e2e-shots   # browser walk of every workflo
   method; kharcha; order booker flow with safe budget, maal aaya with rate-change flags,
   supplier payments; ginti with inferred sales; printable business report for lenders
   (`/app/report`). Backend tests: `tests/test_workflows.py`. Browser: `frontend/e2e/workflow.mjs`.
+- Voice entry "bol kar likhein", Phase A (udhaar, wasooli, kharcha): done. Backend
+  `app/voice/` (`numbers.py` Urdu number words, `names.py` khata matching, `text_parser.py`
+  offline tier, `llm.py` Gemini audio / Groq Whisper, `service.py` understand → confirm),
+  router `api/voice.py`, model `VoiceCapture`. Frontend `src/voice/` (`VoiceSheet`, hold-to-talk
+  `MicButton`, `recorder.ts` → 16 kHz WAV, `speak.ts` browser read-back, `sentence.ts`).
+  Rules: nothing is saved before "Haan, likh do"; an amount is kept only if it is in the words
+  heard; a shared surname is never a match; cloud needs the owner's consent
+  (`Store.voice_cloud_allowed`); recordings live in `VOICE_DIR` (`backend/data/voice`, gitignored)
+  and are cleared on reseed. Naqad udhaar = `LedgerEntry.kind="cash_loan"`, taken out of the
+  galla by the cash book. Tests: `tests/test_voice.py`. Browser: `frontend/e2e/voice.mjs <wav>`
+  (fake mic).
+- Voice Phase C (questions): done. Intent "question" (offline: `text_parser._is_question`; AI:
+  `question_roman`, kept in the owner's language with exact names). `service._answer_question`
+  sends it to `chat_with_copilot` (same tools and number guard); nothing is written, capture
+  status "answered". `answer_language` "urdu" (Urdu script) when the device has an Urdu voice, so
+  it can be read aloud. The offline copilot treats a named customer + no product as a khata
+  question. Browser: `frontend/e2e/voice-ask.mjs <wav>`.
+- Voice Phase B (goods with items): done. `app/voice/items.py`: everyday names (`ALIASES`: cheeni,
+  chawal, sabun, anday...), quantities ("do kilo", "aadha kilo", "paav", "darjan"), size-aware
+  matching ("5 kilo atta" = the 5 kg bag), conversion to the product's unit ("6 anday" = 0.5
+  dozen). Rules: a quantity comes only from the words said (else 1, flagged); prices are always
+  shelf prices; ties ("Dalda": oil or ghee?) are never picked, the shopkeeper chooses (sorted by
+  30-day sales); an AI product hint only breaks a tie; AI items not in the transcript are dropped.
+  A cash-loan khata line may also carry goods: only `debit - sale.total` leaves the cash box
+  (`cash_book.cash_lent`, the one function for that number). Browser: `frontend/e2e/voice-goods.mjs <wav>`.
+- Gemini: Google retires model names (404) and overloads new ones (503). All calls go through
+  `core/gemini_models.generate`, which falls through `GEMINI_FALLBACK_MODELS`. A busy model rests
+  60 s at the back of the line (one voice question = several calls), then is first again (lite
+  fallbacks hear Urdu worse).
+- improve01.md (workflow rhythm), done so far: (1) product sheet has no manual "delivery":
+  deliveries go through Maal aaya (pending order) or Order; manual is only corrections.
+  (2) One Order screen: `?mode=budget` = whole-shop planner (`BudgetPlanner` in BuyPage.tsx),
+  saved via `POST /api/orders/from-plan` (all or nothing, never over budget); `/app/buy`
+  redirects; restock links use `?product=` / `?supplier=`. (3) Today follows the day state;
+  `day/today` returns `tomorrow` after closing (`TomorrowBrief`, shared with DaySheet).
+  (5) Welcome = one-tap language; tour is 4 steps ending on the mic. (6) Closing udhaar /
+  wasooli opened from a customer returns to that customer (`returnToCustomer`).
+  Tests: `tests/test_improvements.py`; browser `frontend/e2e/improve01.mjs`.
+  (4) One assistant: the voice sheet handles entries and questions; phones have a raised
+  centre mic above the 5 tabs (user's choice), desktop one "Talk to HisaabAI" button; no Ask
+  pill, no Today banner. "Follow-up in chat" opens CopilotSheet seeded with the Q&A
+  (`openCopilot(prompt, seed)`). The copilot prompt lists the app's real screens (no "POS").
+  Open: polish (Hisaab tabs, Stock List/Ginti/Map switcher, job-done stamp, collection queue).
+- UI wording: user-facing text says "cash box" (Roman Urdu too), not "galla"; identifiers keep `galla`.
 - Public benchmark: waiting for the user to place `online_retail_II.xlsx` in
   `backend/datasets/raw/`; then run the two scripts in README. Do not download it.

@@ -16,6 +16,7 @@ class DayFigures(BaseModel):
     supplier_payments_pkr: float = Field(description="Paid to distributors in cash from the galla.")
     expenses_pkr: float = Field(description="Running costs: rent, bijli, salaries, transport, general.")
     withdrawals_pkr: float = Field(description="Money taken home or deposited in the bank. Not a cost.")
+    cash_loans_pkr: float = Field(default=0, description="Naqad udhaar: cash lent from the galla. Part of udhaar given.")
     gross_profit_pkr: float = Field(description="Sales minus the cost of the items sold.")
 
 
@@ -41,6 +42,7 @@ class DayStatusResponse(BaseModel):
     today: DayFigures
     since_open_start: datetime
     yesterday: Optional[DaySessionOut]
+    tomorrow: Optional["TomorrowPlan"] = Field(default=None, description="After the day is closed: what tomorrow holds.")
 
 
 class DayOpenResponse(DayStatusResponse):
@@ -107,3 +109,7 @@ class ExpenseResponse(BaseModel):
     note: Optional[str]
     cash_in_drawer_pkr: float
     method: Literal["cash"]
+
+
+DayStatusResponse.model_rebuild()
+DayOpenResponse.model_rebuild()

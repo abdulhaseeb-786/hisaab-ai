@@ -169,6 +169,10 @@ def customer_ledger(db: Session, customer_id: int, store_id: int = 1, now: datet
     from app.services.khata import entry_items  # local import: khata imports this module
 
     items = entry_items(db, [e.sale_id for e in entries[-60:] if e.sale_id])
+    from app.models import VoiceCapture
+
+    recent_ids = [e.entry_id for e in entries[-60:]]
+    voice = {v.ledger_entry_id: v for v in db.query(VoiceCapture).filter(VoiceCapture.ledger_entry_id.in_(recent_ids))} if recent_ids else {}
     running = 0.0
     lines = []
     for e in entries:
@@ -182,6 +186,9 @@ def customer_ledger(db: Session, customer_id: int, store_id: int = 1, now: datet
             "description": e.description,
             "method": e.method if e.credit > 0 else None,
             "items": items.get(e.sale_id, []) if e.sale_id else [],
+            "cash_loan": e.kind == "cash_loan",
+            "voice_capture_id": voice[e.entry_id].capture_id if e.entry_id in voice else None,
+            "has_recording": bool(e.entry_id in voice and voice[e.entry_id].audio_file),
             "running_balance_pkr": round(running, 2),
         })
     return {

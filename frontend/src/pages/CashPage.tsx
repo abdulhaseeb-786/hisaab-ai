@@ -30,7 +30,7 @@ export function Verdict({ o }: { o: CashOutlook }) {
               : pick(`Cash may run short on ${formatDate(o.shortfall_date)}.`, `${formatDate(o.shortfall_date)} ko cash kam par sakta hai.`)}
           </p>
           <p className="text-lg text-ink-soft mt-2">
-            {pick('In the drawer now', 'Abhi galle mein')}: <strong className="text-ink tabular"><Money value={o.opening_cash_pkr} /></strong>.{' '}
+            {pick('In the drawer now', 'Abhi cash box mein')}: <strong className="text-ink tabular"><Money value={o.opening_cash_pkr} /></strong>.{' '}
             {pick('In 7 days, about', '7 din baad takreeban')} <strong className="text-ink tabular">{formatPKR(o.projected_closing_cash_pkr)}</strong>.
           </p>
         </div>

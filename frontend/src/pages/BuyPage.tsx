@@ -1,15 +1,15 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronDown, ClipboardList, SlidersHorizontal } from 'lucide-react';
+import { Check, ChevronDown, ClipboardList, PackageCheck, SlidersHorizontal, Truck } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useReorderPlan, useStore } from '@/api/queries';
-import type { ReorderLine, ReorderPlan, StoreProfile } from '@/api/types';
+import { useCreateOrdersFromPlan, useReorderPlan, useStore } from '@/api/queries';
+import type { PlanOrdersCreated, ReorderLine, ReorderPlan, StoreProfile } from '@/api/types';
 import { useUi } from '@/app/UiContext';
 import { MessageDraft, type Draft } from '@/components/MessageDraft';
 import { Button } from '@/components/ui/Button';
 import { Money } from '@/components/ui/Money';
 import { ProductImage } from '@/components/ui/ProductImage';
 import { EmptyState, ErrorBox, Skeleton } from '@/components/ui/QueryState';
-import { PageTitle, Section } from '@/components/ui/Section';
+import { Section } from '@/components/ui/Section';
 import { Segmented } from '@/components/ui/Segmented';
 import { StockStatus } from '@/components/ui/Status';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -94,10 +94,10 @@ function Line({ line }: { line: ReorderLine }) {
   );
 }
 
-function OrderDraft({ lines, title, store }: { lines: ReorderLine[]; title: string; store: StoreProfile | undefined }) {
+function OrderDraft({ lines, title, store, draftOverride }: { lines: ReorderLine[]; title: string; store: StoreProfile | undefined; draftOverride?: Draft }) {
   const { pick } = useLanguage();
   const [open, setOpen] = useState(false);
-  const draft = useMemo(() => orderText(lines, store), [lines, store]);
+  const draft = useMemo(() => draftOverride ?? orderText(lines, store), [lines, store, draftOverride]);
   return (
     <div className="space-y-3">
       <Button variant={open ? 'secondary' : 'primary'} size="sm" icon={<ClipboardList className="w-5 h-5" />} onClick={() => setOpen((v) => !v)} aria-expanded={open}>
@@ -108,7 +108,7 @@ function OrderDraft({ lines, title, store }: { lines: ReorderLine[]; title: stri
   );
 }
 
-function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
+function Plan({ plan, stale, onSave, saving }: { plan: ReorderPlan; stale: boolean; onSave: () => void; saving: boolean }) {
   const { pick } = useLanguage();
   const store = useStore();
   const [view, setView] = useState<'urgency' | 'supplier'>('urgency');
@@ -238,15 +238,54 @@ function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
         <p className="text-lg font-extrabold">
           {pick('Whole order', 'Poora order')}: <span className="tabular">{formatPKR(plan.total_allocated_spend_pkr)}</span>
         </p>
+        <Button size="lg" block disabled={stale || saving} onClick={onSave} icon={<Truck className="w-5 h-5" />}>
+          {saving
+            ? pick('Saving', 'Save ho raha')
+            : pick(`Save as orders (${bySupplier.length} distributors)`, `Order save karein (${bySupplier.length} distributors)`)}
+        </Button>
+        <p className="text-sm text-ink-muted">
+          {pick(
+            'Saved orders wait under "On the way". When each delivery comes, tap Maal aaya: the bill is checked and stock goes up.',
+            'Save shuda orders "Raste mein" mein rehte hain. Jab maal aaye, "Maal aaya" dabayein: bill check hoga aur stock barhe ga.',
+          )}
+        </p>
         <MessageDraft draft={orderText(lines, store.data)} title={pick('Order list to read out or copy', 'Parhne ya copy karne ke liye order list')} editable />
-        <p className="text-sm text-ink-muted">{pick('To save an order and track its delivery, use the Order screen for one distributor at a time.', 'Order save karne aur maal ka hisaab rakhne ke liye Order screen par ek distributor ka order banayein.')}</p>
       </div>
     </div>
   );
 }
 
-export default function BuyPage() {
+function SavedOrders({ r, onDone }: { r: PlanOrdersCreated; onDone: () => void }) {
   const { pick } = useLanguage();
+  return (
+    <div className="bg-sabz-tint border-2 border-sabz rounded-2xl p-5 space-y-4" role="status">
+      <p className="flex items-center gap-2 text-xl font-extrabold text-sabz-dark">
+        <PackageCheck className="w-6 h-6" />
+        {pick(`${r.orders.length} orders saved: ${formatPKR(r.total_pkr)}`, `${r.orders.length} order save ho gaye: ${formatPKR(r.total_pkr)}`)}
+      </p>
+      <p className="text-base text-ink-soft">
+        {pick('They are under "On the way" above. Tap Maal aaya when each delivery comes.', 'Yeh upar "Raste mein" mein hain. Har maal aane par "Maal aaya" dabayein.')}
+      </p>
+      <ul className="space-y-3">
+        {r.orders.map((o) => (
+          <li key={o.purchase_id} className="bg-card rounded-xl border border-line p-3 space-y-2">
+            <p className="flex justify-between gap-3 font-bold">
+              <span>{o.supplier_name}</span>
+              <span className="tabular">{formatPKR(o.total_pkr)}</span>
+            </p>
+            <OrderDraft lines={[]} store={undefined} title={pick(`Order for ${o.supplier_name}`, `${o.supplier_name} ka order`)} draftOverride={o.draft} />
+          </li>
+        ))}
+      </ul>
+      <Button variant="secondary" onClick={onDone}>{pick('Plan again', 'Naya plan')}</Button>
+    </div>
+  );
+}
+
+/** "I have Rs 50,000: what should I buy?" for the whole shop, saved as real orders. */
+export function BudgetPlanner() {
+  const { pick } = useLanguage();
+  const save = useCreateOrdersFromPlan();
   const [input, setInput] = useState('50000');
   const [cover, setCover] = useState(14);
   const [options, setOptions] = useState(false);
@@ -258,10 +297,9 @@ export default function BuyPage() {
 
   return (
     <div className="space-y-6">
-      <PageTitle
-        title={pick('What should I buy today?', 'Aaj kya khareedun?')}
-        subtitle={pick('Type your budget. You get a list in whole cartons, most urgent first, never over budget.', 'Budget likhein. Poore carton ki list milegi, zaroori maal pehle, budget se zyada kabhi nahi.')}
-      />
+      <p className="text-base text-ink-soft">
+        {pick('Going to the market yourself? Type your budget: a list in whole cartons for the whole shop, most urgent first, never over budget.', 'Khud market ja rahe hain? Budget likhein: poori dukaan ki list poore carton mein, zaroori maal pehle, budget se zyada kabhi nahi.')}
+      </p>
 
       <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
         <label htmlFor="budget" className="block text-lg font-bold">
@@ -312,9 +350,28 @@ export default function BuyPage() {
         )}
       </div>
 
+      {/* The save result lives here, not in <Plan>: saving refreshes the plan, which may then show nothing left to buy. */}
+      {save.isSuccess && <SavedOrders r={save.data} onDone={() => save.reset()} />}
+      {save.isError && <ErrorBox error={save.error} />}
       {plan.isError && <ErrorBox error={plan.error} onRetry={() => plan.refetch()} />}
       {!plan.data && !plan.isError && valid && <Skeleton className="h-80" />}
-      {plan.data && <Plan plan={plan.data} stale={stale} />}
+      {plan.data && !save.isSuccess && (
+        <Plan
+          plan={plan.data}
+          stale={stale}
+          saving={save.isPending}
+          onSave={() =>
+            save.mutate({
+              budget,
+              lines: plan.data.recommendations.flatMap((l) => (l.supplier_id ? [{ product_id: l.product_id, supplier_id: l.supplier_id, packs: l.recommended_packs }] : [])),
+            })
+          }
+        />
+      )}
     </div>
   );
+}
+
+export default function BuyPage() {
+  return <BudgetPlanner />;
 }

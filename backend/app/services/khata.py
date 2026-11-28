@@ -13,6 +13,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.analytics.cash_book import cash_position
 from app.analytics.credit_aging import calculate_credit_summary
 from app.core.clock import store_now
 from app.models import Customer, LedgerEntry, Product, Sale, SaleLine, StockMovement, Store
@@ -129,11 +130,12 @@ def credit_check(db: Session, customer_id: int, amount: float, store_id: int = 1
 
 
 def _receipt(store: Store | None, customer: Customer, items: list[dict[str, Any]], extra: float, note: str | None,
-             total: float, balance: float, due: datetime, when: datetime) -> dict[str, str]:
+             total: float, balance: float, due: datetime, when: datetime, cash: bool = False) -> dict[str, str]:
     shop = store.name if store else ""
     lines = [f"- {i['name']}: {i['qty']:g} x Rs {i['unit_price']:,.0f} = Rs {i['line_total']:,.0f}" for i in items]
     if extra:
-        lines.append(f"- {note or 'Udhaar'}: Rs {extra:,.0f}")
+        label = f"Naqad (cash){': ' + note if note else ''}" if cash else (note or "Udhaar")
+        lines.append(f"- {label}: Rs {extra:,.0f}")
     ur = "\n".join([
         f"*{shop}*", f"{customer.name}, {when:%d %b %Y, %I:%M %p}", "", "Udhaar par:", *lines,
         f"*Kul: Rs {total:,.0f}*", f"Aap ka kul khata: Rs {balance:,.0f}", f"Wapsi ki tareekh: {due:%d %b %Y}", "Shukriya!",
@@ -146,7 +148,14 @@ def _receipt(store: Store | None, customer: Customer, items: list[dict[str, Any]
 
 
 def record_udhaar(db: Session, customer_id: int, items: list[dict[str, Any]], extra_amount: float = 0.0,
-                  note: str | None = None, store_id: int = 1, now: datetime | None = None) -> dict[str, Any]:
+                  note: str | None = None, store_id: int = 1, now: datetime | None = None,
+                  cash_from_galla: bool = False, due_date: datetime | None = None) -> dict[str, Any]:
+    """Write one udhaar line.
+
+    `cash_from_galla`: the extra amount is cash handed over from the drawer (naqad udhaar),
+    so the cash book takes it out of the galla. Otherwise it is goods or a sum on credit
+    and the galla does not change. `due_date` overrides the shop's usual credit term.
+    """
     now = now or store_now()
     cust = db.get(Customer, customer_id)
     if not cust or cust.store_id != store_id:
@@ -155,6 +164,14 @@ def record_udhaar(db: Session, customer_id: int, items: list[dict[str, Any]], ex
         raise KhataError("Add at least one item, or an amount.")
     if extra_amount < 0:
         raise KhataError("Amount cannot be negative.")
+    if cash_from_galla and extra_amount <= 0:
+        raise KhataError("Write how much cash was given.")
+    if cash_from_galla:
+        cash = cash_position(db, store_id, now)["cash_in_hand_pkr"]
+        if extra_amount > cash + 0.01:
+            raise KhataError(f"Only Rs {cash:,.0f} is in the cash box.")
+    if due_date is not None and due_date.date() < now.date():
+        raise KhataError("The return date cannot be in the past.")
 
     products = {p.product_id: p for p in db.query(Product).filter(Product.product_id.in_([i["product_id"] for i in items]))}
     lines: list[dict[str, Any]] = []
@@ -174,7 +191,7 @@ def record_udhaar(db: Session, customer_id: int, items: list[dict[str, Any]], ex
     term = store.default_credit_term_days if store else 30
     items_total = round(sum(l["line_total"] for l in lines), 2)
     total = round(items_total + extra_amount, 2)
-    due = now + timedelta(days=term)
+    due = due_date or now + timedelta(days=term)
 
     sale_id = None
     if lines:
@@ -193,10 +210,12 @@ def record_udhaar(db: Session, customer_id: int, items: list[dict[str, Any]], ex
 
     summary = ", ".join(f"{l['name']} x{l['qty']:g}" for l in lines)
     if extra_amount:
-        summary = ", ".join(x for x in [summary, f"{note or 'Amount'} Rs {extra_amount:,.0f}"] if x)
+        label = note or ("Naqad (cash)" if cash_from_galla else "Amount")
+        summary = ", ".join(x for x in [summary, f"{label} Rs {extra_amount:,.0f}"] if x)
     entry = LedgerEntry(store_id=store_id, customer_id=customer_id, timestamp=now, debit=total, credit=0.0,
                         due_date=due, reference=f"SALE-{sale_id}" if sale_id else "UDHAAR",
-                        description=(summary or note or "Udhaar")[:200], sale_id=sale_id)
+                        description=(summary or note or "Udhaar")[:200], sale_id=sale_id,
+                        kind="cash_loan" if cash_from_galla else None)
     db.add(entry)
     db.commit()
     balance = _balance(db, customer_id)
@@ -212,7 +231,8 @@ def record_udhaar(db: Session, customer_id: int, items: list[dict[str, Any]], ex
         "total_pkr": total,
         "due_date": due,
         "balance_pkr": balance,
-        "receipt": _receipt(store, cust, clean, extra_amount, note, total, balance, due, now),
+        "cash_from_galla": cash_from_galla,
+        "receipt": _receipt(store, cust, clean, extra_amount, note, total, balance, due, now, cash_from_galla),
     }
 
 
@@ -229,14 +249,16 @@ def record_payment(db: Session, customer_id: int, amount: float, method: str = "
     balance = _balance(db, customer_id)
     if amount > balance + 0.01:
         raise KhataError(f"{cust.name} only owes Rs {balance:,.0f}.")
-    db.add(LedgerEntry(store_id=store_id, customer_id=customer_id, timestamp=now, debit=0.0, credit=round(amount, 2),
-                       reference="WASOOLI", method=method,
-                       description=(notes or f"Repayment ({METHOD_LABEL[method]})")[:200]))
+    entry = LedgerEntry(store_id=store_id, customer_id=customer_id, timestamp=now, debit=0.0, credit=round(amount, 2),
+                        reference="WASOOLI", method=method,
+                        description=(notes or f"Repayment ({METHOD_LABEL[method]})")[:200])
+    db.add(entry)
     db.commit()
     new_balance = round(balance - amount, 2)
     store = db.get(Store, store_id)
     shop = store.name if store else ""
     return {
+        "entry_id": entry.entry_id,
         "customer_id": cust.customer_id,
         "name": cust.name,
         "amount_received": amount,

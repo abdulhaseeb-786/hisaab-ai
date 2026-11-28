@@ -42,7 +42,7 @@ def seed_day_sessions(db: Session, now: datetime, seed: int) -> None:
         if diff:
             db.add(CashAdjustment(
                 store_id=STORE_ID, timestamp=closed, amount=diff, session_id=session.session_id,
-                reason="Galla short at closing" if diff < 0 else "Extra cash in galla at closing",
+                reason="Cash box short at closing" if diff < 0 else "Extra cash in cash box at closing",
             ))
             db.flush()
 

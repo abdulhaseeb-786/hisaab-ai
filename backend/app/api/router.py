@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from . import actions, copilot, credit, csv_import, dashboard, day, demo, forecast, insights, payables, products, reorder, store, workflow
+from . import actions, copilot, credit, csv_import, dashboard, day, demo, forecast, insights, payables, products, reorder, store, voice, workflow
 
 api_router = APIRouter(prefix="/api")
-for module in (store, actions, day, dashboard, products, reorder, forecast, insights, credit, payables, workflow, copilot, csv_import, demo):
+for module in (store, actions, day, dashboard, products, reorder, forecast, insights, credit, payables, workflow, copilot, voice, csv_import, demo):
     api_router.include_router(module.router)

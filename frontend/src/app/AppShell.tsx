@@ -1,4 +1,4 @@
-import { CircleHelp, Menu, MessageCircleQuestion } from 'lucide-react';
+import { CircleHelp, Menu, Mic } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useDashboard, useStore } from '@/api/queries';
@@ -15,6 +15,7 @@ import WasooliSheet from '@/components/khata/WasooliSheet';
 import PaySupplierSheet from '@/components/orders/PaySupplierSheet';
 import ReceiveSheet from '@/components/orders/ReceiveSheet';
 import { useLanguage } from '@/i18n/LanguageContext';
+import VoiceSheet from '@/voice/VoiceSheet';
 import { cn } from '@/lib/format';
 import { useOnboarding } from '@/onboarding/OnboardingContext';
 import { MenuSheet } from './MenuSheet';
@@ -84,12 +85,15 @@ function Sidebar() {
 
       <div className="mt-auto space-y-2">
         <button
-          data-tour="ask-side"
-          onClick={() => ui.openCopilot()}
-          className="w-full flex items-center gap-3 min-h-[52px] px-4 rounded-2xl bg-ink text-white font-bold hover:bg-ink-soft"
+          data-tour="voice-side"
+          onClick={() => ui.openVoice(true)}
+          className="w-full flex items-center gap-3 min-h-[60px] px-4 rounded-2xl bg-sabz text-white font-bold hover:bg-sabz-dark"
         >
-          <MessageCircleQuestion className="w-5 h-5" />
-          {pick('Ask HisaabAI', 'HisaabAI se poochein')}
+          <Mic className="w-6 h-6" />
+          <span className="text-left leading-tight">
+            {pick('Talk to HisaabAI', 'HisaabAI se baat')}
+            <span className="block text-xs font-normal text-white/80">{pick('Speak an entry or ask', 'Bolein ya poochein')}</span>
+          </span>
         </button>
         <div className="flex items-center gap-1">
           <button onClick={onboarding.restart} className="flex-1 flex items-center gap-2 min-h-[44px] px-3 rounded-xl text-sm font-bold text-ink-soft hover:bg-ink/5" data-tour="help-side">
@@ -173,17 +177,21 @@ function BottomNav() {
   );
 }
 
-function AskButton() {
+/**
+ * The one assistant, always one tap away: a raised mic above the middle of the bottom bar.
+ * Speak or type an udhaar, wasooli or kharcha, or ask a question.
+ */
+function VoiceButton() {
   const { pick } = useLanguage();
   const ui = useUi();
   return (
     <button
-      data-tour="ask"
-      onClick={() => ui.openCopilot()}
-      className="print:hidden lg:hidden fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-ink text-white font-bold shadow-lift"
+      data-tour="voice"
+      onClick={() => ui.openVoice(true)}
+      aria-label={pick('Talk to HisaabAI: write by voice or ask', 'HisaabAI se baat: bol kar likhein ya poochein')}
+      className="print:hidden lg:hidden fixed left-1/2 -translate-x-1/2 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 w-16 h-16 rounded-full bg-sabz text-white flex items-center justify-center shadow-lift ring-4 ring-paper hover:bg-sabz-dark"
     >
-      <MessageCircleQuestion className="w-6 h-6" />
-      {pick('Ask', 'Poochein')}
+      <Mic className="w-8 h-8" />
     </button>
   );
 }
@@ -203,12 +211,12 @@ export function AppShell() {
         </div>
       </main>
       <BottomNav />
-      <AskButton />
+      <VoiceButton />
 
       <ProductSheet productId={ui.productId} onClose={ui.closeProduct} />
       <CustomerSheet customerId={ui.reminderCustomerId} onClose={ui.closeReminder} />
       <ComboSheet productId={ui.comboProductId} onClose={ui.closeCombo} />
-      <CopilotSheet open={ui.copilot.open} initialPrompt={ui.copilot.prompt} onClose={ui.closeCopilot} />
+      <CopilotSheet open={ui.copilot.open} initialPrompt={ui.copilot.prompt} seed={ui.copilot.seed} onClose={ui.closeCopilot} />
       <CsvSheet open={ui.csvOpen} onClose={ui.closeCsv} />
       <DaySheet />
       <ExpenseSheet />
@@ -216,6 +224,7 @@ export function AppShell() {
       <WasooliSheet />
       <ReceiveSheet />
       <PaySupplierSheet />
+      <VoiceSheet />
     </div>
   );
 }

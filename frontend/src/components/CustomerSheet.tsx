@@ -1,6 +1,6 @@
-import { HandCoins, NotebookPen, Smartphone } from 'lucide-react';
+import { HandCoins, Mic, NotebookPen, Smartphone } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { useCustomerLedger, useStore } from '@/api/queries';
+import { useCustomerLedger, useStore, voiceAudioUrl } from '@/api/queries';
 import type { CustomerLedger, LedgerLine, PaymentResult, StoreProfile } from '@/api/types';
 import { useUi } from '@/app/UiContext';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -34,7 +34,13 @@ function HistoryLine({ e }: { e: LedgerLine }) {
       <div className="flex items-start gap-3">
         <span className="text-sm text-ink-muted w-20 shrink-0 pt-0.5">{formatDateTime(e.timestamp)}</span>
         <span className="flex-1 min-w-0">
-          <span className="font-bold">{pay ? pick('Paid', 'Wasooli') : pick('Udhaar', 'Udhaar')}</span>
+          <span className="font-bold">{pay ? pick('Paid', 'Wasooli') : e.cash_loan ? pick('Cash udhaar', 'Naqad udhaar') : pick('Udhaar', 'Udhaar')}</span>
+          {e.voice_capture_id != null && (
+            <span className="ml-2 inline-flex items-center gap-1 text-sm text-sabz-dark font-bold" title={pick('Written by voice', 'Bol kar likha')}>
+              <Mic className="w-4 h-4" aria-hidden />
+              {pick('by voice', 'awaaz se')}
+            </span>
+          )}
           {pay && e.method && (
             <span className="ml-2 inline-flex items-center gap-1 text-sm text-ink-muted">
               {e.method !== 'cash' && <Smartphone className="w-4 h-4" />}
@@ -61,6 +67,9 @@ function HistoryLine({ e }: { e: LedgerLine }) {
         </ul>
       )}
       {!pay && items.length === 0 && e.description && <p className="ml-[5.75rem] text-sm text-ink-muted">{e.description}</p>}
+      {e.has_recording && e.voice_capture_id != null && (
+        <audio controls preload="none" src={voiceAudioUrl(e.voice_capture_id)} className="ml-[5.75rem] w-[calc(100%-5.75rem)] h-9" aria-label={pick('What was said', 'Kya kaha gaya tha')} />
+      )}
     </li>
   );
 }

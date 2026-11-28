@@ -19,6 +19,7 @@ export function FigureLines({ f }: { f: DayFigures }) {
     { en: `Sales (${f.bills} bills)`, ur: `Sale (${f.bills} bill)`, value: f.sales_pkr, strong: true },
     { en: 'of which cash', ur: 'jis mein cash', value: f.cash_sales_pkr, muted: true },
     { en: 'Given on udhaar', ur: 'Udhaar diya', value: f.udhaar_given_pkr, muted: true },
+    { en: 'Cash lent from the cash box (naqad udhaar)', ur: 'Cash box se naqad udhaar', value: f.cash_loans_pkr ?? 0, sign: '−' },
     { en: 'Khata collected in cash', ur: 'Cash wasooli', value: f.wasooli_cash_pkr, sign: '+' },
     { en: 'Collected by Easypaisa, JazzCash, bank', ur: 'Easypaisa, JazzCash, bank se wasooli', value: f.wasooli_digital_pkr, muted: true },
     { en: 'Paid to distributors', ur: 'Distributors ko diya', value: f.supplier_payments_pkr, sign: '−' },
@@ -63,8 +64,8 @@ function Difference({ diff }: { diff: number }) {
       <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5" />
       <span>
         {short
-          ? pick(`${formatPKR(-diff)} short. It will be written in the book as a galla difference.`, `${formatPKR(-diff)} kam. Kitaab mein galle ka farq likha jaye ga.`)
-          : pick(`${formatPKR(diff)} extra. It will be written in the book as a galla difference.`, `${formatPKR(diff)} zyada. Kitaab mein galle ka farq likha jaye ga.`)}
+          ? pick(`${formatPKR(-diff)} short. It will be written in the book as a cash box difference.`, `${formatPKR(-diff)} kam. Kitaab mein cash box ka farq likha jaye ga.`)
+          : pick(`${formatPKR(diff)} extra. It will be written in the book as a cash box difference.`, `${formatPKR(diff)} zyada. Kitaab mein cash box ka farq likha jaye ga.`)}
       </span>
     </p>
   );
@@ -91,7 +92,7 @@ function CountForm({ mode, expected, open, close }: { mode: 'open' | 'close'; ex
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="p-4 rounded-2xl bg-card border border-line">
-        <p className="text-base text-ink-muted">{pick('The records say the galla should have', 'Records ke mutabiq galle mein hone chahiye')}</p>
+        <p className="text-base text-ink-muted">{pick('The records say the cash box should have', 'Records ke mutabiq cash box mein hone chahiye')}</p>
         <p className="text-3xl font-extrabold tabular">{formatPKR(expected)}</p>
       </div>
       <div className="space-y-2">
@@ -129,10 +130,15 @@ const WEEKDAY_UR: Record<string, string> = {
 };
 
 function Tomorrow({ r }: { r: DayClose }) {
+  const ui = useUi();
+  return <TomorrowBrief t={r.tomorrow} onLeave={ui.closeDay} />;
+}
+
+/** What tomorrow holds: bills due, order bookers visiting, who to ask for money, low stock. */
+export function TomorrowBrief({ t, onLeave }: { t: DayClose['tomorrow']; onLeave?: () => void }) {
   const { pick } = useLanguage();
   const ui = useUi();
   const navigate = useNavigate();
-  const t = r.tomorrow;
   return (
     <div className="space-y-3">
       <h3 className="text-xl font-extrabold flex items-center gap-2">
@@ -169,7 +175,7 @@ function Tomorrow({ r }: { r: DayClose }) {
               {pick('Ask these customers for payment', 'In customers se wasooli karein')}
             </p>
             {t.customers_to_remind.map((c) => (
-              <button key={c.customer_id} onClick={() => ui.openReminder(c.customer_id)} className="w-full flex items-center gap-3 min-h-[48px] px-3 rounded-xl hover:bg-paper text-left">
+              <button key={c.customer_id} onClick={() => { onLeave?.(); ui.openReminder(c.customer_id); }} className="w-full flex items-center gap-3 min-h-[48px] px-3 rounded-xl hover:bg-paper text-left">
                 <span className="flex-1">
                   <span className="font-bold">{c.name}</span>{' '}
                   <span className="text-sm text-lal-dark">{pick(`${formatPKR(c.overdue_pkr)} late, ${c.days_overdue} days`, `${formatPKR(c.overdue_pkr)} late, ${c.days_overdue} din`)}</span>
@@ -181,7 +187,7 @@ function Tomorrow({ r }: { r: DayClose }) {
         )}
         {t.items_running_low > 0 && (
           <li>
-            <button onClick={() => { ui.closeDay(); navigate('/app/order'); }} className="w-full p-4 flex items-center gap-3 text-left hover:bg-paper">
+            <button onClick={() => { onLeave?.(); navigate('/app/order?mode=budget'); }} className="w-full p-4 flex items-center gap-3 text-left hover:bg-paper">
               <PackageSearch className="w-5 h-5 text-haldi-dark shrink-0" />
               <span className="flex-1 font-bold">{pick(`${t.items_running_low} items running low: plan the order`, `${t.items_running_low} items kam hain: order ka plan banayein`)}</span>
               <ChevronRight className="w-5 h-5 text-ink-faint" />
@@ -229,8 +235,8 @@ export function DaySheet() {
       title={effective === 'open' ? pick('Open the shop', 'Dukaan kholein') : pick('Close the day', 'Din band karein')}
       description={
         effective === 'open'
-          ? pick('Count the galla before the first sale.', 'Pehli sale se pehle galla gin lein.')
-          : pick('Count the galla and see the whole day in one place.', 'Galla ginein aur poora din ek jagah dekhein.')
+          ? pick('Count the cash box before the first sale.', 'Pehli sale se pehle cash box gin lein.')
+          : pick('Count the cash box and see the whole day in one place.', 'Cash box ginein aur poora din ek jagah dekhein.')
       }
     >
       {day.isError && <ErrorBox error={day.error} onRetry={() => day.refetch()} />}

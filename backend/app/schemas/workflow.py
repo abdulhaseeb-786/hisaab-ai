@@ -101,6 +101,23 @@ class OrderCreated(Order):
     draft: MessageDraft
 
 
+class PlanLineIn(BaseModel):
+    product_id: int
+    supplier_id: int
+    packs: float = Field(ge=0, le=10_000)
+
+
+class PlanOrdersRequest(BaseModel):
+    budget_pkr: float = Field(gt=0, le=10_000_000, description="The plan's budget; the orders together never cost more.")
+    lines: list[PlanLineIn] = Field(min_length=1, max_length=300)
+
+
+class PlanOrdersCreated(BaseModel):
+    orders: list[OrderCreated] = Field(description="One pending order per distributor; each arrives through Maal aaya.")
+    total_pkr: float
+    budget_pkr: float
+
+
 class ReceiveLineIn(BaseModel):
     product_id: int
     received_qty: float = Field(ge=0, le=100_000)

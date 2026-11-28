@@ -81,11 +81,11 @@ export function MethodPicker({ value, onChange, direction }: { value: PaymentMet
       <p className="text-sm text-ink-muted">
         {value === 'cash'
           ? direction === 'in'
-            ? pick('Goes into the galla.', 'Galle mein jaye ga.')
-            : pick('Comes out of the galla.', 'Galle se nikle ga.')
+            ? pick('Goes into the cash box.', 'Cash box mein jaye ga.')
+            : pick('Comes out of the cash box.', 'Cash box se nikle ga.')
           : direction === 'in'
-            ? pick('Goes to your account, not the galla.', 'Account mein jaye ga, galle mein nahi.')
-            : pick('Paid from your account, not the galla.', 'Account se jaye ga, galle se nahi.')}
+            ? pick('Goes to your account, not the cash box.', 'Account mein jaye ga, cash box mein nahi.')
+            : pick('Paid from your account, not the cash box.', 'Account se jaye ga, cash box se nahi.')}
       </p>
     </div>
   );

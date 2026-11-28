@@ -1556,6 +1556,60 @@
         }
       }
     },
+    "/api/orders/from-plan": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Create From Plan",
+        "description": "Save a whole-shop budget plan as one pending order per distributor (all or nothing, within budget).",
+        "operationId": "create_from_plan_api_orders_from_plan_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanOrdersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanOrdersCreated"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/orders/{purchase_id}/receive": {
       "post": {
         "tags": [
@@ -1916,6 +1970,375 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/status": {
+      "get": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Voice Status",
+        "description": "Is voice ready: has the owner allowed online AI, and is one configured? (Never the keys.)",
+        "operationId": "voice_status_api_voice_status_get",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/settings": {
+      "patch": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Voice Settings",
+        "description": "The owner's yes or no to sending recordings to an online AI to be understood.",
+        "operationId": "voice_settings_api_voice_settings_patch",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoiceSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/understand": {
+      "post": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Understand",
+        "description": "What was said, and what HisaabAI thinks should be written. Nothing is saved to the books yet.\n\nA question (\"Imran ka kitna baqi hai?\") is answered straight away by the copilot instead.",
+        "operationId": "understand_api_voice_understand_post",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_understand_api_voice_understand_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceProposal"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/captures/{capture_id}/confirm": {
+      "post": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Confirm",
+        "description": "The shopkeeper checked it: write the udhaar, wasooli or kharcha, linked to the recording.",
+        "operationId": "confirm_api_voice_captures__capture_id__confirm_post",
+        "parameters": [
+          {
+            "name": "capture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Capture Id"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoiceConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceSaved"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/captures/{capture_id}/discard": {
+      "post": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Discard",
+        "description": "\"Rehne dein\": nothing is written. The capture is kept as set aside.",
+        "operationId": "discard_api_voice_captures__capture_id__discard_post",
+        "parameters": [
+          {
+            "name": "capture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Capture Id"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Discard Api Voice Captures  Capture Id  Discard Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/captures/{capture_id}/audio": {
+      "get": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Audio",
+        "description": "Play back what the shopkeeper said for this entry.",
+        "operationId": "audio_api_voice_captures__capture_id__audio_get",
+        "parameters": [
+          {
+            "name": "capture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Capture Id"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/log": {
+      "get": {
+        "tags": [
+          "Voice entry"
+        ],
+        "summary": "Voice Log",
+        "description": "Recent voice entries and how often they were saved without a correction (real use, not simulated).",
+        "operationId": "voice_log_api_voice_log_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "store_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Store Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceLog"
                 }
               }
             }
@@ -2372,6 +2795,62 @@
           "file"
         ],
         "title": "Body_preview_csv_api_import_csv_post"
+      },
+      "Body_understand_api_voice_understand_post": {
+        "properties": {
+          "audio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio",
+            "description": "The recording (WAV preferred), up to 30 seconds."
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text",
+            "description": "Or the same thing typed."
+          },
+          "seconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 120.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds"
+          },
+          "answer_language": {
+            "type": "string",
+            "enum": [
+              "roman_urdu",
+              "english",
+              "urdu"
+            ],
+            "title": "Answer Language",
+            "description": "For questions: the answer's language ('urdu' = Urdu script, for read-aloud).",
+            "default": "roman_urdu"
+          }
+        },
+        "type": "object",
+        "title": "Body_understand_api_voice_understand_post"
       },
       "BusinessReportResponse": {
         "properties": {
@@ -2852,6 +3331,12 @@
           "expenses_pkr": {
             "type": "number",
             "title": "Expenses Pkr"
+          },
+          "cash_loans_pkr": {
+            "type": "number",
+            "title": "Cash Loans Pkr",
+            "description": "Naqad udhaar: cash handed to customers from the galla.",
+            "default": 0
           },
           "galla_differences_pkr": {
             "type": "number",
@@ -3608,6 +4093,85 @@
         ],
         "title": "CustomerAging"
       },
+      "CustomerCandidate": {
+        "properties": {
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "credit_limit_pkr": {
+            "type": "number",
+            "title": "Credit Limit Pkr"
+          },
+          "balance_pkr": {
+            "type": "number",
+            "title": "Balance Pkr"
+          },
+          "overdue_pkr": {
+            "type": "number",
+            "title": "Overdue Pkr"
+          },
+          "safe_mark_score": {
+            "type": "number",
+            "title": "Safe Mark Score"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Risk Level"
+          },
+          "last_activity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "How close the spoken name is, 0 to 1."
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "name",
+          "phone",
+          "credit_limit_pkr",
+          "balance_pkr",
+          "overdue_pkr",
+          "safe_mark_score",
+          "risk_level",
+          "last_activity",
+          "score"
+        ],
+        "title": "CustomerCandidate"
+      },
       "CustomerCreateRequest": {
         "properties": {
           "name": {
@@ -4059,6 +4623,12 @@
             "title": "Withdrawals Pkr",
             "description": "Money taken home or deposited in the bank. Not a cost."
           },
+          "cash_loans_pkr": {
+            "type": "number",
+            "title": "Cash Loans Pkr",
+            "description": "Naqad udhaar: cash lent from the galla. Part of udhaar given.",
+            "default": 0
+          },
           "gross_profit_pkr": {
             "type": "number",
             "title": "Gross Profit Pkr",
@@ -4233,6 +4803,17 @@
               }
             ]
           },
+          "tomorrow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TomorrowPlan"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "After the day is closed: what tomorrow holds."
+          },
           "difference_pkr": {
             "type": "number",
             "title": "Difference Pkr"
@@ -4400,6 +4981,17 @@
                 "type": "null"
               }
             ]
+          },
+          "tomorrow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TomorrowPlan"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "After the day is closed: what tomorrow holds."
           }
         },
         "type": "object",
@@ -5024,6 +5616,72 @@
         ],
         "title": "InsightsResponse"
       },
+      "ItemHeard": {
+        "properties": {
+          "words": {
+            "type": "string",
+            "title": "Words",
+            "description": "The words for this item, e.g. 'do kilo cheeni'."
+          },
+          "words_urdu": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Words Urdu"
+          },
+          "qty_heard": {
+            "type": "boolean",
+            "title": "Qty Heard",
+            "description": "False when no quantity was said and 1 was filled in."
+          },
+          "qty_said": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty Said",
+            "description": "The words the quantity came from, e.g. 'do kilo'."
+          },
+          "match": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductOption"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preselected only when one product clearly fits."
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/ProductOption"
+            },
+            "type": "array",
+            "title": "Options",
+            "description": "Products that fit, best first; ties go to what sells most."
+          }
+        },
+        "type": "object",
+        "required": [
+          "words",
+          "words_urdu",
+          "qty_heard",
+          "qty_said",
+          "match",
+          "options"
+        ],
+        "title": "ItemHeard"
+      },
       "ItemLine": {
         "properties": {
           "product_id": {
@@ -5310,6 +5968,30 @@
             "type": "array",
             "title": "Items",
             "description": "What was bought on this udhaar, when known."
+          },
+          "cash_loan": {
+            "type": "boolean",
+            "title": "Cash Loan",
+            "description": "Cash handed over from the galla (naqad udhaar).",
+            "default": false
+          },
+          "voice_capture_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voice Capture Id",
+            "description": "Written by voice; see /api/voice/captures/{id}."
+          },
+          "has_recording": {
+            "type": "boolean",
+            "title": "Has Recording",
+            "description": "The voice recording is kept and can be played back.",
+            "default": false
           },
           "running_balance_pkr": {
             "type": "number",
@@ -6109,6 +6791,17 @@
       },
       "PaymentRecordResponse": {
         "properties": {
+          "entry_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entry Id"
+          },
           "customer_id": {
             "type": "integer",
             "title": "Customer Id"
@@ -6159,6 +6852,138 @@
           "receipt"
         ],
         "title": "PaymentRecordResponse"
+      },
+      "PersonGuess": {
+        "properties": {
+          "spoken_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Name",
+            "description": "The name as heard, in Roman letters."
+          },
+          "spoken_name_urdu": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spoken Name Urdu"
+          },
+          "match": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The khata picked for the shopkeeper, only when the match is clear."
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerCandidate"
+            },
+            "type": "array",
+            "title": "Candidates",
+            "description": "Close khatas to choose from, best first."
+          }
+        },
+        "type": "object",
+        "required": [
+          "spoken_name",
+          "spoken_name_urdu",
+          "match",
+          "candidates"
+        ],
+        "title": "PersonGuess"
+      },
+      "PlanLineIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "supplier_id": {
+            "type": "integer",
+            "title": "Supplier Id"
+          },
+          "packs": {
+            "type": "number",
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Packs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "supplier_id",
+          "packs"
+        ],
+        "title": "PlanLineIn"
+      },
+      "PlanOrdersCreated": {
+        "properties": {
+          "orders": {
+            "items": {
+              "$ref": "#/components/schemas/OrderCreated"
+            },
+            "type": "array",
+            "title": "Orders",
+            "description": "One pending order per distributor; each arrives through Maal aaya."
+          },
+          "total_pkr": {
+            "type": "number",
+            "title": "Total Pkr"
+          },
+          "budget_pkr": {
+            "type": "number",
+            "title": "Budget Pkr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "orders",
+          "total_pkr",
+          "budget_pkr"
+        ],
+        "title": "PlanOrdersCreated"
+      },
+      "PlanOrdersRequest": {
+        "properties": {
+          "budget_pkr": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Budget Pkr",
+            "description": "The plan's budget; the orders together never cost more."
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PlanLineIn"
+            },
+            "type": "array",
+            "maxItems": 300,
+            "minItems": 1,
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "budget_pkr",
+          "lines"
+        ],
+        "title": "PlanOrdersRequest"
       },
       "PlannedExpense": {
         "properties": {
@@ -6595,6 +7420,64 @@
           "products"
         ],
         "title": "ProductListResponse"
+      },
+      "ProductOption": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "selling_price": {
+            "type": "number",
+            "title": "Selling Price",
+            "description": "Shelf price; prices never come from speech."
+          },
+          "stock_qty": {
+            "type": "number",
+            "title": "Stock Qty"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "How well it fits the words said, 0 to about 1."
+          },
+          "qty": {
+            "type": "number",
+            "title": "Qty",
+            "description": "The quantity said, in this product's own unit (e.g. '5 kilo atta' = 1 bag of 5 kg)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "name",
+          "unit",
+          "selling_price",
+          "stock_qty",
+          "image_url",
+          "score",
+          "qty"
+        ],
+        "title": "ProductOption"
       },
       "ProductPackInfo": {
         "properties": {
@@ -8584,6 +9467,12 @@
               }
             ],
             "title": "Note"
+          },
+          "cash_from_galla": {
+            "type": "boolean",
+            "title": "Cash From Galla",
+            "description": "The extra amount was cash handed over from the galla (naqad udhaar).",
+            "default": false
           }
         },
         "type": "object",
@@ -8645,6 +9534,11 @@
           "balance_pkr": {
             "type": "number",
             "title": "Balance Pkr"
+          },
+          "cash_from_galla": {
+            "type": "boolean",
+            "title": "Cash From Galla",
+            "default": false
           },
           "receipt": {
             "$ref": "#/components/schemas/MessageDraft"
@@ -8716,6 +9610,696 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VoiceCaptureItem": {
+        "properties": {
+          "capture_id": {
+            "type": "integer",
+            "title": "Capture Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "audio",
+              "text"
+            ],
+            "title": "Source"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "gemini",
+              "groq",
+              "offline"
+            ],
+            "title": "Provider"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "saved",
+              "discarded",
+              "answered"
+            ],
+            "title": "Status"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "udhaar",
+                  "wasooli",
+                  "kharcha",
+                  "question"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent"
+          },
+          "edited": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edited"
+          },
+          "transcript_urdu": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Urdu"
+          },
+          "transcript_roman": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Roman"
+          },
+          "has_recording": {
+            "type": "boolean",
+            "title": "Has Recording"
+          }
+        },
+        "type": "object",
+        "required": [
+          "capture_id",
+          "created_at",
+          "source",
+          "provider",
+          "status",
+          "intent",
+          "edited",
+          "transcript_urdu",
+          "transcript_roman",
+          "has_recording"
+        ],
+        "title": "VoiceCaptureItem"
+      },
+      "VoiceConfirmRequest": {
+        "properties": {
+          "intent": {
+            "type": "string",
+            "enum": [
+              "udhaar",
+              "wasooli",
+              "kharcha"
+            ],
+            "title": "Intent"
+          },
+          "amount": {
+            "type": "number",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Amount",
+            "description": "Udhaar: the amount besides the items (may be 0 with items).",
+            "default": 0
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UdhaarItemIn"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Items",
+            "description": "Udhaar of goods, sold at shelf price."
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "new_customer_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Customer Name",
+            "description": "Open a new khata with this name."
+          },
+          "cash_from_galla": {
+            "type": "boolean",
+            "title": "Cash From Galla",
+            "default": true
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method",
+            "default": "cash"
+          },
+          "expense_category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "rent",
+                  "electricity",
+                  "salaries",
+                  "transport",
+                  "general",
+                  "owner_drawings",
+                  "bank_deposit"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expense Category"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "days_ago": {
+            "type": "integer",
+            "maximum": 7.0,
+            "minimum": 0.0,
+            "title": "Days Ago",
+            "default": 0
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "intent"
+        ],
+        "title": "VoiceConfirmRequest"
+      },
+      "VoiceLog": {
+        "properties": {
+          "saved": {
+            "type": "integer",
+            "title": "Saved"
+          },
+          "answered": {
+            "type": "integer",
+            "title": "Answered",
+            "description": "Questions asked by voice and answered.",
+            "default": 0
+          },
+          "saved_without_changes": {
+            "type": "integer",
+            "title": "Saved Without Changes"
+          },
+          "discarded": {
+            "type": "integer",
+            "title": "Discarded"
+          },
+          "captures": {
+            "items": {
+              "$ref": "#/components/schemas/VoiceCaptureItem"
+            },
+            "type": "array",
+            "title": "Captures"
+          }
+        },
+        "type": "object",
+        "required": [
+          "saved",
+          "saved_without_changes",
+          "discarded",
+          "captures"
+        ],
+        "title": "VoiceLog",
+        "description": "Real usage, not simulated: how often voice entries were saved without a correction."
+      },
+      "VoiceProposal": {
+        "properties": {
+          "capture_id": {
+            "type": "integer",
+            "title": "Capture Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "audio",
+              "text"
+            ],
+            "title": "Source"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "gemini",
+              "groq",
+              "offline"
+            ],
+            "title": "Provider"
+          },
+          "has_recording": {
+            "type": "boolean",
+            "title": "Has Recording"
+          },
+          "transcript_urdu": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Urdu"
+          },
+          "transcript_roman": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Roman"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "udhaar",
+                  "wasooli",
+                  "kharcha",
+                  "question"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent",
+            "description": "Empty when it was not clear. 'question': answered, nothing written."
+          },
+          "question": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question",
+            "description": "Intent 'question': what was asked, as sent to the copilot."
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Intent 'question': the copilot's answer (numbers only from its tools)."
+          },
+          "amount_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Pkr",
+            "description": "Only an amount that was really said; empty otherwise."
+          },
+          "amount_heard": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Heard",
+            "description": "The words the amount came from, e.g. 'paanch hazaar'."
+          },
+          "extra_amount_pkr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extra Amount Pkr",
+            "description": "Udhaar: amount besides the items (cash said with them). Without items, the amount."
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemHeard"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Udhaar of goods: the items heard."
+          },
+          "items_total_pkr": {
+            "type": "number",
+            "title": "Items Total Pkr",
+            "description": "Matched items at shelf prices.",
+            "default": 0
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonGuess"
+          },
+          "cash_from_galla": {
+            "type": "boolean",
+            "title": "Cash From Galla",
+            "description": "Udhaar: cash handed over from the galla (naqad), not goods."
+          },
+          "cash_from_galla_heard": {
+            "type": "boolean",
+            "title": "Cash From Galla Heard",
+            "description": "True if 'cash' or 'saamaan' was actually said."
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "cash",
+              "easypaisa",
+              "jazzcash",
+              "bank"
+            ],
+            "title": "Method"
+          },
+          "expense_category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "rent",
+                  "electricity",
+                  "salaries",
+                  "transport",
+                  "general",
+                  "owner_drawings",
+                  "bank_deposit"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expense Category"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reason_urdu": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Urdu"
+          },
+          "days_ago": {
+            "type": "integer",
+            "maximum": 7.0,
+            "minimum": 0.0,
+            "title": "Days Ago"
+          },
+          "occurred_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Occurred On"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date",
+            "description": "Return date, only if one was said."
+          },
+          "usual_due_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Usual Due Date",
+            "description": "The return date from the shop's usual credit term."
+          },
+          "cash_in_galla_pkr": {
+            "type": "number",
+            "title": "Cash In Galla Pkr"
+          },
+          "missing": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "intent",
+                "amount",
+                "person",
+                "category",
+                "item"
+              ]
+            },
+            "type": "array",
+            "title": "Missing"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/Bilingual"
+            },
+            "type": "array",
+            "title": "Notes",
+            "description": "Plain notes on how it was understood (e.g. offline, amount not heard)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "capture_id",
+          "source",
+          "provider",
+          "has_recording",
+          "transcript_urdu",
+          "transcript_roman",
+          "intent",
+          "amount_pkr",
+          "amount_heard",
+          "person",
+          "cash_from_galla",
+          "cash_from_galla_heard",
+          "method",
+          "expense_category",
+          "reason",
+          "reason_urdu",
+          "days_ago",
+          "occurred_on",
+          "due_date",
+          "usual_due_date",
+          "cash_in_galla_pkr",
+          "missing",
+          "notes"
+        ],
+        "title": "VoiceProposal",
+        "description": "What HisaabAI understood. Nothing is saved until the shopkeeper confirms."
+      },
+      "VoiceSaved": {
+        "properties": {
+          "capture_id": {
+            "type": "integer",
+            "title": "Capture Id"
+          },
+          "intent": {
+            "type": "string",
+            "enum": [
+              "udhaar",
+              "wasooli",
+              "kharcha"
+            ],
+            "title": "Intent"
+          },
+          "edited": {
+            "type": "boolean",
+            "title": "Edited",
+            "description": "The shopkeeper changed something HisaabAI understood."
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "new_customer": {
+            "type": "boolean",
+            "title": "New Customer"
+          },
+          "udhaar": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UdhaarResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "payment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentRecordResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expense": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExpenseResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "capture_id",
+          "intent",
+          "edited",
+          "customer_id",
+          "new_customer"
+        ],
+        "title": "VoiceSaved"
+      },
+      "VoiceSettingsRequest": {
+        "properties": {
+          "cloud_allowed": {
+            "type": "boolean",
+            "title": "Cloud Allowed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cloud_allowed"
+        ],
+        "title": "VoiceSettingsRequest"
+      },
+      "VoiceStatus": {
+        "properties": {
+          "cloud_allowed": {
+            "type": "boolean",
+            "title": "Cloud Allowed",
+            "description": "The owner agreed to send recordings to a cloud AI to be understood."
+          },
+          "cloud_available": {
+            "type": "boolean",
+            "title": "Cloud Available",
+            "description": "A cloud AI is configured (keys are never returned)."
+          },
+          "providers": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "gemini",
+                "groq",
+                "offline"
+              ]
+            },
+            "type": "array",
+            "title": "Providers"
+          },
+          "max_seconds": {
+            "type": "integer",
+            "title": "Max Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cloud_allowed",
+          "cloud_available",
+          "providers",
+          "max_seconds"
+        ],
+        "title": "VoiceStatus"
       },
       "app__schemas__inventory__PriceChange": {
         "properties": {

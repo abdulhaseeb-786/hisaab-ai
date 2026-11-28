@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, Float, Text
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, Float, Text
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -17,6 +17,9 @@ class Store(Base):
     # this plus every recorded cash movement since (see analytics/cash_book.py).
     opening_cash_pkr = Column(Float, nullable=False, default=0.0)
     opening_cash_date = Column(DateTime, nullable=True)
+    # The owner's consent to send voice recordings to a cloud AI (Gemini / Groq) to be
+    # understood. Off until the owner says yes; without it, voice entry works from typed text.
+    voice_cloud_allowed = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships

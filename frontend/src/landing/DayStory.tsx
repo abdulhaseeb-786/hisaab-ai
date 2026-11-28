@@ -10,18 +10,18 @@ import { cn, formatPKR } from '@/lib/format';
 const STEPS: { time: [string, string]; title: [string, string]; body: [string, string] }[] = [
   {
     time: ['8:00 am', 'Subah 8 baje'],
-    title: ['The galla is counted, the day opens', 'Galla gina, din shuru'],
+    title: ['The cash box is counted, the day opens', 'Cash box gina, din shuru'],
     body: [
       'Before the first customer, the owner counts the drawer. HisaabAI checks it against the records and shows who is late, what is running low, and the three things to do first.',
-      'Pehle customer se pehle maalik galla ginta hai. HisaabAI records se milata hai aur batata hai kaun late hai, kya kam hai, aur sab se pehle kya karna hai.',
+      'Pehle customer se pehle maalik cash box ginta hai. HisaabAI records se milata hai aur batata hai kaun late hai, kya kam hai, aur sab se pehle kya karna hai.',
     ],
   },
   {
     time: ['11:00 am', 'Din 11 baje'],
     title: ['The order booker comes', 'Order booker aata hai'],
     body: [
-      'HisaabAI knows how much the galla can safely spend before this bill is due, and fills it with whole cartons, most urgent first. The order is on screen to read out.',
-      'HisaabAI jaanta hai is bill se pehle galla kitna kharch bardasht kar sakta hai, aur poore carton se list banata hai, zaroori maal pehle. Order screen par, parh kar suna dein.',
+      'HisaabAI knows how much the cash box can safely spend before this bill is due, and fills it with whole cartons, most urgent first. The order is on screen to read out.',
+      'HisaabAI jaanta hai is bill se pehle cash box kitna kharch bardasht kar sakta hai, aur poore carton se list banata hai, zaroori maal pehle. Order screen par, parh kar suna dein.',
     ],
   },
   {
@@ -63,7 +63,7 @@ function MorningScreen() {
   const rows: [string, string, boolean][] = k
     ? [
         [pick('Today’s sale', 'Aaj ki sale'), formatPKR(k.revenue_pkr), false],
-        [pick('Cash in drawer', 'Galle mein'), formatPKR(k.cash_in_hand_pkr), false],
+        [pick('Cash in drawer', 'Cash box mein'), formatPKR(k.cash_in_hand_pkr), false],
         [pick('Late khata', 'Late udhaar'), formatPKR(k.overdue_receivables_pkr), true],
         [pick('Running low', 'Kam maal'), `${k.products_at_risk_count} items`, true],
       ]

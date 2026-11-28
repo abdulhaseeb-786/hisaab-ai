@@ -78,7 +78,7 @@ function Result({ r, onAgain }: { r: CountResult; onAgain: () => void }) {
           <div className="p-4 rounded-2xl bg-sabz-tint">
             <p className="text-sm font-bold text-sabz-dark">{pick('Booked as cash sales not written down', 'Bina likhi cash sale ke tor par likha')}</p>
             <p className="text-2xl font-extrabold tabular">{formatPKR(r.inferred_sales_pkr)}</p>
-            <p className="text-sm text-ink-soft">{pick('This is now expected in the galla.', 'Yeh ab galle mein hona chahiye.')}</p>
+            <p className="text-sm text-ink-soft">{pick('This is now expected in the cash box.', 'Yeh ab cash box mein hona chahiye.')}</p>
           </div>
         ) : (
           <div className="p-4 rounded-2xl bg-card border border-line">
@@ -218,8 +218,8 @@ export default function CountPage() {
                 />
                 <p className="text-sm text-ink-muted">
                   {treat === 'loss'
-                    ? pick('Written off at cost. Sales and the galla do not change.', 'Khareed qeemat par nuqsaan likha jaye ga. Sale aur galla nahi badle ga.')
-                    : pick('Booked as cash sales at the shelf price, so the galla should have that money.', 'Shelf ki qeemat par cash sale likhi jaye gi, yani yeh paisa galle mein hona chahiye.')}
+                    ? pick('Written off at cost. Sales and the cash box do not change.', 'Khareed qeemat par nuqsaan likha jaye ga. Sale aur cash box nahi badle ga.')
+                    : pick('Booked as cash sales at the shelf price, so the cash box should have that money.', 'Shelf ki qeemat par cash sale likhi jaye gi, yani yeh paisa cash box mein hona chahiye.')}
                 </p>
               </div>
               <Button block size="lg" onClick={save} disabled={submit.isPending} icon={<Check className="w-6 h-6" />}>

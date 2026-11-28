@@ -7,7 +7,6 @@ import { LanguageProvider } from '@/i18n/LanguageContext';
 import { OnboardingProvider, useOnboarding } from '@/onboarding/OnboardingContext';
 import { Tour } from '@/onboarding/Tour';
 import { Welcome } from '@/onboarding/Welcome';
-import BuyPage from '@/pages/BuyPage';
 import CountPage from '@/pages/CountPage';
 import HisaabPage from '@/pages/HisaabPage';
 import LandingPage from '@/pages/LandingPage';
@@ -56,7 +55,7 @@ export default function App() {
                 <Route index element={<LandingPage />} />
                 <Route path="app" element={<AppWithOnboarding />}>
                   <Route index element={<TodayPage />} />
-                  <Route path="buy" element={<BuyPage />} />
+                  <Route path="buy" element={<Navigate to="/app/order?mode=budget" replace />} />
                   <Route path="order" element={<OrderPage />} />
                   <Route path="stock" element={<StockPage />} />
                   <Route path="stock/count" element={<CountPage />} />

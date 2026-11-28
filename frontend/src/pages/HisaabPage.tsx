@@ -23,7 +23,7 @@ function Galla() {
     <div className="grid lg:grid-cols-[1fr_1.1fr] gap-4">
       <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
         <div>
-          <p className="text-base text-ink-muted">{pick('Should be in the galla now', 'Abhi galle mein hone chahiye')}</p>
+          <p className="text-base text-ink-muted">{pick('Should be in the cash box now', 'Abhi cash box mein hone chahiye')}</p>
           <p className="text-4xl font-extrabold tabular">
             <Money value={d.cash_in_drawer_expected_pkr} />
           </p>
@@ -58,7 +58,7 @@ function History() {
   const history = useDayHistory(14);
   if (!history.data?.length) return null;
   return (
-    <Section title={pick('Last two weeks', 'Pichle do hafte')} hint={pick('Sales and the galla count each night', 'Har raat ki sale aur galle ki ginti')}>
+    <Section title={pick('Last two weeks', 'Pichle do hafte')} hint={pick('Sales and the cash box count each night', 'Har raat ki sale aur cash box ki ginti')}>
       <ul className="bg-card rounded-2xl border border-line shadow-card divide-y divide-line">
         {history.data.map((h) => {
           const diff = h.closing_difference_pkr;
@@ -78,7 +78,7 @@ function History() {
               {diff === null ? (
                 <Pill tone="info" className="text-xs">{pick('Open', 'Khuli')}</Pill>
               ) : Math.abs(diff) < 0.5 ? (
-                <Pill tone="ok" className="text-xs">{pick('Galla matched', 'Galla barabar')}</Pill>
+                <Pill tone="ok" className="text-xs">{pick('Cash Box matched', 'Cash Box barabar')}</Pill>
               ) : (
                 <Pill tone={diff < 0 ? 'urgent' : 'watch'} className="text-xs">
                   {diff < 0 ? pick(`${formatPKR(-diff)} short`, `${formatPKR(-diff)} kam`) : pick(`${formatPKR(diff)} extra`, `${formatPKR(diff)} zyada`)}
@@ -134,9 +134,9 @@ export default function HisaabPage() {
   const o = outlook.data;
   return (
     <div className="space-y-8">
-      <PageTitle title={pick('Hisaab', 'Hisaab')} subtitle={pick('The galla, the week ahead, distributor bills, and a report for the bank.', 'Galla, aane wala hafta, distributors ke bill, aur bank ke liye report.')} />
+      <PageTitle title={pick('Hisaab', 'Hisaab')} subtitle={pick('The cash box, the week ahead, distributor bills, and a report for the bank.', 'Cash Box, aane wala hafta, distributors ke bill, aur bank ke liye report.')} />
 
-      <Section title={pick('Galla', 'Galla')}>
+      <Section title={pick('Cash Box', 'Cash Box')}>
         <Galla />
       </Section>
 

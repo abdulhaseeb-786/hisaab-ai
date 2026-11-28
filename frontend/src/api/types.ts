@@ -62,9 +62,19 @@ export type SafeBudget = S['SafeBudget'];
 export type OrderSuggestion = S['OrderSuggestResponse'];
 export type Order = S['Order'];
 export type OrderCreated = S['OrderCreated'];
+export type PlanOrdersCreated = S['PlanOrdersCreated'];
 export type ReceiveResult = S['ReceiveResponse'];
 
 export type CountSheet = S['CountSheetResponse'];
 export type CountSheetItem = S['CountSheetItem'];
 export type CountResult = S['CountResponse'];
 export type BusinessReport = S['BusinessReportResponse'];
+
+export type VoiceStatus = S['VoiceStatus'];
+export type VoiceProposal = S['VoiceProposal'];
+export type VoiceIntent = S['VoiceConfirmRequest']['intent'];
+export type VoiceConfirm = S['VoiceConfirmRequest'];
+export type VoiceSaved = S['VoiceSaved'];
+export type CustomerCandidate = S['CustomerCandidate'];
+export type ItemHeard = S['ItemHeard'];
+export type ProductOption = S['ProductOption'];

@@ -5,6 +5,7 @@ from .purchases import Supplier, SupplierProduct, Purchase, PurchaseLine
 from .credit import Customer, LedgerEntry, SupplierLedgerEntry
 from .operations import DaySession, CashAdjustment, StockCount, StockCountLine
 from .analytics import Expense, Insight, Forecast, PurchasePlan, PurchasePlanLine
+from .voice import VoiceCapture
 
 __all__ = [
     "Store",
@@ -31,4 +32,5 @@ __all__ = [
     "CashAdjustment",
     "StockCount",
     "StockCountLine",
+    "VoiceCapture",
 ]

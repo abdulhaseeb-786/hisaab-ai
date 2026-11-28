@@ -48,7 +48,7 @@ from app.simulator.demand_profiles import (
     line_quantity_options,
 )
 
-SCHEMA_VERSION = "5"
+SCHEMA_VERSION = "6"
 STORE_ID = 1
 OPENING_CASH = 150_000.0
 

@@ -16,6 +16,7 @@ os.environ["COPILOT_MODE"] = "offline"
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["GROQ_API_KEY"] = ""
 os.environ["DEMO_AUTO_REFRESH"] = "false"
+os.environ["VOICE_DIR"] = str(Path(_TMP_DIR, "voice"))
 
 backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:

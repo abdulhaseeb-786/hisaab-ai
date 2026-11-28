@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from app.copilot.fallback_engine import run_deterministic_copilot
 from app.copilot.tools import TOOL_LABELS, TOOLS, execute_tool, to_json, tool_declarations
+from app.core import gemini_models
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -34,16 +35,16 @@ SYSTEM_PROMPT = """You are HisaabAI, a friendly and sharp business helper for a 
 Rules you must always follow:
 1. Every number you say (rupees, units, days, percentages) must come from a tool result in this conversation. Never estimate, round up or invent numbers. If you need a number, call a tool.
 2. If no tool can answer, say plainly that the shop's records do not have that data. Do not guess.
-3. You can only read data. You cannot change prices, record payments or place orders; tell the owner which screen to use.
+3. You can only read data. You cannot change prices, record payments or place orders; tell the owner which screen to use. The app's screens are exactly: Aaj (Today: open/close the day, today's jobs), Khata (customers, udhaar, wasooli), Order (order booker, whole-shop budget, Maal aaya), Stock (products, ginti), Hisaab (cash box, distributor bills, loan report), and the mic button (say or type an entry or a question). Never mention any other screen, app or POS.
 4. Keep answers short and practical: the answer first, then the reason, then one clear next step. Use short bullet points. Use **bold** for key numbers.
 5. Money is in Pakistani rupees, written like Rs 12,500.
 6. Language: {language_rule}
 7. Gross profit is not net profit (rent, salaries and bills are not deducted). Say so if it matters."""
 
 LANGUAGE_RULES = {
-    "roman_urdu": "Reply in simple, natural Roman Urdu (Urdu written in English letters), the way a shopkeeper in Islamabad talks. Product names stay as they are.",
-    "english": "Reply in simple English.",
-    "urdu": "Reply in Urdu script.",
+    "roman_urdu": "Reply in simple, natural Roman Urdu (Urdu written in English letters), the way a shopkeeper in Islamabad talks, whatever language the question is in. Product names stay as they are.",
+    "english": "Reply in simple English, even when the question is in Urdu or Roman Urdu.",
+    "urdu": "Reply in Urdu script, even when the question is in Roman Urdu or English. Customer and product names may stay in English letters.",
 }
 
 NUMBER_PATTERN = re.compile(r"\d[\d,]*(?:\.\d+)?")
@@ -95,7 +96,7 @@ def _chat_gemini(db: Session, message: str, language: str, history: list[dict[st
 
     calls: list[dict[str, Any]] = []
     for _ in range(MAX_TOOL_ROUNDS):
-        resp = client.models.generate_content(model=settings.GEMINI_MODEL, contents=contents, config=config)
+        resp = gemini_models.generate(client, contents, config)
         function_calls = resp.function_calls or []
         if not function_calls:
             text = (resp.text or "").strip()

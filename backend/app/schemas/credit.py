@@ -77,6 +77,9 @@ class LedgerLine(BaseModel):
     method: Optional[Literal["cash", "easypaisa", "jazzcash", "bank"]] = Field(
         default=None, description="How a repayment was made. Empty for udhaar.")
     items: list[ItemLine] = Field(default_factory=list, description="What was bought on this udhaar, when known.")
+    cash_loan: bool = Field(default=False, description="Cash handed over from the galla (naqad udhaar).")
+    voice_capture_id: Optional[int] = Field(default=None, description="Written by voice; see /api/voice/captures/{id}.")
+    has_recording: bool = Field(default=False, description="The voice recording is kept and can be played back.")
     running_balance_pkr: float
 
 
@@ -107,6 +110,7 @@ class PaymentRecordRequest(BaseModel):
 
 
 class PaymentRecordResponse(BaseModel):
+    entry_id: Optional[int] = None
     customer_id: int
     name: str
     amount_received: float
@@ -170,6 +174,7 @@ class UdhaarRequest(BaseModel):
     items: list[UdhaarItemIn] = Field(default_factory=list, max_length=50)
     extra_amount: float = Field(default=0, ge=0, le=10_000_000, description="Money or items not in the catalogue.")
     note: Optional[str] = Field(default=None, max_length=120)
+    cash_from_galla: bool = Field(default=False, description="The extra amount was cash handed over from the galla (naqad udhaar).")
 
 
 class UdhaarResponse(BaseModel):
@@ -183,6 +188,7 @@ class UdhaarResponse(BaseModel):
     total_pkr: float
     due_date: datetime
     balance_pkr: float
+    cash_from_galla: bool = False
     receipt: MessageDraft
 
 
@@ -230,6 +236,7 @@ class CashPosition(BaseModel):
     wasooli_pkr: float
     supplier_payments_pkr: float
     expenses_pkr: float
+    cash_loans_pkr: float = Field(default=0, description="Naqad udhaar: cash handed to customers from the galla.")
     galla_differences_pkr: float
     cash_in_hand_pkr: float
 

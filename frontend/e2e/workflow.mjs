@@ -197,7 +197,7 @@ await step('close the day with a short galla', async () => {
   await idle(d);
   await d.locator('[data-tour="day-bar"]').getByRole('button', { name: 'Close the day' }).click();
   const sheet = dialog(d);
-  await sheet.getByText('The records say the galla should have').waitFor({ timeout: 8000 });
+  await sheet.getByText('The records say the cash box should have').waitFor({ timeout: 8000 });
   const expectedText = await sheet.locator('p.text-3xl').first().innerText();
   const expected = Number(expectedText.replace(/[^\d]/g, ''));
   await sheet.locator('#galla').fill(String(expected - 300));

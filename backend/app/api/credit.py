@@ -64,7 +64,7 @@ def give_udhaar(payload: UdhaarRequest, store_id: int = 1, db: Session = Depends
     receipt draft to show the customer; nothing is sent anywhere.
     """
     return _run(khata.record_udhaar, db, payload.customer_id, [i.model_dump() for i in payload.items],
-                payload.extra_amount, payload.note, store_id=store_id)
+                payload.extra_amount, payload.note, store_id=store_id, cash_from_galla=payload.cash_from_galla)
 
 
 @router.post("/payment", response_model=PaymentRecordResponse)

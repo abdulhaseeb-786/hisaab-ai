@@ -7,7 +7,8 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 interface UiState {
   productId: number | null;
   reminderCustomerId: number | null;
-  copilot: { open: boolean; prompt?: string };
+  /** `seed`: a voice question and its answer, so the chat continues from there. */
+  copilot: { open: boolean; prompt?: string; seed?: CopilotSeed };
   csvOpen: boolean;
   comboProductId: number | null;
   /** Open or close the day (galla count). */
@@ -19,6 +20,17 @@ interface UiState {
   /** "Maal aaya" for a pending order; 0 means "choose the order first". */
   receivePurchaseId: number | null;
   paySupplierId: number | null;
+  /** The customer sheet to return to when an udhaar / wasooli opened from it is closed. */
+  returnToCustomer: number | null;
+  /** Voice entry: "bol kar likhein". `listen` starts recording as soon as it opens. */
+  voice: { open: boolean; listen?: boolean };
+}
+
+export interface CopilotSeed {
+  question: string;
+  answer: string;
+  provider: 'gemini' | 'groq' | 'offline';
+  tools: { tool_name: string; tool_label: string }[];
 }
 
 interface UiActions {
@@ -26,7 +38,7 @@ interface UiActions {
   closeProduct: () => void;
   openReminder: (customerId: number) => void;
   closeReminder: () => void;
-  openCopilot: (prompt?: string) => void;
+  openCopilot: (prompt?: string, seed?: CopilotSeed) => void;
   closeCopilot: () => void;
   openCsv: () => void;
   closeCsv: () => void;
@@ -44,6 +56,8 @@ interface UiActions {
   closeReceive: () => void;
   openPaySupplier: (supplierId: number) => void;
   closePaySupplier: () => void;
+  openVoice: (listen?: boolean) => void;
+  closeVoice: () => void;
 }
 
 const UiContext = createContext<(UiState & UiActions) | null>(null);
@@ -61,6 +75,8 @@ export function UiProvider({ children }: { children: ReactNode }) {
     expenseOpen: false,
     receivePurchaseId: null,
     paySupplierId: null,
+    voice: { open: false },
+    returnToCustomer: null,
   });
 
   const value = useMemo(() => {
@@ -71,7 +87,7 @@ export function UiProvider({ children }: { children: ReactNode }) {
       closeProduct: () => set({ productId: null }),
       openReminder: (customerId: number) => set({ reminderCustomerId: customerId }),
       closeReminder: () => set({ reminderCustomerId: null }),
-      openCopilot: (prompt?: string) => set({ copilot: { open: true, prompt } }),
+      openCopilot: (prompt?: string, seed?: CopilotSeed) => set({ copilot: { open: true, prompt, seed } }),
       closeCopilot: () => set({ copilot: { open: false } }),
       openCsv: () => set({ csvOpen: true }),
       closeCsv: () => set({ csvOpen: false }),
@@ -79,17 +95,22 @@ export function UiProvider({ children }: { children: ReactNode }) {
       closeCombo: () => set({ comboProductId: null }),
       openDay: (mode: 'open' | 'close') => set({ day: mode }),
       closeDay: () => set({ day: null }),
-      // A customer sheet may be open underneath; the entry sheet replaces it.
-      openUdhaar: (customerId?: number) => set({ udhaar: { open: true, customerId }, reminderCustomerId: null }),
-      closeUdhaar: () => set({ udhaar: { open: false } }),
-      openWasooli: (customerId?: number) => set({ wasooli: { open: true, customerId }, reminderCustomerId: null }),
-      closeWasooli: () => set({ wasooli: { open: false } }),
+      // A customer sheet may be open underneath: the entry sheet replaces it, and closing
+      // the entry brings the customer back (with the new balance) instead of losing your place.
+      openUdhaar: (customerId?: number) =>
+        set({ udhaar: { open: true, customerId }, reminderCustomerId: null, returnToCustomer: state.reminderCustomerId }),
+      closeUdhaar: () => set({ udhaar: { open: false }, reminderCustomerId: state.returnToCustomer, returnToCustomer: null }),
+      openWasooli: (customerId?: number) =>
+        set({ wasooli: { open: true, customerId }, reminderCustomerId: null, returnToCustomer: state.reminderCustomerId }),
+      closeWasooli: () => set({ wasooli: { open: false }, reminderCustomerId: state.returnToCustomer, returnToCustomer: null }),
       openExpense: () => set({ expenseOpen: true }),
       closeExpense: () => set({ expenseOpen: false }),
       openReceive: (purchaseId?: number) => set({ receivePurchaseId: purchaseId ?? 0 }),
       closeReceive: () => set({ receivePurchaseId: null }),
       openPaySupplier: (supplierId: number) => set({ paySupplierId: supplierId }),
       closePaySupplier: () => set({ paySupplierId: null }),
+      openVoice: (listen?: boolean) => set({ voice: { open: true, listen }, reminderCustomerId: null }),
+      closeVoice: () => set({ voice: { open: false } }),
     };
   }, [state]);
 

@@ -8,6 +8,7 @@ import type { ActionType, KpiSummary, TodayAction } from '@/api/types';
 import storeImg from '@/assets/store-isometric.jpg';
 import { RegisterBook } from '@/components/RegisterBook';
 import { useUi } from '@/app/UiContext';
+import { TomorrowBrief } from '@/components/day/DaySheet';
 import { Button } from '@/components/ui/Button';
 import { ProductImage } from '@/components/ui/ProductImage';
 import { ErrorBox, Skeleton } from '@/components/ui/QueryState';
@@ -47,7 +48,7 @@ function Job({ action, first }: { action: TodayAction; first: boolean }) {
   const id = action.target.id;
 
   const run = () => {
-    if (action.action_type === 'restock') navigate('/app/order');
+    if (action.action_type === 'restock') navigate(id ? `/app/order?product=${id}` : '/app/order');
     else if (action.action_type === 'cash_warning') navigate('/app/hisaab');
     else if (id === null) return;
     else if (action.action_type === 'fix_price') ui.openProduct(id);
@@ -186,7 +187,7 @@ function TodayRegister() {
                   note: change === null ? undefined : pick(`${formatChange(change)} vs this time yesterday`, `kal isi waqt se ${formatChange(change)}`),
                 },
                 {
-                  label: pick('Cash in drawer', 'Galle mein cash'),
+                  label: pick('Cash in drawer', 'Cash box mein cash'),
                   value: formatPKR(k.cash_in_hand_pkr),
                   note: pick(`${formatPKR(k.payables_due_7d_pkr)} due to suppliers this week`, `is hafte suppliers ko ${formatPKR(k.payables_due_7d_pkr)}`),
                   to: '/app/hisaab',
@@ -232,7 +233,7 @@ function DayBar() {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-lg font-extrabold">{pick('Open the shop', 'Dukaan kholein')}</span>
-          <span className="block text-sm text-ink-soft">{pick('Count the galla first, so tonight the cash adds up.', 'Pehle galla gin lein, taake raat ko hisaab barabar ho.')}</span>
+          <span className="block text-sm text-ink-soft">{pick('Count the cash box first, so tonight the cash adds up.', 'Pehle cash box gin lein, taake raat ko hisaab barabar ho.')}</span>
         </span>
         <ChevronRight className="w-6 h-6 text-ink-faint" />
       </button>
@@ -246,7 +247,7 @@ function DayBar() {
         <p className="flex-1 font-bold">
           {pick(`Day closed at ${formatDateTime(d.session?.closed_at)}.`, `Din ${formatDateTime(d.session?.closed_at)} par band hua.`)}{' '}
           <span className={cn('font-normal', Math.abs(diff) < 0.5 ? 'text-sabz-dark' : 'text-lal-dark')}>
-            {Math.abs(diff) < 0.5 ? pick('Galla matched.', 'Galla barabar tha.') : diff < 0 ? pick(`${formatPKR(-diff)} short.`, `${formatPKR(-diff)} kam.`) : pick(`${formatPKR(diff)} extra.`, `${formatPKR(diff)} zyada.`)}
+            {Math.abs(diff) < 0.5 ? pick('Cash Box matched.', 'Cash Box barabar tha.') : diff < 0 ? pick(`${formatPKR(-diff)} short.`, `${formatPKR(-diff)} kam.`) : pick(`${formatPKR(diff)} extra.`, `${formatPKR(diff)} zyada.`)}
           </span>
         </p>
         <Button variant="ghost" size="sm" onClick={() => ui.openDay('close')}>{pick('See the day', 'Din dekhein')}</Button>
@@ -262,7 +263,7 @@ function DayBar() {
       <p className="flex-1 min-w-0 basis-48">
         <span className="font-extrabold">{pick('Shop is open', 'Dukaan khuli hai')}</span>{' '}
         <span className="text-ink-soft">
-          {pick(`since ${formatDateTime(d.session?.opened_at)}. Galla should have `, `${formatDateTime(d.session?.opened_at)} se. Galle mein hone chahiye `)}
+          {pick(`since ${formatDateTime(d.session?.opened_at)}. Cash Box should have `, `${formatDateTime(d.session?.opened_at)} se. Cash box mein hone chahiye `)}
           <strong className="text-ink tabular">{formatPKR(d.cash_in_drawer_expected_pkr)}</strong>
         </span>
       </p>
@@ -305,7 +306,7 @@ function QuickActions() {
       <QuickAction icon={<HandCoins className="w-6 h-6" />} label="+ Wasooli" hint={pick('Money received', 'Raqam aayi')} onClick={() => ui.openWasooli()} />
       <QuickAction icon={<ClipboardList className="w-6 h-6" />} label={pick('Order booker', 'Order booker aaya')} hint={pick('What to order', 'Kya mangwayein')} onClick={() => navigate('/app/order')} />
       <QuickAction icon={<PackageCheck className="w-6 h-6" />} label={pick('Delivery came', 'Maal aaya')} hint={onTheWay ? pick(`${onTheWay} on the way`, `${onTheWay} raste mein`) : pick('Check the bill', 'Bill milayein')} onClick={() => ui.openReceive()} />
-      <QuickAction wide icon={<Receipt className="w-6 h-6" />} label="Kharcha" hint={pick('Paid from the galla', 'Galle se diya')} onClick={ui.openExpense} />
+      <QuickAction wide icon={<Receipt className="w-6 h-6" />} label="Kharcha" hint={pick('Paid from the cash box', 'Cash box se diya')} onClick={ui.openExpense} />
     </section>
   );
 }
@@ -341,21 +342,61 @@ function SalesTrend({ k }: { k: KpiSummary }) {
   );
 }
 
+/** After closing: tomorrow's plan stays here until the shop opens again. */
+function TomorrowCard() {
+  const day = useDayToday();
+  const t = day.data?.tomorrow;
+  if (!t) return null;
+  return (
+    <div className="bg-neela-tint/60 border-2 border-neela/30 rounded-2xl p-4 sm:p-5" data-tour="tomorrow">
+      <TomorrowBrief t={t} />
+    </div>
+  );
+}
+
 export default function TodayPage() {
   const { pick, language } = useLanguage();
   const store = useStore();
   const month = useDashboard('30d');
+  const state = useDayToday().data?.state;
 
+  // The screen follows the shopkeeper's day. The counter buttons are never hidden:
+  // an udhaar can happen before the day is opened in the app.
   return (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <DayBar />
-        <QuickActions />
-      </div>
-
-      <TodayRegister />
-
-      <Parchi />
+      {state === 'closed' ? (
+        <>
+          <div className="space-y-4">
+            <DayBar />
+            <TomorrowCard />
+          </div>
+          <div className="space-y-4">
+            <QuickActions />
+          </div>
+          <TodayRegister />
+          <Parchi />
+        </>
+      ) : state === 'not_opened' ? (
+        <>
+          <div className="space-y-4">
+            <DayBar />
+            <Parchi />
+          </div>
+          <div className="space-y-4">
+            <QuickActions />
+          </div>
+          <TodayRegister />
+        </>
+      ) : (
+        <>
+          <div className="space-y-4">
+            <DayBar />
+            <QuickActions />
+          </div>
+          <Parchi />
+          <TodayRegister />
+        </>
+      )}
 
       <Section title={pick('How sales are going', 'Sale ka rujhaan')}>{month.data ? <SalesTrend k={month.data} /> : <Skeleton className="h-40" />}</Section>
 

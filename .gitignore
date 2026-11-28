@@ -54,3 +54,6 @@ backend/datasets/raw/
 
 # Browser workflow screenshots
 frontend/e2e-shots/
+
+# Voice recordings (shop data)
+backend/data/

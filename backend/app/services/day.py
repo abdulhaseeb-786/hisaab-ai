@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.analytics.cash_book import CASH, NON_OPERATING_EXPENSES, cash_position, paid_in_cash
+from app.analytics.cash_book import CASH, NON_OPERATING_EXPENSES, cash_lent, cash_position, paid_in_cash
 from app.analytics.credit_aging import calculate_credit_summary
 from app.analytics.inventory_rules import compute_inventory_health
 from app.analytics.payables import open_supplier_invoices
@@ -64,6 +64,7 @@ def day_figures(db: Session, store_id: int, start: datetime, end: datetime) -> d
     wasooli_digital = _sum(db.query(func.sum(LedgerEntry.credit)).filter(
         LedgerEntry.store_id == store_id, LedgerEntry.timestamp >= start, LedgerEntry.timestamp < end,
         ~paid_in_cash(LedgerEntry.method)))
+    cash_loans = cash_lent(db, store_id, start, end)
     supplier_paid = _sum(db.query(func.sum(SupplierLedgerEntry.debit)).filter(
         SupplierLedgerEntry.store_id == store_id, SupplierLedgerEntry.timestamp >= start,
         SupplierLedgerEntry.timestamp < end, paid_in_cash(SupplierLedgerEntry.method)))
@@ -78,6 +79,7 @@ def day_figures(db: Session, store_id: int, start: datetime, end: datetime) -> d
         "sales_pkr": round(revenue, 2),
         "cash_sales_pkr": cash_sales,
         "udhaar_given_pkr": udhaar_given,
+        "cash_loans_pkr": cash_loans,
         "wasooli_cash_pkr": wasooli_cash,
         "wasooli_digital_pkr": wasooli_digital,
         "supplier_payments_pkr": supplier_paid,
@@ -150,6 +152,8 @@ def day_status(db: Session, store_id: int = 1, now: datetime | None = None) -> d
         "today": day_figures(db, store_id, datetime.combine(now.date(), time.min), now),
         "since_open_start": start,
         "yesterday": _session_dict(yesterday),
+        # After closing, tomorrow's plan stays on the Today screen until the next morning.
+        "tomorrow": _tomorrow(db, store_id, now) if state == "closed" else None,
     }
 
 
@@ -158,7 +162,7 @@ def _book_difference(db: Session, store_id: int, session: DaySession, now: datet
         return
     db.add(CashAdjustment(
         store_id=store_id, timestamp=now, amount=round(diff, 2), session_id=session.session_id,
-        reason=f"Galla {'short' if diff < 0 else 'extra'} at {when}",
+        reason=f"Cash box {'short' if diff < 0 else 'extra'} at {when}",
     ))
 
 
@@ -230,7 +234,7 @@ def record_expense(db: Session, category: str, amount: float, note: str | None, 
         raise DayError("Amount must be more than zero.")
     cash = cash_position(db, store_id, now)["cash_in_hand_pkr"]
     if amount > cash + 0.01:
-        raise DayError(f"Only Rs {cash:,.0f} is in the galla.")
+        raise DayError(f"Only Rs {cash:,.0f} is in the cash box.")
     e = Expense(store_id=store_id, date=now, category=category, amount=round(amount, 2), description=note or category)
     db.add(e)
     db.commit()

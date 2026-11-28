@@ -21,7 +21,7 @@ interface Line {
   qty: number;
 }
 
-function ItemSearch({ onAdd, taken }: { onAdd: (p: Product) => void; taken: Set<number> }) {
+export function ItemSearch({ onAdd, taken }: { onAdd: (p: Product) => void; taken: Set<number> }) {
   const { pick } = useLanguage();
   const [search, setSearch] = useState('');
   const term = useDebounced(search.trim(), 250);
@@ -109,6 +109,7 @@ export function UdhaarSheet() {
   const [lines, setLines] = useState<Line[]>([]);
   const [extra, setExtra] = useState('');
   const [note, setNote] = useState('');
+  const [cash, setCash] = useState(false);
   const open = ui.udhaar.open;
 
   useEffect(() => {
@@ -117,6 +118,7 @@ export function UdhaarSheet() {
       setLines([]);
       setExtra('');
       setNote('');
+      setCash(false);
       give.reset();
       return;
     }
@@ -139,6 +141,7 @@ export function UdhaarSheet() {
       items: lines.map((l) => ({ product_id: l.product.product_id, qty: l.qty })),
       extra: extraValue,
       note,
+      cash: cash && extraValue > 0,
     });
   };
 
@@ -225,6 +228,10 @@ export function UdhaarSheet() {
             <div className="mt-2 space-y-2">
               <AmountInput id="udhaar-extra" value={extra} onChange={setExtra} size="md" label={pick('Other amount', 'Doosri raqam')} />
               <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} placeholder={pick('What for? e.g. cash for medicine', 'Kis liye? maslan dawai ke liye cash')} aria-label={pick('What for?', 'Kis liye?')} className="w-full min-h-[48px] px-4 rounded-xl border-2 border-line bg-card outline-none focus:border-sabz" />
+              <label className="flex items-center gap-3 min-h-[48px] px-1 font-bold text-ink-soft cursor-pointer">
+                <input type="checkbox" checked={cash} onChange={(e) => setCash(e.target.checked)} className="w-6 h-6 accent-sabz" />
+                {pick('I gave this as cash from the cash box', 'Yeh cash box se cash diya')}
+              </label>
             </div>
           </details>
 

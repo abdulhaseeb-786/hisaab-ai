@@ -10,7 +10,7 @@ import { Sheet } from '@/components/ui/Sheet';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { cn, formatPKR } from '@/lib/format';
 
-const KINDS: { value: ExpenseCategory; en: string; ur: string; icon: ReactNode; cost: boolean }[] = [
+export const KINDS: { value: ExpenseCategory; en: string; ur: string; icon: ReactNode; cost: boolean }[] = [
   { value: 'electricity', en: 'Electricity', ur: 'Bijli', icon: <Lightbulb className="w-6 h-6" />, cost: true },
   { value: 'rent', en: 'Rent', ur: 'Kiraya', icon: <Building className="w-6 h-6" />, cost: true },
   { value: 'salaries', en: 'Salary', ur: 'Tankhwah', icon: <UserRound className="w-6 h-6" />, cost: true },
@@ -50,14 +50,14 @@ export function ExpenseSheet() {
   };
 
   return (
-    <Sheet open={ui.expenseOpen} onClose={ui.closeExpense} title={pick('Kharcha from the galla', 'Galle se kharcha')} description={pick(`In the galla now: ${formatPKR(cash)}`, `Galle mein abhi: ${formatPKR(cash)}`)}>
+    <Sheet open={ui.expenseOpen} onClose={ui.closeExpense} title={pick('Kharcha from the cash box', 'Cash box se kharcha')} description={pick(`In the cash box now: ${formatPKR(cash)}`, `Cash box mein abhi: ${formatPKR(cash)}`)}>
       {add.isSuccess ? (
         <div className="space-y-5">
           <p className="flex items-center gap-2 text-2xl font-extrabold text-sabz-dark">
             <CheckCircle2 className="w-7 h-7" /> {pick('Written in the book.', 'Kitaab mein likh diya.')}
           </p>
           <p className="text-lg">
-            {pick(`${meta.en}: ${formatPKR(add.data.amount_pkr)}. Galla now ${formatPKR(add.data.cash_in_drawer_pkr)}.`, `${meta.ur}: ${formatPKR(add.data.amount_pkr)}. Galle mein ab ${formatPKR(add.data.cash_in_drawer_pkr)}.`)}
+            {pick(`${meta.en}: ${formatPKR(add.data.amount_pkr)}. Cash Box now ${formatPKR(add.data.cash_in_drawer_pkr)}.`, `${meta.ur}: ${formatPKR(add.data.amount_pkr)}. Cash box mein ab ${formatPKR(add.data.cash_in_drawer_pkr)}.`)}
           </p>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => { add.reset(); setAmount(''); setNote(''); }}>
@@ -90,7 +90,7 @@ export function ExpenseSheet() {
           </div>
           {!meta.cost && (
             <p className="text-sm text-ink-muted">
-              {pick('This leaves the galla but is not a cost of the shop, so profit does not go down.', 'Yeh galle se nikalta hai magar dukaan ka kharcha nahi, is liye munafa kam nahi hota.')}
+              {pick('This leaves the cash box but is not a cost of the shop, so profit does not go down.', 'Yeh cash box se nikalta hai magar dukaan ka kharcha nahi, is liye munafa kam nahi hota.')}
             </p>
           )}
           <div className="space-y-2">
@@ -98,7 +98,7 @@ export function ExpenseSheet() {
               {pick('How much?', 'Kitne?')}
             </label>
             <AmountInput id="exp-amount" value={amount} onChange={setAmount} invalid={tooMuch} autoFocus />
-            {tooMuch && <p className="text-sm font-bold text-lal-dark">{pick(`Only ${formatPKR(cash)} is in the galla.`, `Galle mein sirf ${formatPKR(cash)} hain.`)}</p>}
+            {tooMuch && <p className="text-sm font-bold text-lal-dark">{pick(`Only ${formatPKR(cash)} is in the cash box.`, `Cash box mein sirf ${formatPKR(cash)} hain.`)}</p>}
           </div>
           <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} placeholder={pick('Note (optional), e.g. K-Electric bill', 'Note (marzi se), maslan K-Electric bill')} aria-label={pick('Note', 'Note')} className="w-full min-h-[48px] px-4 rounded-xl border-2 border-line bg-card outline-none focus:border-sabz" />
           {add.isError && <ErrorBox error={add.error} />}

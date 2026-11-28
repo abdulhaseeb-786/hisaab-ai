@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import time
+from pathlib import Path
 
 from sqlalchemy import inspect, select
 
@@ -27,6 +28,7 @@ def reset_and_seed_database(seed: int | None = None) -> dict:
     started = time.perf_counter()
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    _clear_voice_recordings()
     db = SessionLocal()
     try:
         summary = seed_store_digital_twin(db, seed=seed)
@@ -36,6 +38,19 @@ def reset_and_seed_database(seed: int | None = None) -> dict:
     summary["data_label"] = settings.DEMO_DATA_LABEL
     logger.info("Demo store seeded: %s", summary)
     return summary
+
+
+def _clear_voice_recordings() -> None:
+    """The voice_captures table was just emptied, so its recordings have no owner any more."""
+    folder = Path(settings.VOICE_DIR)
+    if not folder.is_dir():
+        return
+    for f in folder.iterdir():
+        if f.is_file() and f.suffix in {".wav", ".webm", ".ogg", ".mp4", ".m4a", ".mp3"}:
+            try:
+                f.unlink()
+            except OSError:  # a file still open on Windows; it is overwritten by name later
+                logger.warning("Could not delete old recording %s", f.name)
 
 
 def demo_data_status() -> dict:

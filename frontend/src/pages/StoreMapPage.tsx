@@ -51,7 +51,7 @@ export default function StoreMapPage() {
         headline: pick(`${z.product.name}: ${formatNumber(z.product.stock_qty)} ${z.product.unit} left`, `${z.product.name}: ${formatNumber(z.product.stock_qty)} ${z.product.unit} bacha`),
         detail: pick(z.product.risk_reason, z.product.risk_reason_ur),
         action: pick('Make the order list', 'Order list banayein'),
-        run: () => navigate('/app/buy'),
+        run: () => navigate(`/app/order?product=${z.product!.product_id}`),
       };
     }
     if (z.type === 'squeeze' && z.squeeze) {

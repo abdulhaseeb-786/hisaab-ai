@@ -14,13 +14,13 @@ interface Step {
 const STEPS: Step[] = [
   {
     targets: ['day-bar'],
-    en: ['Open and close the day', 'Count the galla in the morning and at night. HisaabAI checks it against the records, so every number stays honest.'],
-    ur: ['Din kholein aur band karein', 'Subah aur raat ko galla ginein. HisaabAI records se milata hai, taake har number sahi rahe.'],
+    en: ['Open and close the day', 'Count the cash box in the morning and at night. HisaabAI checks it against the records, so every number stays honest.'],
+    ur: ['Din kholein aur band karein', 'Subah aur raat ko cash box ginein. HisaabAI records se milata hai, taake har number sahi rahe.'],
   },
   {
     targets: ['quick-actions'],
-    en: ['Your everyday buttons', 'Udhaar with the items, wasooli, the order booker, a delivery, or kharcha. One tap each, right at the counter.'],
-    ur: ['Roz ke button', 'Items ke saath udhaar, wasooli, order booker, maal aana, ya kharcha. Har ek ek tap par, counter par hi.'],
+    en: ['Your counter buttons', 'Udhaar with the items, wasooli, the order booker, a delivery, or kharcha. One tap each.'],
+    ur: ['Counter ke button', 'Items ke saath udhaar, wasooli, order booker, maal aana, ya kharcha. Har ek ek tap par.'],
   },
   {
     targets: ['first-job'],
@@ -28,29 +28,9 @@ const STEPS: Step[] = [
     ur: ['Aaj ke kaam', 'Sab se zaroori kaam hamesha sab se upar. Har kaam ke saath wajah aur numbers.'],
   },
   {
-    targets: ['nav-order', 'side-nav-order'],
-    en: ['When the order booker comes', 'Pick the distributor. You get what to order in whole cartons, and how much the galla can safely spend.'],
-    ur: ['Jab order booker aaye', 'Distributor chunein. Poore carton mein order milta hai, aur yeh bhi ke galla kitna kharch bardasht kar sakta hai.'],
-  },
-  {
-    targets: ['nav-khata', 'side-nav-khata'],
-    en: ['Khata', 'Who took what and when, who is late, and "Udhaar dun?" before you give more.'],
-    ur: ['Khata', 'Kis ne kya aur kab liya, kaun late hai, aur mazeed dene se pehle "Udhaar dun?".'],
-  },
-  {
-    targets: ['nav-hisaab', 'side-nav-hisaab'],
-    en: ['Hisaab', 'The galla, the week ahead, distributor bills, and a business report you can print for a loan.'],
-    ur: ['Hisaab', 'Galla, aane wala hafta, distributors ke bill, aur loan ke liye print hone wali report.'],
-  },
-  {
-    targets: ['ask', 'ask-side'],
-    en: ['Ask anything', 'Type a question in Roman Urdu or English. Answers come only from your records.'],
-    ur: ['Kuch bhi poochein', 'Roman Urdu ya English mein sawal likhein. Jawab sirf aap ke records se.'],
-  },
-  {
-    targets: ['help', 'help-side'],
-    en: ['Help is always here', 'Tap this any time to see this tutorial again.'],
-    ur: ['Madad hamesha yahan', 'Yeh tutorial dobara dekhna ho to kabhi bhi yeh dabayein.'],
+    targets: ['voice', 'voice-side'],
+    en: ['Just say it', 'Press the mic and speak: "Ali Butt took 5,000 on udhaar", "2 kilo cheeni", or "How much does Imran owe?". You check it before anything is written. The ? button shows this tour again.'],
+    ur: ['Bas bol dein', 'Mic dabayein aur bolein: "Ali Butt 5000 udhaar le gaya", "do kilo cheeni", ya "Imran ka kitna baqi hai?". Likhne se pehle aap check karte hain. ? ka button yeh tour dobara dikhata hai.'],
   },
 ];
 

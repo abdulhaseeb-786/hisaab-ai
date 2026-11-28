@@ -1,8 +1,9 @@
 import confetti from 'canvas-confetti';
-import { Check, ChevronDown, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Check, ChevronDown, Minus, PackageCheck, Plus, ShoppingCart, Truck } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdjustStock, useForecast, useInsights, useProduct, useUpdatePrice } from '@/api/queries';
+import { useAdjustStock, useForecast, useInsights, useOrders, useProduct, useUpdatePrice } from '@/api/queries';
+import { useUi } from '@/app/UiContext';
 import type { ProductDetail } from '@/api/types';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { cn, formatDate, formatNumber, formatPct, formatPKR } from '@/lib/format';
@@ -96,10 +97,70 @@ function PriceForm({ p }: { p: ProductDetail }) {
   );
 }
 
+/**
+ * A delivery is never typed in here: it goes through "Maal aaya", which checks the bill,
+ * records what is owed to the distributor and flags a rate rise. This sheet only corrects
+ * the count (more found on the shelf, or damaged / lost).
+ */
+function DeliveryPanel({ p }: { p: ProductDetail }) {
+  const { pick } = useLanguage();
+  const ui = useUi();
+  const navigate = useNavigate();
+  const pending = useOrders('pending');
+  const orders = (pending.data ?? []).filter((o) => o.lines.some((l) => l.product_id === p.product_id));
+  return (
+    <div className="p-3 rounded-2xl bg-sabz-tint/60 border border-sabz-mid space-y-2">
+      <p className="flex items-center gap-2 font-bold">
+        <Truck className="w-5 h-5 text-sabz" />
+        {pick('Delivery came?', 'Maal aaya?')}
+      </p>
+      {orders.length > 0 ? (
+        <ul className="space-y-2">
+          {orders.map((o) => {
+            const line = o.lines.find((l) => l.product_id === p.product_id)!;
+            return (
+              <li key={o.purchase_id}>
+                <Button
+                  block
+                  icon={<PackageCheck className="w-5 h-5" />}
+                  onClick={() => {
+                    ui.closeProduct();
+                    ui.openReceive(o.purchase_id);
+                  }}
+                >
+                  {pick(`Check the bill: ${o.supplier_name} (${formatNumber(line.qty)} ${line.unit})`, `Bill milayein: ${o.supplier_name} (${formatNumber(line.qty)} ${line.unit})`)}
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <>
+          <p className="text-sm text-ink-soft">
+            {pick(
+              'No order for this item is on the way. Record deliveries through an order, so the bill, what you owe and any rate rise are all checked.',
+              'Is item ka koi order raste mein nahi. Maal order ke zariye darj karein, taake bill, distributor ka qarz aur rate ka farq sab check ho.',
+            )}
+          </p>
+          <Button
+            variant="secondary"
+            icon={<ShoppingCart className="w-5 h-5" />}
+            onClick={() => {
+              ui.closeProduct();
+              navigate(p.supplier_id ? `/app/order?supplier=${p.supplier_id}` : '/app/order');
+            }}
+          >
+            {p.supplier_name ? pick(`Order from ${p.supplier_name}`, `${p.supplier_name} se order`) : pick('Make an order', 'Order banayein')}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+
 function StockForm({ p }: { p: ProductDetail }) {
   const { pick } = useLanguage();
-  const pack = p.pack_info;
-  const [dir, setDir] = useState<1 | -1>(1);
+  const [dir, setDir] = useState<1 | -1>(-1);
   const [qty, setQty] = useState('');
   const adjust = useAdjustStock();
   const value = Number(qty);
@@ -109,19 +170,21 @@ function StockForm({ p }: { p: ProductDetail }) {
     e.preventDefault();
     if (!valid) return;
     adjust.mutate(
-      { productId: p.product_id, change: dir * value, reason: dir === 1 ? 'Delivery received' : 'Damaged or lost' },
+      { productId: p.product_id, change: dir * value, reason: dir === 1 ? 'Count correction: more on the shelf' : 'Damaged or lost' },
       { onSuccess: () => setQty('') },
     );
   };
 
   return (
-    <Block title={pick('Update stock', 'Stock darj karein')}>
-      <div role="radiogroup" aria-label={pick('Stock change', 'Stock tabdeeli')} className="grid grid-cols-2 gap-2">
-        <button role="radio" aria-checked={dir === 1} onClick={() => setDir(1)} className={cn('min-h-[48px] rounded-xl border-2 font-bold flex items-center justify-center gap-2', dir === 1 ? 'border-sabz bg-sabz-tint text-sabz-dark' : 'border-line bg-card')}>
-          <Plus className="w-5 h-5" /> {pick('Delivery came', 'Maal aaya')}
-        </button>
-        <button role="radio" aria-checked={dir === -1} onClick={() => setDir(-1)} className={cn('min-h-[48px] rounded-xl border-2 font-bold flex items-center justify-center gap-2', dir === -1 ? 'border-lal bg-lal-tint text-lal-dark' : 'border-line bg-card')}>
+    <Block title={pick('Stock', 'Stock')}>
+      <DeliveryPanel p={p} />
+      <p className="font-bold pt-2">{pick('Correct the count', 'Ginti theek karein')}</p>
+      <div role="radiogroup" aria-label={pick('Stock correction', 'Stock ki durusti')} className="grid grid-cols-2 gap-2">
+        <button type="button" role="radio" aria-checked={dir === -1} onClick={() => setDir(-1)} className={cn('min-h-[48px] rounded-xl border-2 font-bold flex items-center justify-center gap-2', dir === -1 ? 'border-lal bg-lal-tint text-lal-dark' : 'border-line bg-card')}>
           <Minus className="w-5 h-5" /> {pick('Damaged or lost', 'Kharab ya gum')}
+        </button>
+        <button type="button" role="radio" aria-checked={dir === 1} onClick={() => setDir(1)} className={cn('min-h-[48px] rounded-xl border-2 font-bold flex items-center justify-center gap-2', dir === 1 ? 'border-sabz bg-sabz-tint text-sabz-dark' : 'border-line bg-card')}>
+          <Plus className="w-5 h-5" /> {pick('Found more', 'Zyada nikla')}
         </button>
       </div>
       <form onSubmit={submit} className="flex gap-2">
@@ -133,15 +196,11 @@ function StockForm({ p }: { p: ProductDetail }) {
           {pick('Save', 'Save')}
         </Button>
       </form>
-      {pack && dir === 1 && (
-        <div className="flex flex-wrap gap-2">
-          {[1, 2, 3].map((n) => (
-            <button key={n} type="button" onClick={() => setQty(String(n * pack.units_per_pack))} className="min-h-[40px] px-3 rounded-full border-2 border-line text-sm font-bold hover:border-ink-muted">
-              {n} {pack.pack_unit} = {n * pack.units_per_pack} {p.unit}
-            </button>
-          ))}
-        </div>
-      )}
+      <p className="text-sm text-ink-muted">
+        {dir === 1
+          ? pick('Only for a miscount. A delivery goes through Maal aaya above.', 'Sirf ginti ki ghalti ke liye. Naya maal upar "Maal aaya" se darj karein.')
+          : pick('Taken off the shelf and booked as a loss.', 'Shelf se nikal kar nuqsan mein likha jaye ga.')}
+      </p>
       {dir === -1 && value > p.stock_qty && <p className="font-bold text-lal-dark">{pick(`Only ${p.stock_qty} in stock.`, `Sirf ${p.stock_qty} stock mein hai.`)}</p>}
       {adjust.isSuccess && (
         <p className="flex items-center gap-2 font-bold text-sabz-dark">
@@ -267,10 +326,10 @@ export function ProductSheet({ productId, onClose }: { productId: number | null;
               icon={<ShoppingCart className="w-5 h-5" />}
               onClick={() => {
                 onClose();
-                navigate('/app/buy');
+                navigate(`/app/order?product=${p.product_id}`);
               }}
             >
-              {pick('Add to today’s order list', 'Aaj ke order mein dekhein')}
+              {p.supplier_name ? pick(`Order from ${p.supplier_name}`, `${p.supplier_name} se mangwayein`) : pick('Order it', 'Mangwayein')}
             </Button>
           )}
 

@@ -121,14 +121,14 @@ def safe_budget(db: Session, store_id: int = 1, now: datetime | None = None, sup
         "safety_cash_pkr": safety,
         "orders_on_the_way_pkr": pending,
         "explanation": [
-            f"Cash in the galla now: Rs {cash_now:,.0f}.",
+            f"Cash in the cash box now: Rs {cash_now:,.0f}.",
             f"A new order is paid when its bill is due, about {due:%d %b} ({days(lead)} delivery + {days(terms)} credit).",
             f"By then, after expected sales, kharcha, bills already due and Rs {pending:,.0f} of orders on the way, "
             f"cash is expected to be at least Rs {low:,.0f}.",
             f"Keeping Rs {safety:,.0f} aside for safety, you can order up to Rs {safe:,.0f}. Each order you save lowers this.",
         ],
         "explanation_ur": [
-            f"Galle mein abhi: Rs {cash_now:,.0f}.",
+            f"Cash box mein abhi: Rs {cash_now:,.0f}.",
             f"Naye order ka bill takreeban {due:%d %b} ko dena hoga ({lead} din delivery + {terms} din udhaar).",
             f"Tab tak andaazan sales, kharcha, pehle wale bill aur Rs {pending:,.0f} ke raste wale orders ke baad "
             f"kam az kam Rs {low:,.0f} hon ge.",
@@ -234,6 +234,52 @@ def create_order(db: Session, supplier_id: int, lines: list[dict[str, Any]], sto
                  now: datetime | None = None) -> dict[str, Any]:
     """Save the order given to the booker. Stock arrives later through receive_order."""
     now = now or store_now()
+    order, supplier = _add_order(db, supplier_id, lines, store_id, now)
+    db.commit()
+    db.refresh(order)
+    out = _order_dict(db, order)
+    out["draft"] = _order_draft(db.get(Store, store_id), supplier, out["lines"], out["total_pkr"], now)
+    return out
+
+
+def create_orders_from_plan(db: Session, lines: list[dict[str, Any]], budget_pkr: float, store_id: int = 1,
+                            now: datetime | None = None) -> dict[str, Any]:
+    """Save a whole-shop budget plan as one pending order per distributor, in one go.
+
+    Either every order is saved or none is. The orders together never cost more than the
+    budget, the same rule the plan itself follows. Each order then arrives through Maal aaya.
+    """
+    now = now or store_now()
+    lines = [l for l in lines if l["packs"] > 0]
+    if not lines:
+        raise OrderError("Add at least one item to the order.")
+    groups: dict[int, list[dict[str, Any]]] = {}
+    for l in lines:
+        if not l.get("supplier_id"):
+            raise OrderError("Every item needs a distributor before it can be ordered.")
+        groups.setdefault(int(l["supplier_id"]), []).append(l)
+    try:
+        made = [_add_order(db, sid, group, store_id, now) for sid, group in groups.items()]
+        total = round(sum(o.total for o, _ in made), 2)
+        if total > budget_pkr + 0.5:
+            raise OrderError(f"These orders come to Rs {total:,.0f}, more than the budget of Rs {budget_pkr:,.0f}.")
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    store = db.get(Store, store_id)
+    out = []
+    for order, supplier in made:
+        db.refresh(order)
+        o = _order_dict(db, order)
+        o["draft"] = _order_draft(store, supplier, o["lines"], o["total_pkr"], now)
+        out.append(o)
+    return {"orders": out, "total_pkr": total, "budget_pkr": budget_pkr}
+
+
+def _add_order(db: Session, supplier_id: int, lines: list[dict[str, Any]], store_id: int,
+               now: datetime) -> tuple[Purchase, Supplier]:
+    """Build one pending order (flushed, not committed)."""
     supplier = db.get(Supplier, supplier_id)
     if not supplier or supplier.store_id != store_id:
         raise LookupError("Distributor not found.")
@@ -260,11 +306,8 @@ def create_order(db: Session, supplier_id: int, lines: list[dict[str, Any]], sto
         total += qty * p.cost_price
     order.total = round(total, 2)
     order.expected_date = now + timedelta(days=max(1, lead))
-    db.commit()
-    db.refresh(order)
-    out = _order_dict(db, order)
-    out["draft"] = _order_draft(db.get(Store, store_id), supplier, out["lines"], out["total_pkr"], now)
-    return out
+    db.flush()
+    return order, supplier
 
 
 def list_orders(db: Session, status: str | None = "pending", supplier_id: int | None = None, store_id: int = 1,
@@ -341,7 +384,7 @@ def receive_order(db: Session, purchase_id: int, lines: list[dict[str, Any]], bi
     if pay_now_pkr > 0 and method == CASH:
         cash = cash_position(db, store_id, now)["cash_in_hand_pkr"]
         if pay_now_pkr > cash + 0.01:
-            raise OrderError(f"Only Rs {cash:,.0f} is in the galla.")
+            raise OrderError(f"Only Rs {cash:,.0f} is in the cash box.")
 
     order.status = "received"
     order.received_date = now
@@ -386,7 +429,7 @@ def pay_supplier(db: Session, supplier_id: int, amount: float, method: str = CAS
     if method == CASH:
         cash = cash_position(db, store_id, now)["cash_in_hand_pkr"]
         if amount > cash + 0.01:
-            raise OrderError(f"Only Rs {cash:,.0f} is in the galla.")
+            raise OrderError(f"Only Rs {cash:,.0f} is in the cash box.")
     db.add(SupplierLedgerEntry(store_id=store_id, supplier_id=supplier_id, timestamp=now, debit=round(amount, 2),
                                credit=0.0, reference="PAYMENT", method=method,
                                description=(note or f"Payment ({method})")[:200]))

@@ -34,6 +34,9 @@ class LedgerEntry(Base):
     sale_id = Column(Integer, ForeignKey("sales.sale_id"), nullable=True, index=True)
     # How a repayment came in: cash (goes in the galla), easypaisa, jazzcash or bank.
     method = Column(String(20), nullable=True)
+    # "cash_loan": cash handed over from the galla (naqad udhaar), so the cash book takes
+    # it out of the drawer. NULL: goods or an amount on credit, the galla does not change.
+    kind = Column(String(20), nullable=True)
 
     customer = relationship("Customer", back_populates="ledger_entries")
 

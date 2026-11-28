@@ -1,8 +1,10 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { CalendarDays, ChevronDown, ChevronRight, ClipboardList, PackageCheck, Plus, Trash2, Truck, Wallet } from 'lucide-react';
+import { CalendarDays, ChevronDown, ClipboardList, PackageCheck, Plus, Trash2, Truck, Wallet } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCreateOrder, useOrders, useOrderSuggestion, useProducts, useSuppliers } from '@/api/queries';
+import { useSearchParams } from 'react-router-dom';
+import { useCreateOrder, useOrders, useOrderSuggestion, useProduct, useProducts, useSuppliers } from '@/api/queries';
+import { Segmented } from '@/components/ui/Segmented';
+import { BudgetPlanner } from './BuyPage';
 import type { OrderCreated, OrderSuggestion, Product, SupplierOverview } from '@/api/types';
 import { useUi } from '@/app/UiContext';
 import { MessageDraft } from '@/components/MessageDraft';
@@ -167,8 +169,8 @@ function OrderBuilder({ s, onSaved }: { s: SupplierOverview; onSaved: (o: OrderC
         <AmountInput id="order-budget" value={input} onChange={(v) => { setInput(v); setTouched(false); }} />
         <p className="text-sm text-ink-soft">
           {pick(
-            `Safe to order: ${formatPKR(s.suggested_budget_pkr)}. You usually order ${formatPKR(s.usual_order_pkr)} from them; the galla can take up to ${formatPKR(s.budget.safe_to_order_pkr)}.`,
-            `Mehfooz order: ${formatPKR(s.suggested_budget_pkr)}. Aap aam tor par ${formatPKR(s.usual_order_pkr)} ka order dete hain; galla ${formatPKR(s.budget.safe_to_order_pkr)} tak bardasht kar sakta hai.`,
+            `Safe to order: ${formatPKR(s.suggested_budget_pkr)}. You usually order ${formatPKR(s.usual_order_pkr)} from them; the cash box can take up to ${formatPKR(s.budget.safe_to_order_pkr)}.`,
+            `Mehfooz order: ${formatPKR(s.suggested_budget_pkr)}. Aap aam tor par ${formatPKR(s.usual_order_pkr)} ka order dete hain; cash box ${formatPKR(s.budget.safe_to_order_pkr)} tak bardasht kar sakta hai.`,
           )}
         </p>
         <button onClick={() => setWhy((v) => !v)} aria-expanded={why} className="inline-flex items-center gap-1 min-h-[44px] text-sm font-bold text-ink-muted hover:text-ink">
@@ -268,11 +270,15 @@ function OnTheWay() {
   const { pick } = useLanguage();
   const ui = useUi();
   const orders = useOrders('pending');
+  const [all, setAll] = useState(false);
   if (!orders.data?.length) return null;
+  // Due first; only the first few show, so the rest of the screen stays in reach.
+  const sorted = [...orders.data].sort((x, y) => String(x.expected_date ?? '').localeCompare(String(y.expected_date ?? '')));
+  const shown = all ? sorted : sorted.slice(0, 3);
   return (
-    <Section title={pick('On the way', 'Raste mein')} hint={pick('Tap "Maal aaya" when the delivery comes', 'Maal aaye to "Maal aaya" dabayein')}>
+    <Section title={pick(`On the way (${sorted.length})`, `Raste mein (${sorted.length})`)} hint={pick('Tap "Maal aaya" when the delivery comes', 'Maal aaye to "Maal aaya" dabayein')}>
       <ul className="bg-card rounded-2xl border border-line shadow-card divide-y divide-line">
-        {orders.data.map((o) => (
+        {shown.map((o) => (
           <li key={o.purchase_id} className="p-4 flex flex-wrap items-center gap-3">
             <div className="min-w-0 flex-1 basis-48">
               <p className="font-bold">{o.supplier_name}</p>
@@ -285,6 +291,14 @@ function OnTheWay() {
             </Button>
           </li>
         ))}
+        {sorted.length > 3 && (
+          <li>
+            <button type="button" onClick={() => setAll((v) => !v)} aria-expanded={all} className="w-full min-h-[48px] px-4 flex items-center gap-2 font-bold text-ink-soft hover:bg-paper">
+              <ChevronDown className={cn('w-5 h-5 transition-transform', all && 'rotate-180')} />
+              {all ? pick('Show fewer', 'Kam dikhayein') : pick(`${sorted.length - 3} more on the way`, `${sorted.length - 3} aur raste mein`)}
+            </button>
+          </li>
+        )}
       </ul>
     </Section>
   );
@@ -307,14 +321,57 @@ export default function OrderPage() {
     window.setTimeout(() => builderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   };
 
+  // One Order screen, two ways to buy. Every "order this" link in the app lands here:
+  //   /app/order?mode=budget          whole shop, one budget (going to the market yourself)
+  //   /app/order?supplier=3           that distributor's order (the booker is here)
+  //   /app/order?product=12           the distributor of that product
+  const [params, setParams] = useSearchParams();
+  const mode = params.get('mode') === 'budget' ? 'budget' : 'booker';
+  const setMode = (m: 'budget' | 'booker') => {
+    const next = new URLSearchParams(params);
+    if (m === 'budget') next.set('mode', 'budget');
+    else next.delete('mode');
+    setParams(next, { replace: true });
+  };
+  const productId = Number(params.get('product')) || null;
+  const product = useProduct(productId);
+  const wanted = Number(params.get('supplier')) || product.data?.supplier_id || 0;
+  useEffect(() => {
+    if (wanted && list.some((s) => s.supplier_id === wanted)) {
+      choose(wanted);
+      const next = new URLSearchParams(params);
+      next.delete('supplier');
+      next.delete('product');
+      next.delete('mode');
+      setParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wanted, list.length]);
+
   return (
     <div className="space-y-8">
-      <PageTitle title={pick('Order', 'Order')} subtitle={pick('The order booker is here? Pick the distributor. HisaabAI suggests what to order and how much you can safely spend.', 'Order booker aaya hai? Distributor chunein. HisaabAI batata hai kya mangwana hai aur kitna kharch mehfooz hai.')} />
-
-      {suppliers.isError && <ErrorBox error={suppliers.error} onRetry={() => suppliers.refetch()} />}
-      {!suppliers.data && !suppliers.isError && <Skeleton className="h-64" />}
+      <PageTitle title={pick('Order', 'Order')} subtitle={pick('Buy for the shop: with the order booker, or yourself at the market. Every order arrives through Maal aaya.', 'Dukaan ke liye khareedari: order booker ke saath, ya khud market se. Har order "Maal aaya" se aata hai.')} />
 
       <OnTheWay />
+
+      <Segmented
+        label={pick('How are you buying?', 'Kaise khareed rahe hain?')}
+        value={mode}
+        onChange={setMode}
+        options={[
+          { value: 'booker', label: pick('Order booker is here', 'Order booker aaya') },
+          { value: 'budget', label: pick('Whole shop, one budget', 'Poori dukaan, ek budget') },
+        ]}
+        className="w-full sm:w-auto [&>button]:flex-1"
+      />
+
+      {mode === 'budget' ? (
+        <BudgetPlanner />
+      ) : (
+      <>
+      <p className="text-base text-ink-soft -mt-4">{pick('Pick the distributor. HisaabAI suggests what to order and how much you can safely spend.', 'Distributor chunein. HisaabAI batata hai kya mangwana hai aur kitna kharch mehfooz hai.')}</p>
+      {suppliers.isError && <ErrorBox error={suppliers.error} onRetry={() => suppliers.refetch()} />}
+      {!suppliers.data && !suppliers.isError && <Skeleton className="h-64" />}
 
       {suppliers.data && (
         <Section title={today.length ? pick('Visiting today', 'Aaj aane wale') : pick('Distributors', 'Distributors')} hint={pick('Route days from your records', 'Records ke mutabiq aane ke din')}>
@@ -347,16 +404,8 @@ export default function OrderPage() {
         </details>
       )}
 
-      <Link to="/app/buy" className="group flex items-center gap-4 bg-card rounded-2xl border border-line shadow-card p-4 hover:border-ink-muted">
-        <span className="w-12 h-12 rounded-full bg-sabz-tint text-sabz flex items-center justify-center shrink-0">
-          <ClipboardList className="w-6 h-6" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-lg font-extrabold">{pick('One budget for all distributors', 'Sab distributors ke liye ek budget')}</span>
-          <span className="block text-sm text-ink-muted">{pick('Going to the market yourself? Plan the whole shop at once.', 'Khud market ja rahe hain? Poori dukaan ka plan ek saath.')}</span>
-        </span>
-        <ChevronRight className="w-6 h-6 text-ink-faint group-hover:text-ink" />
-      </Link>
+      </>
+      )}
 
       {list.some((s) => s.overdue_pkr > 0) && (
         <p className="text-sm text-ink-muted flex items-center gap-2">

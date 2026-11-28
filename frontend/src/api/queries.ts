@@ -5,8 +5,8 @@
  * data it changes, so all screens refresh themselves with the new numbers.
  */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, unwrap } from './client';
-import type { ChatLanguage, ExpenseCategory, ImportType, KpiPeriod, PaymentMethod } from './types';
+import { API_BASE_URL, api, unwrap } from './client';
+import type { ChatLanguage, ExpenseCategory, ImportType, KpiPeriod, PaymentMethod, VoiceConfirm, VoiceProposal } from './types';
 
 export const queryKeys = {
   store: ['store'] as const,
@@ -31,6 +31,7 @@ export const queryKeys = {
   countSheet: (category: string) => ['count-sheet', category] as const,
   countHistory: ['count-history'] as const,
   report: ['report'] as const,
+  voiceStatus: ['voice-status'] as const,
 };
 
 /** Data that depends on stock, prices, sales, khata or cash. */
@@ -272,10 +273,10 @@ export function useCreditCheck(customerId: number | null, amount: number) {
 export function useGiveUdhaar() {
   const invalidate = useInvalidateStoreData();
   return useMutation({
-    mutationFn: (v: { customerId: number; items: { product_id: number; qty: number }[]; extra: number; note?: string }) =>
+    mutationFn: (v: { customerId: number; items: { product_id: number; qty: number }[]; extra: number; note?: string; cash?: boolean }) =>
       unwrap(
         api.POST('/api/credit/udhaar', {
-          body: { customer_id: v.customerId, items: v.items, extra_amount: v.extra, note: v.note || null },
+          body: { customer_id: v.customerId, items: v.items, extra_amount: v.extra, note: v.note || null, cash_from_galla: Boolean(v.cash) },
         }),
       ),
     onSuccess: invalidate,
@@ -300,6 +301,16 @@ export function useCreateOrder() {
   return useMutation({
     mutationFn: (v: { supplierId: number; lines: { product_id: number; packs: number }[] }) =>
       unwrap(api.POST('/api/orders', { body: { supplier_id: v.supplierId, lines: v.lines } })),
+    onSuccess: invalidate,
+  });
+}
+
+/** Save a whole-shop budget plan as one pending order per distributor (all or nothing). */
+export function useCreateOrdersFromPlan() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { budget: number; lines: { product_id: number; supplier_id: number; packs: number }[] }) =>
+      unwrap(api.POST('/api/orders/from-plan', { body: { budget_pkr: v.budget, lines: v.lines } })),
     onSuccess: invalidate,
   });
 }
@@ -423,4 +434,58 @@ export function useResetDemo() {
 
 export function csvTemplateUrl(type: ImportType): string {
   return `${import.meta.env.VITE_API_BASE_URL ?? ''}/api/import/template/${type}`;
+}
+
+// ---- voice entry ("bol kar likhein") ---------------------------------------------------
+
+export function useVoiceStatus() {
+  return useQuery({ queryKey: queryKeys.voiceStatus, queryFn: () => unwrap(api.GET('/api/voice/status')) });
+}
+
+export function useVoiceSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (cloudAllowed: boolean) => unwrap(api.PATCH('/api/voice/settings', { body: { cloud_allowed: cloudAllowed } })),
+    onSuccess: (data) => qc.setQueryData(queryKeys.voiceStatus, data),
+  });
+}
+
+/** Multipart upload: plain fetch, with the same error handling as every other call. */
+async function postForm<T>(path: string, form: FormData): Promise<{ data?: T; error?: unknown; response: Response }> {
+  const response = await fetch(`${API_BASE_URL}${path}`, { method: 'POST', body: form });
+  const body = await response.json().catch(() => undefined);
+  return response.ok ? { data: body as T, response } : { error: body, response };
+}
+
+/** Send a recording (or typed text). Returns what HisaabAI understood; nothing is saved yet. */
+export function useVoiceUnderstand() {
+  return useMutation({
+    mutationFn: (v: { audio?: Blob; seconds?: number; text?: string; answerLanguage?: 'roman_urdu' | 'english' | 'urdu' }) => {
+      const form = new FormData();
+      if (v.answerLanguage) form.append('answer_language', v.answerLanguage);
+      if (v.audio) form.append('audio', v.audio, v.audio.type.includes('wav') ? 'clip.wav' : 'clip.webm');
+      if (v.seconds) form.append('seconds', String(Math.round(v.seconds * 10) / 10));
+      if (v.text) form.append('text', v.text);
+      return unwrap(postForm<VoiceProposal>('/api/voice/understand', form));
+    },
+  });
+}
+
+export function useVoiceConfirm() {
+  const invalidate = useInvalidateStoreData();
+  return useMutation({
+    mutationFn: (v: { captureId: number; body: VoiceConfirm }) =>
+      unwrap(api.POST('/api/voice/captures/{capture_id}/confirm', { params: { path: { capture_id: v.captureId } }, body: v.body })),
+    onSuccess: invalidate,
+  });
+}
+
+export function useVoiceDiscard() {
+  return useMutation({
+    mutationFn: (captureId: number) => unwrap(api.POST('/api/voice/captures/{capture_id}/discard', { params: { path: { capture_id: captureId } } })),
+  });
+}
+
+export function voiceAudioUrl(captureId: number): string {
+  return `${API_BASE_URL}/api/voice/captures/${captureId}/audio`;
 }

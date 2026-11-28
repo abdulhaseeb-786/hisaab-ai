@@ -49,7 +49,7 @@ export function PaySupplierSheet() {
             <CheckCircle2 className="w-7 h-7" /> {pick('Payment written in the book.', 'Payment kitaab mein likh di.')}
           </p>
           <p className="text-lg">
-            {pick(`Paid ${formatPKR(pay.data.amount_paid_pkr)}. Still owed: ${formatPKR(pay.data.remaining_payable_pkr)}. Galla now ${formatPKR(pay.data.cash_in_drawer_pkr)}.`, `${formatPKR(pay.data.amount_paid_pkr)} diye. Ab baqi: ${formatPKR(pay.data.remaining_payable_pkr)}. Galle mein ab ${formatPKR(pay.data.cash_in_drawer_pkr)}.`)}
+            {pick(`Paid ${formatPKR(pay.data.amount_paid_pkr)}. Still owed: ${formatPKR(pay.data.remaining_payable_pkr)}. Cash Box now ${formatPKR(pay.data.cash_in_drawer_pkr)}.`, `${formatPKR(pay.data.amount_paid_pkr)} diye. Ab baqi: ${formatPKR(pay.data.remaining_payable_pkr)}. Cash box mein ab ${formatPKR(pay.data.cash_in_drawer_pkr)}.`)}
           </p>
           <p className="text-sm text-ink-muted">{pick('The oldest bills are cleared first.', 'Sab se purane bill pehle saaf hote hain.')}</p>
           <Button block onClick={ui.closePaySupplier}>{pick('Done', 'Theek hai')}</Button>
@@ -75,7 +75,7 @@ export function PaySupplierSheet() {
             </button>
           </div>
           {overOwed && <p className="text-sm font-bold text-lal-dark">{pick(`You owe only ${formatPKR(owed)}.`, `Sirf ${formatPKR(owed)} dene hain.`)}</p>}
-          {overCash && !overOwed && <p className="text-sm font-bold text-lal-dark">{pick(`Only ${formatPKR(cash)} is in the galla.`, `Galle mein sirf ${formatPKR(cash)} hain.`)}</p>}
+          {overCash && !overOwed && <p className="text-sm font-bold text-lal-dark">{pick(`Only ${formatPKR(cash)} is in the cash box.`, `Cash box mein sirf ${formatPKR(cash)} hain.`)}</p>}
           <MethodPicker value={method} onChange={setMethod} direction="out" />
           {pay.isError && <ErrorBox error={pay.error} />}
           <Button type="submit" size="lg" block disabled={value <= 0 || overOwed || overCash || pay.isPending}>

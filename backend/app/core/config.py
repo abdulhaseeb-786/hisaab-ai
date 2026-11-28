@@ -39,12 +39,19 @@ class Settings(BaseSettings):
 
     # LLM providers (keys only from the environment or .env, never stored or returned)
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-3.5-flash"
+    # Tried in order when a model is retired (404) or overloaded (503/504); see core/gemini_models.py.
+    GEMINI_FALLBACK_MODELS: str = "gemini-3.5-flash,gemini-flash-latest,gemini-flash-lite-latest"
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
     LLM_TIMEOUT_SECONDS: float = 20.0
     # "auto" tries Gemini, then Groq, then the offline engine. "offline" skips the LLMs.
     COPILOT_MODE: str = "auto"
+
+    # Voice entry ("bol kar likhein"). Recordings are kept as proof next to the khata line.
+    VOICE_DIR: str = str(BACKEND_DIR / "data" / "voice")
+    VOICE_MAX_BYTES: int = 6_000_000      # about 3 minutes of 16 kHz WAV; clips are capped at 30 s
+    GROQ_WHISPER_MODEL: str = "whisper-large-v3"
 
     model_config = SettingsConfigDict(
         env_file=str(BACKEND_DIR / ".env"),

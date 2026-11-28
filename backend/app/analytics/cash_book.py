@@ -3,6 +3,7 @@
 cash now = opening cash on the opening date
          + cash sales + khata repayments paid in cash
          - supplier payments paid in cash - expenses (incl. owner household money, bank deposits)
+         - naqad udhaar (cash lent to customers from the drawer)
          + galla differences found when the drawer was counted (extra +, short −)
 
 Repayments and supplier payments made by Easypaisa, JazzCash or bank never touch the drawer.
@@ -24,6 +25,7 @@ from app.models import CashAdjustment, Expense, LedgerEntry, Sale, Store, Suppli
 
 NON_OPERATING_EXPENSES = {"owner_drawings", "bank_deposit"}
 CASH = "cash"
+CASH_LOAN = "cash_loan"  # LedgerEntry.kind for naqad udhaar
 
 
 def paid_in_cash(column):
@@ -33,6 +35,20 @@ def paid_in_cash(column):
 
 def _sum(query) -> float:
     return float(query.scalar() or 0.0)
+
+
+def cash_lent(db: Session, store_id: int, start: datetime, end: datetime, include_end: bool = False) -> float:
+    """Naqad udhaar: cash handed to customers from the drawer.
+
+    A cash-loan khata line can also carry goods (its sale): only the part above the
+    goods' total left the drawer ("500 cash aur 2 kilo cheeni" takes 500 out, not 830).
+    """
+    end_filter = LedgerEntry.timestamp <= end if include_end else LedgerEntry.timestamp < end
+    return _sum(
+        db.query(func.sum(LedgerEntry.debit - func.coalesce(Sale.total, 0.0)))
+        .outerjoin(Sale, Sale.sale_id == LedgerEntry.sale_id)
+        .filter(LedgerEntry.store_id == store_id, LedgerEntry.kind == CASH_LOAN, LedgerEntry.timestamp >= start, end_filter)
+    )
 
 
 def cash_position(db: Session, store_id: int = 1, now: datetime | None = None) -> dict[str, Any]:
@@ -54,6 +70,7 @@ def cash_position(db: Session, store_id: int = 1, now: datetime | None = None) -
         CashAdjustment.store_id == store_id, CashAdjustment.timestamp >= since, CashAdjustment.timestamp <= now))
     expenses = _sum(db.query(func.sum(Expense.amount)).filter(
         Expense.store_id == store_id, Expense.date >= since, Expense.date <= now))
+    cash_loans = cash_lent(db, store_id, since, now, include_end=True)
 
     return {
         "as_of": now,
@@ -63,8 +80,9 @@ def cash_position(db: Session, store_id: int = 1, now: datetime | None = None) -
         "wasooli_pkr": round(wasooli, 2),
         "supplier_payments_pkr": round(supplier_paid, 2),
         "expenses_pkr": round(expenses, 2),
+        "cash_loans_pkr": round(cash_loans, 2),
         "galla_differences_pkr": round(adjustments, 2),
-        "cash_in_hand_pkr": round(opening + cash_sales + wasooli - supplier_paid - expenses + adjustments, 2),
+        "cash_in_hand_pkr": round(opening + cash_sales + wasooli - supplier_paid - expenses - cash_loans + adjustments, 2),
     }
 
 

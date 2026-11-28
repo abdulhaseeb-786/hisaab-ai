@@ -2,6 +2,7 @@ import { Database, RotateCcw, Send } from 'lucide-react';
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useCopilotChat, type ChatTurn } from '@/api/queries';
 import type { ChatResponse } from '@/api/types';
+import type { CopilotSeed } from '@/app/UiContext';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { cn } from '@/lib/format';
 import { Sheet } from './ui/Sheet';
@@ -22,14 +23,14 @@ const SUGGESTIONS: [string, string][] = [
   ['How is cash this week?', 'Is hafte cash ka kya haal hai?'],
 ];
 
-const SOURCE: Record<ChatResponse['provider_used'], [string, string]> = {
+export const SOURCE: Record<ChatResponse['provider_used'], [string, string]> = {
   gemini: ['Gemini, using your shop records', 'Gemini, aap ke records se'],
   groq: ['Llama, using your shop records', 'Llama, aap ke records se'],
   offline: ['Worked out on this device from your records', 'Aap ke records se, bina internet'],
 };
 
 /** Shows **bold** and line breaks without injecting HTML. */
-function RichText({ text }: { text: string }) {
+export function RichText({ text }: { text: string }) {
   return (
     <>
       {text.split('\n').map((line, i, all) => (
@@ -44,7 +45,7 @@ function RichText({ text }: { text: string }) {
   );
 }
 
-export function CopilotSheet({ open, initialPrompt, onClose }: { open: boolean; initialPrompt?: string; onClose: () => void }) {
+export function CopilotSheet({ open, initialPrompt, seed, onClose }: { open: boolean; initialPrompt?: string; seed?: CopilotSeed; onClose: () => void }) {
   const { pick, language, t } = useLanguage();
   const chat = useCopilotChat();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -66,6 +67,18 @@ export function CopilotSheet({ open, initialPrompt, onClose }: { open: boolean; 
       },
     );
   };
+
+  // Continuing from a voice answer: the question and answer are already in the chat.
+  const seeded = useRef<CopilotSeed | undefined>(undefined);
+  useEffect(() => {
+    if (open && seed && seeded.current !== seed) {
+      seeded.current = seed;
+      setMessages([
+        { role: 'user', text: seed.question },
+        { role: 'assistant', text: seed.answer, meta: { provider_used: seed.provider, tool_calls: seed.tools.map((t) => ({ ...t, parameters: {}, result_summary: {} })) } },
+      ]);
+    }
+  }, [open, seed]);
 
   useEffect(() => {
     if (open && initialPrompt && sent.current !== initialPrompt) {

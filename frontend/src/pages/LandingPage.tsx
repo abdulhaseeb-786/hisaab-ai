@@ -116,7 +116,7 @@ function Hero() {
             k
               ? [
                   { label: pick('Today’s sale', 'Aaj ki sale'), value: formatPKR(k.revenue_pkr) },
-                  { label: pick('Cash in drawer', 'Galle mein cash'), value: formatPKR(k.cash_in_hand_pkr) },
+                  { label: pick('Cash in drawer', 'Cash box mein cash'), value: formatPKR(k.cash_in_hand_pkr) },
                   { label: pick('Late khata', 'Late udhaar'), value: formatPKR(k.overdue_receivables_pkr), tone: 'red' },
                   { label: pick('Running low', 'Kam maal'), value: `${k.products_at_risk_count} items`, tone: 'red' },
                 ]
@@ -319,7 +319,7 @@ function Demo() {
             </ol>
           )}
           {p && p.total_skus_recommended > 6 && (
-            <Link to="/app/buy" className="inline-flex mt-3 min-h-[44px] items-center font-bold text-sabz hover:underline">
+            <Link to="/app/order?mode=budget" className="inline-flex mt-3 min-h-[44px] items-center font-bold text-sabz hover:underline">
               {pick(`See all ${p.total_skus_recommended} items and send the order`, `Tamam ${p.total_skus_recommended} items dekhein aur order bhejein`)}
             </Link>
           )}
