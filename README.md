@@ -9,6 +9,7 @@ The shopkeeper says what happened in Urdu. HisaabAI writes the khata, the cash b
 and every morning tells him the three jobs that save him money.
 
 [![Track 3: FinTech and Financial Inclusion](https://img.shields.io/badge/CYE%202026-Track%203%3A%20FinTech%20%26%20Inclusion-0E6B3F)](#)
+[![Track 5: Urdu & Regional Tech](https://img.shields.io/badge/CYE%202026-Track%205%3A%20Urdu%20%26%20Regional%20Tech-E8A317)](#)
 [![Backend tests](https://img.shields.io/badge/backend%20tests-205%20passing-0E6B3F)](#tested-not-mocked)
 [![Languages](https://img.shields.io/badge/speaks-Urdu%20%C2%B7%20Roman%20Urdu%20%C2%B7%20English-E8A317)](#speak-it-check-it-its-in-the-books)
 [![Works offline](https://img.shields.io/badge/works-offline%20too-2A5BA8)](#why-you-can-trust-the-numbers)
@@ -76,24 +77,14 @@ as proof if a customer ever says *"maine itna nahi liya"*.
 A karyana store can't get a loan because, on paper, it has no history. Every udhaar, wasooli and cash
 count in HisaabAI builds that history, and one tap prints a **business report** a bank or microfinance
 officer can read: six months of sales, profit after running costs, khata, supplier bills and how well the
-books were kept. That is why this is a Track 3 project.
+books were kept. Together with Urdu and regional-language voice bookkeeping, this places HisaabAI across
+**Track 3 (FinTech & Financial Inclusion)** and **Track 5 (Urdu & Regional Tech)**.
 
 ## Why you can trust the numbers
 
 With money, trust beats magic. The AI understands and explains; **the shop's own books decide**.
 
-```mermaid
-flowchart LR
-    A["Heard<br/>Urdu, Punjabi, English"] --> B["Understood<br/>Gemini → Groq → offline rules"]
-    B --> C["Checked<br/>amount said? name? shelf price?"]
-    C --> D["Confirmed<br/>'Haan, likh do'"]
-    D --> E["Written<br/>khata, cash box, stock"]
-    style A fill:#DCE6F6,stroke:#2A5BA8
-    style B fill:#DCE6F6,stroke:#2A5BA8
-    style C fill:#FCEDCC,stroke:#865606
-    style D fill:#D7EDDF,stroke:#0E6B3F
-    style E fill:#D7EDDF,stroke:#0E6B3F
-```
+<img src="docs/images/flow-trust.png" alt="Voice and verification pipeline: Heard in Urdu, Punjabi, Roman Urdu or English -> Understood via Gemini, Groq Whisper or offline Urdu rules -> Checked in code against spoken amounts, exact customer names and shelf prices -> Owner approves with Haan likh do to save to khata, cash box and stock with audio proof, or Question Only is answered aloud without writing anything." width="100%">
 
 - **Nothing is written until the shopkeeper confirms.** A question is only answered, never written.
 - **An amount is kept only if it was really said.** If the AI says Rs 50,000 but he said *"paanch hazaar"*,
@@ -111,25 +102,7 @@ flowchart LR
 
 ## How it's built
 
-```mermaid
-flowchart LR
-    subgraph Phone["Phone or laptop (browser)"]
-        UI["React app<br/>mic, review card, read-aloud"]
-    end
-    subgraph Engine["Shop engine (FastAPI)"]
-        S["Services that write<br/>khata · cash book · orders · ginti · report"]
-        AN["Read-only analytics<br/>3 jobs · forecast · budget plan · cash outlook"]
-        DB[("Shop records<br/>SQLite")]
-        S --> DB
-        AN --> DB
-    end
-    subgraph AI["AI layer (never writes)"]
-        V["Voice: Gemini audio → Groq Whisper → offline parser"]
-        C["Copilot: allow-listed read-only tools"]
-    end
-    UI <--> Engine
-    Engine <--> AI
-```
+<img src="docs/images/flow-architecture.png" alt="System architecture: Browser React and TypeScript app communicates via typed REST JSON with the FastAPI Shop Engine (Confirmed Write Services and Read-Only Analytics backed by SQLite), while the AI Layer (3-tier Voice Parser and Grounded Shop Copilot) only returns drafts or calls allow-listed read tools and never writes to the database." width="100%">
 
 | Part | Where | What it does |
 |---|---|---|
