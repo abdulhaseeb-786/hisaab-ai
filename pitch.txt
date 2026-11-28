@@ -1,0 +1,229 @@
+HISAABAI — GRAND FINALE PITCH (CYE 2026, Track 3: FinTech & Financial Inclusion)
+5 minutes live + 2 minutes jury Q&A. Target run time: about 4:30 (30 seconds of buffer for a slow AI answer or applause).
+
+HOW TO READ THIS
+- SAY   = the words (about 130 words a minute; each beat is timed).
+- DO    = what the demo driver does on the laptop/phone at that moment.
+- SLIDE = what the slide behind you shows. One idea per slide; the slide supports, never competes.
+- Two roles: SPEAKER (stands, talks to the jury) and DRIVER (runs the app, says only the demo lines).
+  One person can do both; then hold the phone and speak to it yourself.
+- [FILL] = a fact only your team can give. Do not invent it on stage.
+- Demo numbers change every day (the demo shop runs up to today). Say what is ON SCREEN, not what is written here.
+
+THE ONE SENTENCE THE JURY MUST REMEMBER
+"The shopkeeper speaks, HisaabAI writes it in the khata, and every morning it tells him the three jobs that save him money."
+Urdu tag line (say it twice: in the hook and as the last line):
+"Dukaandar bolta hai. HisaabAI likhta hai."
+
+
+=====================================================================
+0:00 – 0:30   HOOK  (30 s)
+=====================================================================
+SLIDE: Full-bleed photo of a karyana counter with the red khata register. No text except "حساب".
+
+SAY (SPEAKER, slowly, looking at the jury, not the screen):
+"Haji Akram runs a general store in G-9 Markaz.
+Every night he opens this. (point to the red khata register)
+Who took udhaar, what the distributor brought, what's left in the galla. All by hand.
+The register tells him what happened. It never tells him what to do tomorrow.
+So we built a shop where he just speaks..."
+(beat)  "Dukaandar bolta hai. HisaabAI likhta hai."
+
+Note: Haji Akram is our demo shop's owner. If a real shopkeeper you spoke to agrees, use his name and shop instead. [FILL]
+
+
+=====================================================================
+0:30 – 1:00   PROBLEM  (30 s)
+=====================================================================
+SLIDE: Three money leaks, one line each, with an icon:
+  1. The fast seller runs out.                (Dalda pouch, empty shelf)
+  2. The distributor quietly raises the rate. (rate up, shelf price same)
+  3. Udhaar that never comes back.            (khata, 76 days late)
+Footer, small: "~1 million kiryana stores in Pakistan (Karandaaz). Only ~151,000 retailers of 5M+ businesses use a POS machine (SBP)."
+
+SAY:
+"Pakistan has about a million karyana stores, almost all on paper.
+Each one leaks money in the same three places.
+The fast seller runs out, and the customer walks to the next shop.
+The distributor raises the rate, the shelf price doesn't move, and the margin disappears.
+And udhaar comes back late, or never.
+Today's tools are built for typing. A shopkeeper with a queue at the counter does not type."
+
+[FILL, optional but strong] One line from a real shopkeeper you spoke to, e.g.:
+"A shopkeeper in [area] told us: '[quote]'." Put his words on the slide. Real voices beat statistics.
+
+
+=====================================================================
+1:00 – 1:20   SOLUTION IN ONE BREATH  (20 s)
+=====================================================================
+SLIDE: The app on a phone. One line: "Speak it. Check it. It's in the books."
+
+SAY:
+"HisaabAI is a munshi in the shopkeeper's pocket.
+He speaks in Urdu, the way he talks, and it writes the khata, the cash book and the stock.
+Every morning it gives him three jobs, with the reason and the numbers.
+Let me show you. Live."
+
+
+=====================================================================
+1:20 – 3:10   LIVE DEMO  (about 1:50, four moments; AI answers take 4–8 s each, keep talking through them)
+=====================================================================
+SLIDE: Switch to the live app (screen mirroring). The slide deck is paused here.
+Before the pitch: demo shop reset, voice permission given, phone volume up, mic tested in the hall.
+
+--- Moment 1: Voice entry (45 s) ---------------------------------
+DO (DRIVER holds the phone near his mouth, presses the green mic, speaks clearly):
+   "Aaj Ali Butt mujh se paanch hazaar rupay udhaar le kar gaya, beti ki fees ke liye."
+SAY (SPEAKER, while it thinks):
+"No typing. No forms."
+DO: The card appears in Urdu script and Roman Urdu. The phone reads it back.
+SAY:
+"The person, the amount, cash from the galla, even the reason. And he checks it first.
+Ali Butt is new, so it opens a new khata. It doesn't guess he's Imran Butt."
+DO: Tap "Haan, likh do". The red ادھار stamp lands.
+SAY:
+"Written. And the cash box is five thousand lighter, automatically."
+
+--- Moment 2: Goods on udhaar (25 s) -----------------------------
+DO (DRIVER speaks):
+   "Imran do kilo cheeni aur teen Lux sabun le gaya."
+SAY:
+"Goods too. 'Cheeni' is the sugar on his shelf, two kilos, three Lux soaps,
+at his own shelf price. The stock goes down by itself."
+DO: Tap "Haan, likh do".
+
+--- Moment 3: Ask a question (20 s) -------------------------------
+DO (DRIVER speaks):
+   "Imran ka kitna udhaar baqi hai?"
+SAY:
+"Or just ask. The answer comes from his own khata, read aloud in Urdu."
+
+--- Moment 4: The three jobs + the Rs 50,000 plan (30 s) ----------
+DO: Go to Aaj (Today). Point at "Aaj ke 3 kaam".
+SAY:
+"Every morning, three jobs. Dalda runs out in three days. Tapal's rate went up but the shelf price didn't:
+fix it. Tariq Bhai is seventy-six days late: here's a polite reminder."
+DO: Tap Order -> "Whole shop, one budget" (Rs 50,000 is already filled in).
+SAY:
+"And 'I have fifty thousand, what do I buy?' Whole cartons, most urgent first,
+never one rupee over budget. One tap, and it's an order for each distributor."
+DO: (If time allows) tap "Save as orders". If running late, skip the tap.
+
+IF THE INTERNET OR MIC FAILS (decide in advance, do not debug on stage):
+- Say: "The hall Wi-Fi is busy, so I'll type it. Same engine." Tap "Ya likh kar batayein", type the
+  same sentence. Typed Roman Urdu works fully offline.
+- Last resort: play the 30-second backup video of Moment 1 (record it the day before).
+
+
+=====================================================================
+3:10 – 3:35   WHY YOU CAN TRUST IT  (25 s)
+=====================================================================
+SLIDE: Four short lines (the app's real rules), each with a check mark:
+  ✓ Nothing is saved until the shopkeeper says "Haan".
+  ✓ An amount is kept only if it was really said.
+  ✓ Prices and balances come from his books, never from the AI.
+  ✓ No internet? Typed Urdu still works. The recording is kept as proof.
+
+SAY:
+"With money, trust beats magic. So the engine has rules.
+Nothing is written until he says 'haan'.
+If the AI says fifty thousand but he said 'paanch hazaar', we throw the AI's number away.
+Prices and balances come from his books, never from the AI.
+And if a customer says 'maine itna nahi liya', he plays back the recording."
+
+
+=====================================================================
+3:35 – 4:15   IMPACT + BUSINESS  (40 s)
+=====================================================================
+SLIDE: Left: "Paper khata" -> Right: "A credit history". Show the printable Business Report for a loan.
+Below: the business model in one line. [FILL: your final model]
+
+SAY:
+"Why financial inclusion? A karyana store can't get a loan because on paper it has no history.
+Every udhaar, wasooli and galla count in HisaabAI builds that history,
+and one tap prints a business report a lender can read.
+Voice gets the data in. The three jobs keep him coming back. The history opens credit."
+
+Business model [FILL, pick ONE and say it in one sentence]. Suggested:
+"Free for the shopkeeper. With his consent, the same records let microfinance banks
+lend to shops they could never see before; they pay us per loan."
+(Alternative: a small monthly fee, e.g. Rs [FILL] per month, about the price of one carton of tea.)
+
+
+=====================================================================
+4:15 – 4:30   THE ASK + CLOSE  (15 s)
+=====================================================================
+SLIDE: "Our ask" + the app's logo + "Dukaandar bolta hai. HisaabAI likhta hai."
+
+SAY:
+"Today it runs on a simulated shop, and we say so on every screen.
+Our ask: five real shops in Islamabad for a thirty-day pilot,
+and one introduction to a microfinance partner.
+[FILL: team names, one line: 'We are …, students at …']
+Dukaandar bolta hai. HisaabAI likhta hai. Shukriya."
+
+(Stop. Smile. Don't add anything. You still have about 30 seconds in hand.)
+
+
+=====================================================================
+JURY Q&A (2 minutes) — SHORT ANSWERS, 15–20 SECONDS EACH
+=====================================================================
+Rule: answer in one or two sentences, then stop. If a question is about something not built yet,
+say "not yet" plainly and give the next step.
+
+Q: "Is this real data?"
+A: "No, it's a simulated shop with a full year of sales, and it's labelled 'Demo data' on every screen.
+    It's built to load a real shop's sales and products from a CSV file, and that's our pilot."
+
+Q: "How accurate is the forecast?"
+A: "On the simulated shop, our calendar-aware model beats the simple averages, but simulated accuracy
+    proves nothing about real shops, so we don't claim it. We're testing it on a public dataset of
+    real retail sales next." [If you run the public benchmark before Dec 2, quote that number instead.]
+
+Q: "What if the AI makes a mistake, or invents a number?"
+A: "It can't write anything by itself. The shopkeeper confirms every entry. An amount the AI suggests is
+    dropped unless it was actually said, and every price and balance comes from the books, not the AI."
+
+Q: "What about noise in the shop, accents, Punjabi?"
+A: "It understands mixed Urdu, Punjabi and English. When it's unsure, it shows choices instead of guessing,
+    and he can always correct the card or type it."
+
+Q: "What about privacy? You're recording customers' names."
+A: "Voice goes to an online AI only after the owner says yes; it's off by default.
+    No messages are sent from the app at all: no WhatsApp, no SMS. The data belongs to the shop."
+
+Q: "No internet?"
+A: "Everything except voice-to-text works offline: typed Urdu, the khata, the plan, the three jobs.
+    Voice needs internet for now."
+
+Q: "Why would a shopkeeper pay? Competitors?"
+A: "Khata apps record what happened. We tell him what to do: what to buy, which price to fix,
+    who to collect from. And speaking is faster than any app's typing. [FILL: model]."
+
+Q: "What does one shop cost you to run?"
+A: "A voice entry is one short AI call; most screens use no AI at all. [FILL: your estimate per shop
+    per month, if asked. If you don't know: 'Low enough to be free at pilot scale; we'll measure it in the pilot.']"
+
+Q: "How did you validate this with shopkeepers?"
+A: [FILL] Only answer with real conversations. If you have none: "Not enough yet. That's exactly
+    what the five-shop pilot is for."
+
+
+=====================================================================
+BEFORE YOU GO ON STAGE (checklist)
+=====================================================================
+[ ] Reset the demo shop on the morning of Dec 2 (data runs up to "today").
+[ ] Voice permission already given on the phone; Gemini key working (try one sentence in the hall).
+[ ] Phone on its own mobile data or hotspot, not the hall Wi-Fi. Screen mirroring tested.
+[ ] Volume up for read-aloud; check the phone has an Urdu voice.
+[ ] Backup video of Moment 1 on the laptop desktop.
+[ ] Rehearse with a timer 5 times. If you pass 4:40, cut Moment 2 (goods) first, then the "Save as orders" tap.
+[ ] Fill every [FILL] above, or delete the line.
+[ ] Before Dec 2, if possible: talk to 3 real shopkeepers (one quote for the Problem slide), and run the
+    public-data forecast benchmark (backend/datasets/raw has the zip; see README).
+
+SOURCES (for the Problem slide footer; check once more before printing)
+- Karandaaz, "Micro-Retailer Financing": ~1 million kiryana stores, informality and thin credit history
+  block formal financing. https://karandaaz.com.pk/?p=7762
+- ProPakistani (SBP data), June 2025: only ~151,000 of 5M+ MSMEs/retailers have POS machines.
+  https://propakistani.pk/2025/06/22/only-3-of-5-million-retailers-accept-digital-payments-via-pos-machines-sbp/

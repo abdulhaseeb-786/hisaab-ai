@@ -1,0 +1,864 @@
+{
+  "1": [
+    {
+      "name": "hisaab",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "name",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "tag-ur",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 400
+    },
+    {
+      "name": "tag-en",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "event",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    }
+  ],
+  "2": [
+    {
+      "name": "big",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "big-sub",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "src1",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "donut",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "donut-c",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 300
+    },
+    {
+      "name": "donut-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 300
+    }
+  ],
+  "3": [
+    {
+      "name": "leak1-card",
+      "effect": "fade",
+      "trigger": "click",
+      "delay": 0
+    },
+    {
+      "name": "leak1-dot",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak1-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak1-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak1-big",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "leak1-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "leak1-tail",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 250
+    },
+    {
+      "name": "leak2-card",
+      "effect": "fade",
+      "trigger": "click",
+      "delay": 0
+    },
+    {
+      "name": "leak2-dot",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak2-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak2-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak2-big",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "leak2-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "leak2-tail",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 250
+    },
+    {
+      "name": "leak3-card",
+      "effect": "fade",
+      "trigger": "click",
+      "delay": 0
+    },
+    {
+      "name": "leak3-dot",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak3-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak3-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "leak3-big",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "leak3-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "leak3-tail",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 250
+    },
+    {
+      "name": "punch",
+      "effect": "fade",
+      "trigger": "click",
+      "delay": 0
+    }
+  ],
+  "4": [
+    {
+      "name": "step1-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "step1-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "step1-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "step1-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "step2-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 250
+    },
+    {
+      "name": "step2-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "step2-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "step2-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "step3-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 250
+    },
+    {
+      "name": "step3-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "step3-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "step3-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "card-bg",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "card",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "said",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 200
+    },
+    {
+      "name": "stamp",
+      "effect": "zoom",
+      "trigger": "after",
+      "delay": 500
+    }
+  ],
+  "5": [
+    {
+      "name": "ph1-frame",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 250
+    },
+    {
+      "name": "ph1-screen",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m1-n",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m1-nt",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m1-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "ph2-frame",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "ph2-screen",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m2-n",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m2-nt",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m2-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "ph3-frame",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "ph3-screen",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m3-n",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m3-nt",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m3-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "ph4-frame",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "ph4-screen",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m4-n",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m4-nt",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "m4-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    }
+  ],
+  "6": [
+    {
+      "name": "node1-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "node1-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node1-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node1-rule",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 120
+    },
+    {
+      "name": "arrow1",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node2-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node2-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node2-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node2-rule",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 120
+    },
+    {
+      "name": "arrow2",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node3-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node3-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node3-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node3-rule",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 120
+    },
+    {
+      "name": "arrow3",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node4-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node4-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node4-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node4-rule",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 120
+    },
+    {
+      "name": "arrow4",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node5-dot",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "node5-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node5-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "node5-rule",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 120
+    },
+    {
+      "name": "proof-bg",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "proof1-b",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "proof1-s",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "proof2-b",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "proof2-s",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 150
+    },
+    {
+      "name": "proof3-b",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 300
+    },
+    {
+      "name": "proof3-s",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 300
+    }
+  ],
+  "7": [
+    {
+      "name": "flow1-box",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "flow1-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow1-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow1-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "farrow1",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "flow2-box",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "flow2-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow2-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow2-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "farrow2",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "flow3-box",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "flow3-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow3-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow3-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "farrow3",
+      "effect": "wipe",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "flow4-box",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 0
+    },
+    {
+      "name": "flow4-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow4-head",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "flow4-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "report-bg",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "report",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "why-h",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "why-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "model-bg",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "model-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "model-t",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    }
+  ],
+  "8": [
+    {
+      "name": "ask-h",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "ask1-box",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 300
+    },
+    {
+      "name": "ask1-dot",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "ask1-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "ask1-big",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "ask1-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "ask2-box",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 250
+    },
+    {
+      "name": "ask2-dot",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "ask2-icon",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "ask2-big",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "ask2-line",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 100
+    },
+    {
+      "name": "honest",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 200
+    },
+    {
+      "name": "close-ur",
+      "effect": "fade",
+      "trigger": "after",
+      "delay": 400
+    },
+    {
+      "name": "close-en",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 0
+    },
+    {
+      "name": "team",
+      "effect": "fade",
+      "trigger": "with",
+      "delay": 200
+    }
+  ]
+}

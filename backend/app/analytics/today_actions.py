@@ -34,7 +34,7 @@ AREA_ORDER = {"restock": 0, "fix_price": 1, "collect_khata": 2, "clear_dead_stoc
 
 RANKING_RULE = (
     "The most urgent problem from each area (stock, price, khata, dead stock, cash), "
-    "ordered by urgency and then by area. The top three are shown."
+    "ordered by urgency and then by area. The top three show first, and the list updates as each job is done."
 )
 
 
@@ -229,7 +229,8 @@ def _cash_action(outlook: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def get_today_three_actions(db: Session, store_id: int = 1, now: datetime | None = None, limit: int = 3) -> list[dict[str, Any]]:
+def get_today_actions_ranked(db: Session, store_id: int = 1, now: datetime | None = None) -> list[dict[str, Any]]:
+    """Return every active area job in priority order (stock, price, khata, dead stock, cash)."""
     now = now or store_now()
     inventory = compute_inventory_health(db, store_id=store_id, now=now)
     candidates = [
@@ -241,6 +242,10 @@ def get_today_three_actions(db: Session, store_id: int = 1, now: datetime | None
     ]
     actions = [a for a in candidates if a]
     actions.sort(key=lambda a: (URGENCY_ORDER[a["urgency"]], AREA_ORDER[a["action_type"]]))
-    for rank, a in enumerate(actions[:limit], start=1):
+    for rank, a in enumerate(actions, start=1):
         a["priority"] = rank
-    return actions[:limit]
+    return actions
+
+
+def get_today_three_actions(db: Session, store_id: int = 1, now: datetime | None = None, limit: int = 3) -> list[dict[str, Any]]:
+    return get_today_actions_ranked(db, store_id=store_id, now=now)[:limit]

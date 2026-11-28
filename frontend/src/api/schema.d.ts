@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * Get Today Actions
-         * @description Top 3 actions for today, each with evidence and a next step (HOME-01).
+         * @description Top priority actions for today (default 3), each with evidence and a next step (HOME-01).
          */
         get: operations["get_today_actions_api_actions_today_get"];
         put?: never;
@@ -3485,6 +3485,8 @@ export interface components {
             as_of: string;
             /** Ranking Rule */
             ranking_rule: string;
+            /** Total Available */
+            total_available: number;
             /** Actions */
             actions: components["schemas"]["ActionItem"][];
         };
@@ -3943,6 +3945,7 @@ export interface operations {
         parameters: {
             query?: {
                 store_id?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;

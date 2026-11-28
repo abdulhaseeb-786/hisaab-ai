@@ -1,122 +1,242 @@
+<div align="center">
+
+<img src="docs/images/banner.png" alt="HisaabAI: the shopkeeper speaks, HisaabAI writes the books. Three screens of the app: items on udhaar, a saved entry with its ادھار stamp, and today's three jobs." width="100%">
+
 # HisaabAI
 
-Decision support for Pakistani general stores (karyana). HisaabAI reads a shop's sales,
-stock, khata (customer credit) and supplier bills, and answers one question every
-morning: **what should I do today, and why?** Built for Capital Youth Expo 2026,
-Track 3: FinTech & Financial Inclusion.
+**The voice-first bookkeeper for Pakistan's karyana stores.**
+The shopkeeper says what happened in Urdu. HisaabAI writes the khata, the cash box and the stock,
+and every morning tells him the three jobs that save him money.
 
-It follows the shopkeeper's real day:
+[![Track 3: FinTech and Financial Inclusion](https://img.shields.io/badge/CYE%202026-Track%203%3A%20FinTech%20%26%20Inclusion-0E6B3F)](#)
+[![Backend tests](https://img.shields.io/badge/backend%20tests-205%20passing-0E6B3F)](#tested-not-mocked)
+[![Languages](https://img.shields.io/badge/speaks-Urdu%20%C2%B7%20Roman%20Urdu%20%C2%B7%20English-E8A317)](#speak-it-check-it-its-in-the-books)
+[![Works offline](https://img.shields.io/badge/works-offline%20too-2A5BA8)](#why-you-can-trust-the-numbers)
 
-* **Open the shop:** count the galla (cash drawer). Any difference from the records is
-  written down, so every cash number afterwards is real.
-* **At the counter:** `+ Udhaar` records who took what: the items, prices and due date
-  come out of stock and onto that customer's khata. Before saving, **"Udhaar dun?"**
-  answers yes / careful / no with the reasons. `+ Wasooli` records repayments and how
-  they came (cash, Easypaisa, JazzCash, bank); only cash goes into the galla.
-* **When the order booker visits:** HisaabAI shows the distributors due today, what the
-  shop owes them, and **how much it can safely order**: the lowest cash expected in the
-  week after that bill falls due. It suggests the order in whole cartons, most urgent
-  first, with reasons.
-* **When the delivery comes (Maal aaya):** check it against the bill. Short items and
-  changed rates are flagged with the new margin and a one-tap price fix; the bill is
-  added to what the shop owes.
-* **Ginti (stock count):** count a shelf; stock is corrected, and the shortfall is booked
-  as loss or as sales nobody wrote down, so even a shop without billing gets its numbers.
-* **Close the day:** count the galla again and see the whole day in register lines, then
-  tomorrow's bills, booker visits and the customers to remind.
-* **Business report for a loan:** six months of sales, profit after running costs, khata,
-  supplier bills and record keeping, ready to print for a bank or microfinance officer.
+**[Live demo](#)** &nbsp;·&nbsp; **[2-minute video](#)** &nbsp;·&nbsp; **[Pitch deck](pitch/HisaabAI_Pitch.pdf)** &nbsp;·&nbsp; **[Run it locally](#run-it-locally)**
 
-Also: **Today's 3 jobs** (the most urgent stock, price and khata problems), margin-squeeze
-alerts, a Safe Mark score for every customer, a 7-day cash outlook, and a **copilot in
-Roman Urdu and English** that answers only from the shop's own records and works offline.
+</div>
 
-**No messages are sent.** Receipts, reminders and orders are drafts shown on screen, to
-show the customer, read out, or copy. There is no WhatsApp or SMS integration, so no
-customer number ever leaves the shop.
+<!-- Before submission: put the deployed URL and the video link in the two links above. -->
 
-Every number is computed by deterministic code. The LLM only explains results; it can
-never invent a number (answers that contain numbers without a tool call are discarded).
+---
 
-## Run it
+## The problem
 
-Backend (Python 3.11+):
+Pakistan has about **a million karyana stores** ([Karandaaz](https://karandaaz.com.pk/?p=7762)), and only about
+**151,000 retailers out of 5 million+ have a POS machine** ([SBP data via ProPakistani](https://propakistani.pk/2025/06/22/only-3-of-5-million-retailers-accept-digital-payments-via-pos-machines-sbp/)).
+The rest run on a red paper register, and they leak money in the same three places:
+
+| | The leak | In the demo shop, today |
+|---|---|---|
+| 📦 | **The fast seller runs out**, and the customer walks to the next shop | Dalda oil: 2.6 days left, delivery takes 4 |
+| 📉 | **The distributor quietly raises the rate**, the shelf price doesn't move | Tapal: cost up Rs 45, margin down from 9.2% to 3.3% |
+| 📒 | **Udhaar comes back late**, or never | Tariq Bhai: Rs 30,696, 76 days late |
+
+Typing tools have not reached the counter, because a shopkeeper with a queue does not type. And even
+where records exist, nothing turns them into a decision.
+
+## Speak it, check it, it's in the books
+
+Press the mic and say it the way you'd tell a munshi:
+
+<img src="docs/images/voice.png" alt="Three screens: a cash udhaar written with its stamp and receipt, goods matched to the shelf at shelf prices, and a spoken question answered from the khata" width="100%">
+
+| He says | HisaabAI writes |
+|---|---|
+| *"Aaj Ali Butt mujh se paanch hazaar rupay udhaar le kar gaya, beti ki fees ke liye"* | A new khata for Ali Butt, Rs 5,000 **cash** udhaar with the reason; the cash box is Rs 5,000 lighter |
+| *"Imran do kilo cheeni aur teen Lux sabun le gaya"* | Imran Butt's khata: 2 kg sugar and 3 Lux soaps at **his own shelf prices**; stock goes down |
+| *"Imran ne do hazaar wapas diye, Easypaisa pe"* | A wasooli of Rs 2,000 by Easypaisa (not into the cash box) |
+| *"Bijli ka bill saadhe teen hazaar diya"* | Rs 3,500 electricity kharcha from the cash box |
+| *"Imran ka kitna udhaar baqi hai?"* | Nothing is written: the answer comes from his khata, read aloud in Urdu |
+
+Every entry first appears as a card in **Urdu script and Roman Urdu**, with what was heard and
+the recording. The shopkeeper fixes anything with a tap, then says **"Haan, likh do"**. The red
+ادھار stamp lands, a receipt is ready to show the customer, and the recording stays on the khata line
+as proof if a customer ever says *"maine itna nahi liya"*.
+
+## A shopkeeper's whole day
+
+<img src="docs/images/day.png" alt="Three screens: today's three jobs, the Rs 50,000 whole-shop plan, and a khata line written by voice with its recording" width="100%">
+
+| When | What HisaabAI does |
+|---|---|
+| **Morning** | Count the cash box to open the day. Any difference from the records is written down, so every cash number after it is real. **Today's 3 jobs** sit at the top: what runs out first, which price to fix, who to collect from, each with the reason and the numbers. |
+| **At the counter** | Udhaar with items or cash, wasooli by cash, Easypaisa, JazzCash or bank, kharcha. By voice or with the buttons. **"Udhaar dun?"** answers *yes / careful / no* with the reasons, before more credit is given. |
+| **The order booker visits** | One Order screen. *Booker is here:* what to order from this distributor and **how much the cash box can safely spend**. *Whole shop, one budget:* "I have Rs 50,000, what do I buy?", in whole cartons, most urgent first, **never one rupee over budget**, saved as one order per distributor. |
+| **Maal aaya** | Check the delivery against the bill. Short items and rate rises are flagged with the new margin and a one-tap price fix; the bill joins what the shop owes. |
+| **Ginti** | Count a shelf. Stock is corrected and the shortfall is booked as a loss or as sales nobody wrote down. |
+| **Night** | Count the cash box again and see the day in register lines. **Tomorrow's brief** (bills due, bookers visiting, customers to remind) stays on the home screen until morning. |
+| **Any time** | Ask in Roman Urdu or English. A 7-day cash outlook, a Safe Mark score for every customer, margin-squeeze and dead-stock alerts. |
+
+### Records that open credit
+
+<img src="docs/images/report.png" alt="The business report for a loan: monthly sales, profit after running costs, margin and record keeping" width="100%">
+
+A karyana store can't get a loan because, on paper, it has no history. Every udhaar, wasooli and cash
+count in HisaabAI builds that history, and one tap prints a **business report** a bank or microfinance
+officer can read: six months of sales, profit after running costs, khata, supplier bills and how well the
+books were kept. That is why this is a Track 3 project.
+
+## Why you can trust the numbers
+
+With money, trust beats magic. The AI understands and explains; **the shop's own books decide**.
+
+```mermaid
+flowchart LR
+    A["Heard<br/>Urdu, Punjabi, English"] --> B["Understood<br/>Gemini → Groq → offline rules"]
+    B --> C["Checked<br/>amount said? name? shelf price?"]
+    C --> D["Confirmed<br/>'Haan, likh do'"]
+    D --> E["Written<br/>khata, cash box, stock"]
+    style A fill:#DCE6F6,stroke:#2A5BA8
+    style B fill:#DCE6F6,stroke:#2A5BA8
+    style C fill:#FCEDCC,stroke:#865606
+    style D fill:#D7EDDF,stroke:#0E6B3F
+    style E fill:#D7EDDF,stroke:#0E6B3F
+```
+
+- **Nothing is written until the shopkeeper confirms.** A question is only answered, never written.
+- **An amount is kept only if it was really said.** If the AI says Rs 50,000 but he said *"paanch hazaar"*,
+  the AI's number is thrown away. Spoken amounts like *dhai sau*, *sawa do hazaar* and *dedh lakh* are
+  parsed by our own code.
+- **Prices and balances come from the books, never from the AI.** Items are matched to the shelf by
+  our own matcher. When two products fit (*"Dalda": oil or ghee?*), the shopkeeper chooses.
+- **A shared surname is not a match.** "Ali Butt" is never written into Imran Butt's khata.
+- **Copilot answers with numbers but no data behind them are discarded**, and the offline engine answers instead.
+- **It never gets stuck.** If Gemini is busy or a model is retired, other models are tried, then Groq,
+  then offline rules. Typed Urdu works with no internet at all.
+- **No messages are sent.** Receipts, reminders and orders are drafts to show, read out or copy.
+  No WhatsApp or SMS integration, so no customer number leaves the shop. Voice goes to an online AI
+  only after the owner says yes; it is off by default.
+
+## How it's built
+
+```mermaid
+flowchart LR
+    subgraph Phone["Phone or laptop (browser)"]
+        UI["React app<br/>mic, review card, read-aloud"]
+    end
+    subgraph Engine["Shop engine (FastAPI)"]
+        S["Services that write<br/>khata · cash book · orders · ginti · report"]
+        AN["Read-only analytics<br/>3 jobs · forecast · budget plan · cash outlook"]
+        DB[("Shop records<br/>SQLite")]
+        S --> DB
+        AN --> DB
+    end
+    subgraph AI["AI layer (never writes)"]
+        V["Voice: Gemini audio → Groq Whisper → offline parser"]
+        C["Copilot: allow-listed read-only tools"]
+    end
+    UI <--> Engine
+    Engine <--> AI
+```
+
+| Part | Where | What it does |
+|---|---|---|
+| Voice entry | `backend/app/voice/` | Urdu number words, name matching, item matching, offline parser, AI tiers, confirm and save |
+| Workflows | `backend/app/services/` | Day open/close and kharcha, khata and the credit check, orders and Maal aaya, ginti, the business report |
+| Analytics | `backend/app/analytics/` | Inventory risk, margin squeeze, dead stock, khata aging, payables, the cash book, Today's jobs |
+| Budget plan | `backend/app/reorder/` | Whole cartons within a budget, used per distributor and for the whole shop |
+| Forecast | `backend/app/forecasting/` | Calendar-aware smoothing (Ramadan, Eid, salary weeks) against two baselines, chosen by backtest |
+| Copilot | `backend/app/copilot/` | Gemini and Groq function calling over read-only tools, plus an offline engine |
+| Demo shop | `backend/app/simulator/` | A year of a realistic shop from a fixed seed |
+| App | `frontend/src/` | React 18, TypeScript (strict), Vite, Tailwind, TanStack Query; the API client is generated from the backend's OpenAPI schema |
+
+## Run it locally
+
+**Backend** (Python 3.11+):
 
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env          # optional; defaults work
+cp .env.example .env          # optional; the defaults run the demo
 uvicorn app.main:app --port 8000 --reload
 ```
 
-On first start the backend builds the demo store (about 3 seconds). API docs: http://localhost:8000/docs
+The first start builds the demo shop (about 3 seconds). API docs: http://localhost:8000/docs
 
-Frontend (Node 20+):
+**Frontend** (Node 20+):
 
 ```bash
 cd frontend
 npm install
-npm run dev                   # http://localhost:5173 (landing page), app at /app
+npm run dev                   # http://localhost:5173: landing page; the app is at /app
 ```
 
-Tests and checks:
+**Voice** needs the microphone, which browsers allow only on `localhost` or HTTPS. Set at least one key in
+`backend/.env` (keys are read only from there or the environment, never stored or returned by the API):
+
+| Setting | Purpose |
+|---|---|
+| `GEMINI_API_KEY` | Hears the audio and fills the entry (first choice) |
+| `GROQ_API_KEY` | Whisper transcription and Llama, as the backup |
+| `GEMINI_MODEL`, `GEMINI_FALLBACK_MODELS` | Which Gemini models to try, in order |
+| `COPILOT_MODE` | `auto` (online first) or `offline` (never calls an AI) |
+
+Without keys, everything still works: typed Urdu, the copilot's offline engine, and every screen.
+
+## Tested, not mocked
 
 ```bash
-cd backend && python -m pytest tests -q        # 95 tests, run on a temporary database
-cd frontend && npm run typecheck               # API types are generated from the backend
-cd frontend && npm run gen:api                 # after changing a backend schema
+cd backend && python -m pytest tests -q          # 205 tests on a temporary database
+cd frontend && npm run typecheck
 ```
 
-## Public benchmark data (optional)
+The tests check the books, not just the responses: the cash box after a cash loan, stock after goods on
+udhaar, a plan that never exceeds its budget, orders saved all or nothing, and AI answers with invented
+amounts thrown away.
 
-The forecaster is also tested on real retail sales: **Online Retail II** (UCI Machine
-Learning Repository, CC BY 4.0), https://archive.ics.uci.edu/dataset/502/online+retail+ii
+Five end-to-end walkthroughs drive the real app in Microsoft Edge (`frontend/e2e/`). The voice ones play a
+recorded sentence into a fake microphone and check the result all the way to the khata and the cash box:
+`workflow.mjs` (the whole day), `voice.mjs`, `voice-goods.mjs`, `voice-ask.mjs` and `improve01.mjs`.
+Run them only against a scratch backend; each file's header says how.
 
-1. Download and unzip it, and put `online_retail_II.xlsx` in `backend/datasets/raw/`
-   (that folder is not committed).
-2. From `backend/`: `python scripts/build_public_benchmark.py datasets/raw/online_retail_II.xlsx`
-3. Then: `python scripts/forecast_benchmark.py` (writes `docs/forecast_benchmark.md`).
+## Demo data, honestly
 
-## Demo data
+The demo is a **simulated** shop, *Al-Madina General Store* in G-9 Markaz, Islamabad: 120 real Pakistani
+grocery products, 15 khata customers and 8 distributors, generated from a fixed seed. It covers the 12
+months up to today, with weekday and salary-week patterns, Ramadan, Chaand Raat and both Eids, distributor
+route days, customers with different paying habits, and a few nights when the cash box was short. Names
+and phone numbers are fictional.
 
-The demo is a **simulated** store, "Al-Madina General Store", with 120 real Pakistani
-grocery products, 15 khata customers and 8 distributors, generated from a fixed seed
-(42). It covers the 12 months up to today: weekday and salary-week patterns, Ramadan,
-Chaand Raat and both Eids (real 2025–2026 dates), distributor route days and lead times,
-customers with different payment habits (cash and mobile wallets), itemised udhaar, the
-last 30 days of galla counts (a few nights short or over), and the shop's own cash
-expenses. A few demo
-moments are recorded as ordinary events: a stock count that leaves Dalda oil short,
-two supplier price rises not passed on, a slow-selling floor cleaner, and a customer who
-stopped paying. Customer names and phone numbers are fictional.
+Everything is labelled *Demo data* in the app, and **simulated accuracy is never presented as real-world
+accuracy.** On the simulated shop, our calendar-aware forecast has the lowest error of the three methods
+on 14-day totals (21.1%, against 22.7% and 22.8%; see [docs/forecast_benchmark.md](docs/forecast_benchmark.md)).
+The same test on a public dataset of real retail sales is ready to run:
 
-Everything is labelled "Demo data" in the app. **Simulated results are never presented
-as real-world accuracy.** The forecaster is also tested on a public dataset of real
-retail sales (see `docs/forecast_benchmark.md`).
+1. Put `online_retail_II.xlsx` (UCI, link below) in `backend/datasets/raw/`.
+2. `python scripts/build_public_benchmark.py datasets/raw/online_retail_II.xlsx` (from `backend/`)
+3. `python scripts/forecast_benchmark.py`
 
-## How it is built
+## What's next
 
-* `backend/app/analytics/`: inventory risk, margin squeeze, dead stock, khata aging,
-  payables, cash book, cash outlook, KPIs and Today's actions. Each module states its rules.
-* `backend/app/services/`: the workflows that write records: day open/close and kharcha,
-  khata entry and the credit check, orders and deliveries, ginti, the business report.
-* `backend/app/reorder/budget_optimizer.py`: the budget planner, also used per distributor.
-* `backend/app/forecasting/`: calendar-aware smoothing and two baselines, chosen by backtest.
-* `backend/app/copilot/`: allow-listed tools, Gemini/Groq function calling, offline engine.
-* `backend/app/simulator/`: the demo store generator.
-* `frontend/src/api/`: typed client generated from the backend's OpenAPI schema, plus
-  React Query hooks.
+- **A 30-day pilot with 5 real shops** in Islamabad, on their own records (CSV import and voice).
+- **One microfinance partner**, to turn a shop's records into its first loan.
+- Voice that works offline, barcode and bill photos, more shop types.
 
-## Disclosures (CYE rules)
+## Disclosures (CYE 2026 rules)
 
-* **Languages and frameworks:** Python, FastAPI, SQLAlchemy, Pydantic, NumPy, pandas,
-  SQLite; TypeScript, React, Vite, Tailwind CSS, TanStack Query, React Router,
-  Framer Motion, lucide-react, canvas-confetti, openapi-fetch, openapi-typescript.
-* **LLM APIs (optional):** Google Gemini (`google-genai`), Groq (`groq`, Llama 3.3 70B).
-  The app works fully without them.
-* **Public dataset:** "Online Retail II", D. Chen, UCI Machine Learning Repository,
-  https://doi.org/10.24432/C5CG6D (CC BY 4.0). Used only to evaluate the forecaster.
-* **Images:** illustrations in `frontend/src/assets` were generated with Google Gemini.
-  Product pack photos in `backend/static/images/products` are used for the demo only.
-* **AI coding assistants:** this project was built with help from AI coding assistants
-  (Claude Code by Anthropic).
+- **Build window:** the repository's first commit is 26 November 2026, inside the 16–28 November build window.
+- **Backend:** Python, FastAPI, Uvicorn, SQLAlchemy, Pydantic, pydantic-settings, NumPy, pandas,
+  python-multipart, tzdata, SQLite; tests with pytest and httpx; openpyxl for the public benchmark only.
+- **Frontend:** TypeScript, React, React DOM, React Router, Vite, Tailwind CSS, PostCSS, Autoprefixer,
+  TanStack Query, Framer Motion, lucide-react, canvas-confetti, clsx, tailwind-merge, openapi-fetch,
+  openapi-typescript. Browser APIs: MediaRecorder and Web Audio (recording), Web Speech synthesis (read-aloud).
+- **Fonts:** Atkinson Hyperlegible Next and Noto Nastaliq Urdu (Google Fonts).
+- **AI APIs (optional; the app works without them):** Google Gemini (`google-genai`) for voice understanding
+  and the copilot; Groq (`groq`) for Whisper transcription and Llama 3.3 70B.
+- **Public dataset:** "Online Retail II", D. Chen, UCI Machine Learning Repository,
+  https://doi.org/10.24432/C5CG6D (CC BY 4.0), used only to evaluate the forecaster.
+- **Statistics in this README and the deck:** Karandaaz (number of kiryana stores); State Bank of Pakistan
+  data reported by ProPakistani (POS adoption). Links above.
+- **Testing and pitch tooling:** playwright-core with Microsoft Edge (end-to-end walkthroughs and screenshots);
+  pptxgenjs, sharp, react-icons and Pillow (the pitch deck and README images, in `pitch/deck/`).
+- **Images:** the illustrations in `frontend/src/assets` were generated with Google Gemini. Product pack
+  photos in `backend/static/images/products` are used for the demo only. App screenshots are of this app.
+- **AI coding assistants:** this project was built with help from Claude Code by Anthropic.
+
+<div align="center">
+<br>
+<img src="pitch/deck/assets/art/tagline-urdu-haldi.png" alt="دکاندار بولتا ہے، حساب لکھتا ہے" width="420"><br>
+<sub><i>Dukaandar bolta hai. HisaabAI likhta hai.</i> &nbsp;·&nbsp; Capital Youth Expo 2026</sub>
+</div>

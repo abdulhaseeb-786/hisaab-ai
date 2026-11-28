@@ -18,14 +18,14 @@ const STEPS: Step[] = [
     ur: ['Din kholein aur band karein', 'Subah aur raat ko cash box ginein. HisaabAI records se milata hai, taake har number sahi rahe.'],
   },
   {
-    targets: ['quick-actions'],
-    en: ['Your counter buttons', 'Udhaar with the items, wasooli, the order booker, a delivery, or kharcha. One tap each.'],
-    ur: ['Counter ke button', 'Items ke saath udhaar, wasooli, order booker, maal aana, ya kharcha. Har ek ek tap par.'],
-  },
-  {
     targets: ['first-job'],
     en: ["Today's jobs", 'The most important job is always at the top. Each one says why, with the numbers.'],
     ur: ['Aaj ke kaam', 'Sab se zaroori kaam hamesha sab se upar. Har kaam ke saath wajah aur numbers.'],
+  },
+  {
+    targets: ['quick-actions'],
+    en: ['Your counter buttons', 'Udhaar with the items, wasooli, the order booker, a delivery, or kharcha. One tap each.'],
+    ur: ['Counter ke button', 'Items ke saath udhaar, wasooli, order booker, maal aana, ya kharcha. Har ek ek tap par.'],
   },
   {
     targets: ['voice', 'voice-side'],

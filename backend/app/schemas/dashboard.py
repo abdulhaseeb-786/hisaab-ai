@@ -40,6 +40,7 @@ class TodayActionsResponse(DataLabelled):
     store_name: str
     as_of: datetime
     ranking_rule: str
+    total_available: int
     actions: list[ActionItem]
 
 

@@ -78,16 +78,16 @@ export function RegisterBook({
         </div>
 
         {/* Right page: today's figures, written in. */}
-        <div className="relative register-margin pl-12 sm:pl-14 pr-3 sm:pr-5 pt-1 pb-3 md:py-5">
+        <div className="relative register-margin pl-11 sm:pl-14 pr-3 sm:pr-5 pt-1 pb-3 md:py-5">
           <ul className="relative">
             {lines.map((l, i) => {
               const content = (
                 <span className="flex-1 min-w-0">
-                  <span className="flex items-end">
-                    <span className="text-base text-ink-soft shrink-0">{l.label}</span>
-                    <span className="flex-1 border-b-2 border-dotted border-[#CFC6AE] mx-2 mb-2 min-w-[0.75rem]" aria-hidden />
+                  <span className="flex items-baseline gap-1.5 min-w-0">
+                    <span className="text-sm sm:text-base text-ink-soft truncate">{l.label}</span>
+                    <span className="flex-1 border-b-2 border-dotted border-[#CFC6AE] mb-1 min-w-[6px]" aria-hidden />
                     <motion.span
-                      className={cn('shrink-0 text-xl font-extrabold tabular whitespace-nowrap', size === 'app' && 'lg:text-2xl', l.tone === 'red' ? 'text-lal' : 'text-[#1F3A7A]')}
+                      className={cn('shrink-0 text-lg sm:text-xl font-extrabold tabular whitespace-nowrap', size === 'app' && 'lg:text-2xl', l.tone === 'red' ? 'text-lal-600' : 'text-[#1F3A7A]')}
                       initial={animate ? { clipPath: 'inset(0 100% 0 0)' } : false}
                       animate={open ? { clipPath: 'inset(0 0% 0 0)' } : undefined}
                       transition={{ delay: lineDelay(i), duration: 0.45, ease: 'easeOut' }}
@@ -110,9 +110,9 @@ export function RegisterBook({
               return (
                 <li key={i} className="border-b border-[rgba(42,91,168,0.2)] last:border-b-0">
                   {l.to ? (
-                    <Link to={l.to} className="group flex items-center min-h-[3.25rem] py-1.5 rounded-lg hover:bg-[#F6EFD9]/70 -mx-2 px-2">
+                    <Link to={l.to} className="group flex items-center gap-1.5 min-h-[3.25rem] py-1.5 rounded-lg hover:bg-[#F6EFD9]/70 -mx-1.5 px-1.5">
                       {content}
-                      <ChevronRight className="w-4 h-4 text-ink-faint ml-1 shrink-0 group-hover:text-ink" />
+                      <ChevronRight className="w-4 h-4 text-ink-faint shrink-0 group-hover:text-ink" />
                     </Link>
                   ) : (
                     <div className="flex items-center min-h-[3.25rem] py-1.5">{content}</div>

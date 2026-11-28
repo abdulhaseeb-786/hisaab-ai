@@ -26,6 +26,7 @@ def test_store_profile_comes_from_the_database(client):
 def test_today_actions_have_evidence_and_both_languages(client):
     data = client.get("/api/actions/today").json()
     assert data["ranking_rule"]
+    assert data["total_available"] >= 4
     actions = data["actions"]
     assert len(actions) == 3
     assert [a["priority"] for a in actions] == [1, 2, 3]
@@ -33,6 +34,9 @@ def test_today_actions_have_evidence_and_both_languages(client):
     for a in actions:
         assert a["evidence"] and a["next_step"] and a["title_ur"] and a["summary_ur"]
         assert a["target"]["kind"] in ("product", "customer")
+    expanded = client.get("/api/actions/today?limit=10").json()
+    assert len(expanded["actions"]) == expanded["total_available"]
+    assert [a["priority"] for a in expanded["actions"]] == list(range(1, expanded["total_available"] + 1))
 
 
 @pytest.mark.parametrize("period", ["today", "7d", "30d", "90d"])

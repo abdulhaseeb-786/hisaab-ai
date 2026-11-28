@@ -56,7 +56,7 @@
           "Today's Actions"
         ],
         "summary": "Get Today Actions",
-        "description": "Top 3 actions for today, each with evidence and a next step (HOME-01).",
+        "description": "Top priority actions for today (default 3), each with evidence and a next step (HOME-01).",
         "operationId": "get_today_actions_api_actions_today_get",
         "parameters": [
           {
@@ -67,6 +67,18 @@
               "type": "integer",
               "default": 1,
               "title": "Store Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "default": 3,
+              "title": "Limit"
             }
           }
         ],
@@ -9313,6 +9325,10 @@
             "type": "string",
             "title": "Ranking Rule"
           },
+          "total_available": {
+            "type": "integer",
+            "title": "Total Available"
+          },
           "actions": {
             "items": {
               "$ref": "#/components/schemas/ActionItem"
@@ -9327,6 +9343,7 @@
           "store_name",
           "as_of",
           "ranking_rule",
+          "total_available",
           "actions"
         ],
         "title": "TodayActionsResponse"

@@ -57,8 +57,12 @@ export function useStore() {
   });
 }
 
-export function useTodayActions() {
-  return useQuery({ queryKey: queryKeys.actions, queryFn: () => unwrap(api.GET('/api/actions/today')) });
+export function useTodayActions(limit = 3) {
+  return useQuery({
+    queryKey: [...queryKeys.actions, limit],
+    queryFn: () => unwrap(api.GET('/api/actions/today', { params: { query: { limit } } })),
+    placeholderData: keepPreviousData,
+  });
 }
 
 export function useDashboard(period: KpiPeriod = '30d') {

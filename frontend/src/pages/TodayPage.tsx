@@ -99,12 +99,27 @@ function Job({ action, first }: { action: TodayAction; first: boolean }) {
 
 function Parchi() {
   const { pick } = useLanguage();
-  const actions = useTodayActions();
+  const [showAll, setShowAll] = useState(false);
+  const actions = useTodayActions(showAll ? 10 : 3);
   const [rule, setRule] = useState(false);
   const reduce = useReducedMotion();
 
+  const list = actions.data?.actions ?? [];
+  const total = actions.data?.total_available ?? list.length;
+  const extra = Math.max(0, total - 3);
+  const title =
+    showAll && total > 3
+      ? pick(`Today's ${total} jobs`, `Aaj ke ${total} kaam`)
+      : total > 0 && total < 3
+        ? pick(`Today's ${total} ${total === 1 ? 'job' : 'jobs'}`, `Aaj ${total === 1 ? 'ka 1 kaam' : `ke ${total} kaam`}`)
+        : pick("Today's top 3 jobs", 'Aaj ke 3 ahem kaam');
+  const hint =
+    !showAll && extra > 0
+      ? pick(`Most important first · ${extra} more waiting`, `Sab se zaroori pehle · ${extra} aur baqi`)
+      : pick('Most important first · updates as you finish', 'Sab se zaroori pehle · mukammal hote hi update hota hai');
+
   return (
-    <Section title={pick("Today's 3 jobs", 'Aaj ke 3 kaam')} hint={pick('Most important first', 'Sab se zaroori pehle')}>
+    <Section title={title} hint={hint}>
       <motion.div
         data-tour="today-actions"
         initial={reduce ? false : { opacity: 0, y: 14, rotate: -0.6 }}
@@ -121,9 +136,9 @@ function Parchi() {
           </div>
         )}
         {actions.data &&
-          (actions.data.actions.length ? (
+          (list.length ? (
             <ol>
-              {actions.data.actions.map((a, i) => (
+              {list.map((a, i) => (
                 <Job key={a.id} action={a} first={i === 0} />
               ))}
             </ol>
@@ -131,10 +146,23 @@ function Parchi() {
             <p className="pl-16 pr-6 py-8 text-lg font-bold">{pick('Nothing urgent today. Well done.', 'Aaj koi fori kaam nahi. Shabash.')}</p>
           ))}
         {actions.data && (
-          <div className="pl-16 pr-6 py-3 border-t border-line bg-card/70">
-            <button onClick={() => setRule((v) => !v)} className="min-h-[44px] text-sm font-bold text-ink-muted hover:text-ink" aria-expanded={rule}>
-              {pick('How are these chosen?', 'Yeh kaise chune gaye?')}
-            </button>
+          <div className="pl-16 pr-4 sm:pr-6 py-3 border-t border-line bg-card/70">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <button onClick={() => setRule((v) => !v)} className="min-h-[44px] text-sm font-bold text-ink-muted hover:text-ink" aria-expanded={rule}>
+                {pick('How are these chosen?', 'Yeh kaise chune gaye?')}
+              </button>
+              {extra > 0 && (
+                <button
+                  onClick={() => setShowAll((v) => !v)}
+                  className="min-h-[44px] text-sm font-extrabold text-sabz-700 hover:text-sabz-900"
+                  aria-expanded={showAll}
+                >
+                  {showAll
+                    ? pick('Show top 3 only', 'Sirf top 3 dekhein')
+                    : pick(`See ${extra} more ${extra === 1 ? 'job' : 'jobs'}`, `Aur ${extra} kaam dekhein`)}
+                </button>
+              )}
+            </div>
             {rule && <p className="text-sm text-ink-soft pb-2">{actions.data.ranking_rule}</p>}
           </div>
         )}
@@ -361,43 +389,20 @@ export default function TodayPage() {
   const month = useDashboard('30d');
   const state = useDayToday().data?.state;
 
-  // The screen follows the shopkeeper's day. The counter buttons are never hidden:
-  // an udhaar can happen before the day is opened in the app.
+  // Logical flow from top to bottom:
+  // 1. Greeting & today's headline register figures (TodayRegister)
+  // 2. Day status bar (and Tomorrow's brief when closed)
+  // 3. Today's top 3 important jobs (Parchi)
+  // 4. Counter quick actions, 30-day trend, and store map
   return (
     <div className="space-y-8">
-      {state === 'closed' ? (
-        <>
-          <div className="space-y-4">
-            <DayBar />
-            <TomorrowCard />
-          </div>
-          <div className="space-y-4">
-            <QuickActions />
-          </div>
-          <TodayRegister />
-          <Parchi />
-        </>
-      ) : state === 'not_opened' ? (
-        <>
-          <div className="space-y-4">
-            <DayBar />
-            <Parchi />
-          </div>
-          <div className="space-y-4">
-            <QuickActions />
-          </div>
-          <TodayRegister />
-        </>
-      ) : (
-        <>
-          <div className="space-y-4">
-            <DayBar />
-            <QuickActions />
-          </div>
-          <Parchi />
-          <TodayRegister />
-        </>
-      )}
+      <div className="space-y-4">
+        <TodayRegister />
+        <DayBar />
+        {state === 'closed' && <TomorrowCard />}
+      </div>
+      <Parchi />
+      <QuickActions />
 
       <Section title={pick('How sales are going', 'Sale ka rujhaan')}>{month.data ? <SalesTrend k={month.data} /> : <Skeleton className="h-40" />}</Section>
 
