@@ -68,7 +68,7 @@ export function RegisterBook({
 
       <div
         className={cn(
-          'relative rounded-2xl overflow-hidden bg-[#FFFDF6] grid',
+          'relative rounded-2xl overflow-hidden bg-[#FFFDF6] grid pencil-edge',
           size === 'hero' ? 'sm:grid-cols-[0.72fr_1.28fr] min-h-[22rem]' : 'md:grid-cols-[0.8fr_1.2fr] min-h-[14rem]',
         )}
       >
@@ -139,6 +139,7 @@ export function RegisterBook({
           <span className="font-urdu text-5xl sm:text-6xl text-[#E9C46A] leading-[1.9] drop-shadow" lang="ur">
             حساب
           </span>
+          <span className="mt-2 h-px w-24 bg-gold-light/70" />
           <span className="mt-5 text-sm font-bold tracking-wide text-[#F3DFA2]/90">{storeName}</span>
         </motion.div>
       </div>

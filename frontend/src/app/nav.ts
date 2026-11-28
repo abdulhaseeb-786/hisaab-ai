@@ -1,4 +1,6 @@
-import { Banknote, BookOpenText, Boxes, Map, ShoppingCart, Sun } from 'lucide-react';
+import { Banknote, BookOpenText, Boxes, LayoutDashboard, Map, ShoppingCart, Sun } from 'lucide-react';
+
+export const LANDING_NAV = { to: '/', end: true, icon: LayoutDashboard, en: 'Dashboard', ur: 'Dashboard' } as const;
 
 /** The five daily jobs, in the order a shopkeeper's day goes. */
 export const PRIMARY_NAV = [

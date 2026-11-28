@@ -9,14 +9,15 @@
   }
   body {
     @apply bg-paper text-ink font-sans antialiased;
+    background-image: repeating-linear-gradient(90deg, transparent 0, transparent 6rem, rgba(11, 59, 46, 0.018) 6rem, rgba(11, 59, 46, 0.018) calc(6rem + 1px));
   }
   :focus-visible {
-    outline: 3px solid #e8a317;
+    outline: 3px solid #c9a227;
     outline-offset: 2px;
     border-radius: 0.5rem;
   }
   ::selection {
-    background: #bfddc9;
+    background: #f1d98b;
   }
   input[type='search']::-webkit-search-cancel-button {
     -webkit-appearance: none;
@@ -58,6 +59,22 @@
   }
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+  .royal-header {
+    @apply bg-royal-950 text-ivory;
+    box-shadow: inset 0 -1px 0 rgba(201, 162, 39, 0.38);
+  }
+  .royal-card {
+    @apply border border-line bg-card;
+    box-shadow: 0 14px 40px -24px rgba(6, 38, 30, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  .gold-rule {
+    height: 1px;
+    background: #c9a227;
+    opacity: 0.45;
+  }
+  .pencil-edge {
+    box-shadow: inset 0 0 0 1px rgba(42, 91, 168, 0.12), inset 0 0 24px rgba(42, 91, 168, 0.06);
   }
 }
 

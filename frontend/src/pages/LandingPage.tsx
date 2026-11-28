@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useDashboard, useForecast, useReorderPlan, useStore, useTodayActions } from '@/api/queries';
 import type { TodayAction } from '@/api/types';
+import logoSquare from '@/assets/Render-1x1.jpg';
+import BasketAnimation from '@/components/BasketAnimation';
 import { Logo } from '@/components/Logo';
 import { RegisterBook } from '@/components/RegisterBook';
 import { ProductImage } from '@/components/ui/ProductImage';
@@ -23,20 +25,20 @@ function ScrollProgress() {
 function TopBar() {
   const { pick, language, toggleLanguage } = useLanguage();
   return (
-    <header className="sticky top-0 z-30 bg-paper/90 backdrop-blur border-b border-line">
+    <header className="sticky top-0 z-30 royal-header">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
-        <Logo />
-        <nav className="hidden md:flex items-center gap-6 ml-8 text-base font-bold text-ink-soft" aria-label={pick('Page', 'Page')}>
-          <a href="#problem" className="hover:text-ink">{pick('Why', 'Kyun')}</a>
-          <a href="#day" className="hover:text-ink">{pick('A day with it', 'Ek din')}</a>
-          <a href="#demo" className="hover:text-ink">{pick('Try it', 'Aazmayein')}</a>
-          <a href="#how" className="hover:text-ink">{pick('How it works', 'Kaise kaam karta hai')}</a>
+        <Logo inverse animated />
+        <nav className="hidden md:flex items-center gap-6 ml-8 text-base font-bold text-ivory/75" aria-label={pick('Page', 'Page')}>
+          <a href="#problem" className="hover:text-ivory">{pick('Why', 'Kyun')}</a>
+          <a href="#day" className="hover:text-ivory">{pick('A day with it', 'Ek din')}</a>
+          <a href="#demo" className="hover:text-ivory">{pick('Try it', 'Aazmayein')}</a>
+          <a href="#how" className="hover:text-ivory">{pick('How it works', 'Kaise kaam karta hai')}</a>
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <button onClick={toggleLanguage} className="min-h-[44px] px-3 rounded-xl font-bold text-sm text-ink-soft hover:bg-ink/5">
+          <button onClick={toggleLanguage} className="min-h-[44px] px-3 rounded-xl font-bold text-sm text-ivory/75 hover:bg-white/5">
             {language === 'roman_urdu' ? 'English' : 'Roman Urdu'}
           </button>
-          <Link to="/app" className="hidden sm:inline-flex items-center min-h-[44px] px-4 rounded-xl bg-sabz text-white font-bold hover:bg-sabz-dark">
+          <Link to="/app" className="hidden sm:inline-flex items-center min-h-[44px] px-4 rounded-xl bg-gold text-royal-950 font-bold hover:bg-gold-light">
             {pick('Open the demo shop', 'Demo dukaan kholein')}
           </Link>
         </div>
@@ -291,7 +293,10 @@ function Demo() {
       <Reveal delay={0.15}>
         <div className="rounded-2xl border border-line bg-card shadow-card p-5 sm:p-6 min-h-[26rem]">
           <div className="flex items-center justify-between mb-2">
-            <p className="font-extrabold">{pick('Order list', 'Order ki list')}</p>
+            <div className="flex items-center gap-3">
+              <BasketAnimation compact active={Boolean(p?.recommendations.length)} />
+              <p className="font-extrabold">{pick('Order list', 'Order ki list')}</p>
+            </div>
             {p && <p className="text-sm text-ink-muted tabular">{pick(`${Math.round(p.budget_used_pct)}% of budget`, `budget ka ${Math.round(p.budget_used_pct)}%`)}</p>}
           </div>
           {p && (
@@ -519,7 +524,12 @@ export default function LandingPage() {
       </main>
       <footer className="border-t border-line">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row gap-3 justify-between text-sm text-ink-muted">
-          <Logo />
+          <div className="flex items-center gap-3">
+            <img src={logoSquare} alt="HisaabAI" className="h-12 w-12 rounded-2xl border border-gold/40 bg-royal-950 object-contain" />
+            <span className="text-base font-extrabold text-ink">
+              Hisaab<span className="text-sabz">AI</span>
+            </span>
+          </div>
           <p>{pick('Capital Youth Expo 2026, Track 3: FinTech and Financial Inclusion', 'Capital Youth Expo 2026, Track 3: FinTech aur Financial Inclusion')}</p>
         </div>
       </footer>

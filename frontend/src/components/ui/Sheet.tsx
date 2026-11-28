@@ -17,6 +17,7 @@ export function Sheet({
   footer,
   children,
   width = 'md',
+  side = 'right',
 }: {
   open: boolean;
   onClose: () => void;
@@ -25,6 +26,7 @@ export function Sheet({
   footer?: ReactNode;
   children: ReactNode;
   width?: 'md' | 'lg';
+  side?: 'right' | 'left';
 }) {
   const { pick } = useLanguage();
   const titleId = useId();
@@ -47,17 +49,18 @@ export function Sheet({
   }, [open, onClose]);
 
   const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+  const offscreenX = side === 'left' ? '-100%' : '100%';
   const motionProps = reduce
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : isDesktop
-      ? { initial: { x: '100%' }, animate: { x: 0 }, exit: { x: '100%' } }
+      ? { initial: { x: offscreenX }, animate: { x: 0 }, exit: { x: offscreenX } }
       : { initial: { y: '100%' }, animate: { y: 0 }, exit: { y: '100%' } };
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-ink/40"
+          className={cn('fixed inset-0 z-50 flex items-end md:items-stretch bg-ink/40', side === 'left' ? 'md:justify-start' : 'md:justify-end')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -74,7 +77,8 @@ export function Sheet({
             onClick={(e) => e.stopPropagation()}
             className={cn(
               'bg-paper w-full flex flex-col outline-none shadow-lift',
-              'max-h-[92vh] rounded-t-sheet md:max-h-none md:h-full md:rounded-none md:rounded-l-sheet',
+              'max-h-[92vh] rounded-t-sheet md:max-h-none md:h-full md:rounded-none',
+              side === 'left' ? 'md:rounded-r-sheet' : 'md:rounded-l-sheet',
               width === 'lg' ? 'md:w-[640px]' : 'md:w-[520px]',
             )}
           >

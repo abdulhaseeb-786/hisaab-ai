@@ -5,14 +5,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: '#F6F7F3', // page background: register-paper white
-        card: '#FFFFFF',
+        paper: '#F7F4EA', // page background: warm register-paper ivory
+        card: '#FFFDF8',
+        ivory: '#FFF8E8',
         ink: { DEFAULT: '#17201B', soft: '#2F3A33', muted: '#56605A', faint: '#7C867F' },
-        line: { DEFAULT: '#DCE1D9', strong: '#C4CCC1' },
+        line: { DEFAULT: '#DED8C7', strong: '#C9C0A8' },
         sabz: { DEFAULT: '#0E6B3F', dark: '#0A4F2E', tint: '#E4F1E8', mid: '#BFDDC9' },
         haldi: { DEFAULT: '#E8A317', dark: '#9A5B00', tint: '#FDF3DC' },
         lal: { DEFAULT: '#C0392B', dark: '#962D22', tint: '#FCE9E7' },
         neela: { DEFAULT: '#2A5BA8', tint: '#E6EEF9' }, // register ruling blue
+        royal: { DEFAULT: '#0B3B2E', 950: '#06261E', 900: '#0A3328', 800: '#0F4B39', 700: '#166246', tint: '#EAF3ED' },
+        gold: { DEFAULT: '#C9A227', light: '#F1D98B', dark: '#8A6B12', tint: '#FBF4DC' },
       },
       fontFamily: {
         sans: ['"Atkinson Hyperlegible Next"', '"Atkinson Hyperlegible"', 'system-ui', 'sans-serif'],
@@ -35,6 +38,8 @@ export default {
         card: '0 1px 0 rgba(23,32,27,0.04), 0 1px 3px rgba(23,32,27,0.06)',
         lift: '0 8px 28px -8px rgba(23,32,27,0.18)',
         slip: '0 1px 0 rgba(23,32,27,0.05), 0 10px 30px -12px rgba(14,107,63,0.25)',
+        royal: '0 18px 50px -18px rgba(6,38,30,0.45)',
+        gold: '0 0 0 1px rgba(201,162,39,0.35)',
       },
       keyframes: {
         'pulse-ring': { '0%': { boxShadow: '0 0 0 0 rgba(232,163,23,0.55)' }, '100%': { boxShadow: '0 0 0 14px rgba(232,163,23,0)' } },

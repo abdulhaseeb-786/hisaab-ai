@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useReorderPlan, useStore } from '@/api/queries';
 import type { ReorderLine, ReorderPlan, StoreProfile } from '@/api/types';
 import { useUi } from '@/app/UiContext';
+import BasketAnimation from '@/components/BasketAnimation';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Money } from '@/components/ui/Money';
 import { ProductImage } from '@/components/ui/ProductImage';
@@ -138,18 +139,21 @@ function Plan({ plan, stale }: { plan: ReorderPlan; stale: boolean }) {
 
   return (
     <div className={cn('space-y-6 transition-opacity', stale && 'opacity-60')}>
-      <div className="bg-card rounded-2xl border border-line shadow-card p-5 space-y-4">
-        <p className="text-xl font-extrabold leading-snug">
-          {pick(
-            `${plan.total_skus_recommended} items for `,
-            `${plan.total_skus_recommended} cheezein, `,
-          )}
-          <Money value={plan.total_allocated_spend_pkr} className="tabular" />
-          {pick('.', ' mein.')}{' '}
-          <span className="text-ink-muted font-bold">
-            {pick(`${formatPKR(plan.remaining_unallocated_pkr)} stays with you.`, `${formatPKR(plan.remaining_unallocated_pkr)} bachein ge.`)}
-          </span>
-        </p>
+      <div className="royal-card rounded-2xl p-5 space-y-4">
+        <div className="flex items-start gap-4">
+          <BasketAnimation compact className="mt-0.5" />
+          <p className="text-xl font-extrabold leading-snug">
+            {pick(
+              `${plan.total_skus_recommended} items for `,
+              `${plan.total_skus_recommended} cheezein, `,
+            )}
+            <Money value={plan.total_allocated_spend_pkr} className="tabular" />
+            {pick('.', ' mein.')}{' '}
+            <span className="text-ink-muted font-bold">
+              {pick(`${formatPKR(plan.remaining_unallocated_pkr)} stays with you.`, `${formatPKR(plan.remaining_unallocated_pkr)} bachein ge.`)}
+            </span>
+          </p>
+        </div>
         <div className="h-3 rounded-full bg-ink/[0.07] overflow-hidden" role="progressbar" aria-valuenow={Math.round(plan.budget_used_pct)} aria-valuemin={0} aria-valuemax={100} aria-label={pick('Budget used', 'Budget istemal')}>
           <motion.div className="h-full bg-sabz rounded-full" initial={false} animate={{ width: `${Math.min(100, plan.budget_used_pct)}%` }} transition={{ duration: 0.5 }} />
         </div>

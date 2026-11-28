@@ -34,7 +34,7 @@ export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => voi
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title={pick('Menu', 'Menu')} description={store.data ? `${store.data.name}, ${store.data.location ?? ''}` : undefined}>
+    <Sheet open={open} onClose={onClose} side="left" title={pick('Menu', 'Menu')} description={store.data ? `${store.data.name}, ${store.data.location ?? ''}` : undefined}>
       <div className="space-y-3">
         <Row icon={<Globe className="w-5 h-5" />} title={pick('Language: English', 'Zabaan: Roman Urdu')} detail={pick('Switch to Roman Urdu', 'English mein badlein')} onClick={toggleLanguage} />
         <Row icon={<CircleHelp className="w-5 h-5" />} title={pick('Show the tutorial again', 'Tutorial dobara dekhein')} onClick={() => go(onboarding.restart)} />

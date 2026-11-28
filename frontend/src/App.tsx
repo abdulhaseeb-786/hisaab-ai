@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ApiError } from '@/api/client';
 import { AppShell } from '@/app/AppShell';
-import { UiProvider } from '@/app/UiContext';
+import { UiProvider, useUi } from '@/app/UiContext';
+import CopilotLauncher from '@/components/CopilotLauncher';
+import CopilotSheet from '@/components/CopilotSheet';
 import { LanguageProvider } from '@/i18n/LanguageContext';
 import { OnboardingProvider, useOnboarding } from '@/onboarding/OnboardingContext';
 import { Tour } from '@/onboarding/Tour';
@@ -42,6 +44,16 @@ function OnboardingLayer() {
   return null;
 }
 
+function GlobalCopilot() {
+  const ui = useUi();
+  return (
+    <>
+      <CopilotLauncher />
+      <CopilotSheet open={ui.copilot.open} initialPrompt={ui.copilot.prompt} onClose={ui.closeCopilot} />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -62,6 +74,7 @@ export default function App() {
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              <GlobalCopilot />
             </UiProvider>
           </OnboardingProvider>
         </BrowserRouter>
